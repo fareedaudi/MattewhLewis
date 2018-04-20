@@ -49,8 +49,8 @@ class App extends React.Component{
   render(){
     return (
       <div>
-        <HeaderUI universities={this.state.universities}/>
-          <Switch>
+      <HeaderUI universities={this.state.universities}/>
+          <Switch>    
               <Route exact path="/" render={() => <HomePage/> }/>
               <Route exact path="/requirements/:univ_id" render={(props) => <RequirementsPage {...props} univNameMap={this.state.univNameMap}/>}/>
           </Switch>
