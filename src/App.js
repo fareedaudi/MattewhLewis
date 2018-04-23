@@ -7,6 +7,7 @@ import {Switch, Route} from 'react-router-dom';
 import HomePage from './containers/HomePage';
 import Requirements from './containers/Requirements';
 import RequirementsPage from './containers/RequirementsPage';
+import {UNIVERSITIES_URL} from './api';
 
 
 class App extends React.Component{
@@ -20,8 +21,25 @@ class App extends React.Component{
 
   componentDidMount(){
     // Get list of all universities
+    this.loadUniversitiesIntoState();
+  }
+  
+  render(){
+    return (
+      <div>
+      <HeaderUI universities={this.state.universities}/>
+          <Switch>    
+              <Route exact path="/" render={() => <HomePage/> }/>
+              <Route exact path="/requirements/:univ_id" render={(props) => <RequirementsPage {...props} universities={this.state.universities}/>}/>
+          </Switch>
+      <Footer/>
+      </div>
+    )
+  }
+
+  loadUniversitiesIntoState(){
     fetch(
-      'http://localhost:8000/universities'
+      UNIVERSITIES_URL
     ).then(
       response => (response.json())
     ).then(
@@ -34,29 +52,11 @@ class App extends React.Component{
         },{});
         this.setState(
           {
-            universities:univList,
-            univNameMap:univNameMap
+            universities:univList
           }
         );
       }
     );
-    
-    
-
-  }
-  
-
-  render(){
-    return (
-      <div>
-      <HeaderUI universities={this.state.universities}/>
-          <Switch>    
-              <Route exact path="/" render={() => <HomePage/> }/>
-              <Route exact path="/requirements/:univ_id" render={(props) => <RequirementsPage {...props} univNameMap={this.state.univNameMap}/>}/>
-          </Switch>
-      <Footer/>
-      </div>
-    )
   }
 } 
 

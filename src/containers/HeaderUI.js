@@ -23,6 +23,12 @@ export default class HeaderUI extends React.Component {
     }
   }
 
+  handleUniversitySelection(ev){
+    let univ_id = ev.target.key;
+    this.activateRequirements();
+    this.props.history.push(`/requirements/${univ_id}`)
+  }
+
   activateHome(){
     this.setState({
       homeActive:true,
@@ -40,6 +46,7 @@ export default class HeaderUI extends React.Component {
   }
 
   activateRequirements(){
+    console.log('requirements fired!');
     this.setState({
       homeActive:false,
       requirementsActive:true,
@@ -88,7 +95,7 @@ export default class HeaderUI extends React.Component {
                 key={obj.university_id} 
                 to={"/requirements/"+obj.university_id} 
                 tag={Link}
-                onClick={this.activateRequirements}
+                onClick={this.handleUniversitySelection}
                 >{obj.university_name}</DropdownItem>
                 // Refreshes entire page, because router doesn't trigger re-rendering of components (for AJAX, etc.)
               ))}
