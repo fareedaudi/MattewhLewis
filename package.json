@@ -8,6 +8,7 @@
     "flexbox-react": "^4.4.0",
     "react": "^16.3.1",
     "react-dom": "^16.3.1",
+    "react-fontawesome": "^1.6.1",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.4",
     "reactstrap": "^5.0.0-beta.3"

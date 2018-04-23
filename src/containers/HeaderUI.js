@@ -111,7 +111,9 @@ export default class HeaderUI extends React.Component {
               <DropdownItem key={obj.university_id} onClick={this.activatePrograms}>{obj.university_name}</DropdownItem>
             ))}
           </DropdownMenu>
-        </Dropdown>        
+        </Dropdown>
+
+
         <NavItem className="ml-auto">
         <LoginContext.Consumer>
             {

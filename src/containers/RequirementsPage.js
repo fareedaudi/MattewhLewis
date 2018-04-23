@@ -6,9 +6,12 @@ import {
     CardBody,
     CardText,
     Col,
-    Row
+    Row,
+    ListGroup,
+    ListGroupItem
 } from 'reactstrap';
 import {ROOT_URL} from '../api';
+
 
 export default class RequirementsPage extends React.Component{
     constructor(props){
@@ -19,33 +22,9 @@ export default class RequirementsPage extends React.Component{
             programs:[]
         }
     }
-
     componentDidMount(){
         this.fetchUniversityName();
         this.fetchUniversityProgramsAndUpdateState();
-    }
-
-    fetchUniversityName(){
-        let univ_id = this.props.match.params.univ_id;
-        let university = this.props.universities.filter(
-            univ => (univ.university_id === univ_id)
-        );
-        console.log(this.props.universities);
-    }
-
-    fetchUniversityProgramsAndUpdateState(){
-        let univ_id = this.props.match.params.univ_id;
-        fetch(
-            `${ROOT_URL}/programs_by_university/${univ_id}`,
-        ).then(
-            response => response.json()
-        ).then(
-            programList => {
-                this.setState({
-                    programs:programList
-                });
-            }
-        );
     }
 
     componentWillReceiveProps(nextProps){
@@ -77,6 +56,29 @@ export default class RequirementsPage extends React.Component{
             </Container>
         )
     }
+
+    fetchUniversityProgramsAndUpdateState(){
+        let univ_id = this.props.match.params.univ_id;
+        fetch(
+            `${ROOT_URL}/programs_by_university/${univ_id}`,
+        ).then(
+            response => response.json()
+        ).then(
+            programList => {
+                this.setState({
+                    programs:programList
+                });
+            }
+        );
+    }
+
+    fetchUniversityName(){
+        let univ_id = this.props.match.params.univ_id;
+        let university = this.props.universities.filter(
+            univ => (univ.university_id === univ_id)
+        );
+        console.log(this.props.universities);
+    }
 }
 
 class RequirementsCard extends React.Component{
@@ -93,7 +95,7 @@ class RequirementsCard extends React.Component{
 
     handleProgramSelection(ev){
         this.setSelectorToSelected(ev.target.value);
-        if(ev.target.value != -1){
+        if(this.realSelection(ev)){
             this.getSelectedProgramDataAndSetState(ev.target.value);
         }
     }
@@ -122,6 +124,10 @@ class RequirementsCard extends React.Component{
         this.setState({
             showSJCCourses:!this.state.showSJCCourses
         });
+    }
+
+    realSelection(ev){
+        return ev.target.value != -1
     }
 
     render(){
@@ -239,14 +245,15 @@ class EditorCard extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            editMode:false
+            editMode:false,
+            loggedIn:false
         }
     }
 
     render(){
         var instructions = (this.state.editMode)?
             'Edit courses for degree components, below.':
-            'View/edit saved maps, below, or create a new map!';
+            'View your saved maps below, or create a new map!';
         return (
             <Card>
                 <CardHeader>
@@ -256,19 +263,65 @@ class EditorCard extends React.Component{
                     <CardText>
                         {instructions}
                     </CardText>
-                    <EditorView/>
+                    {
+                    this.state.editMode ?
+                    <MapEditor/>:
+                    <SavedMaps/>
+                    }
                 </CardBody>
             </Card>
         )
     }
 }
 
-class EditorView extends React.Component{
+
+
+
+class SavedMaps extends React.Component{
     constructor(props){
         super(props);
     }
 
     render(){
-        return <div id="editor-view"></div>
+        return (
+            <CardText id="map-editor">
+                <h6>Saved Maps</h6>
+                <ListGroup>
+                    <SavedMapTile/>
+                    <SavedMapTile/>
+                    <SavedMapTile/>
+                </ListGroup>
+            </CardText>
+        )
+    }
+}
+
+class SavedMapTile extends React.Component{
+    render(){
+        return (
+            <ListGroupItem className="justify-content-between d-flex">
+                <a href="" onClick={(ev)=>{ev.preventDefault();}}>Geography Studies B.S.</a>
+                <span className="pull-right">
+                    <span className="fa fa-paper-plane"/>&nbsp;&nbsp;
+                    <span className="fa fa-share-alt"  style={{color:"green"}}/>&nbsp;&nbsp;
+                    <span className="fa fa-trash"/>
+                </span>
+            </ListGroupItem>
+        )
+    }
+}
+
+
+class MapEditor extends React.Component{
+    constructor(props){
+        super(props);
+    }
+
+    render(){
+        return (
+            <CardText id="map-editor">
+                <h6>Map Editor</h6>
+            </CardText>
+        )
     }
 }
