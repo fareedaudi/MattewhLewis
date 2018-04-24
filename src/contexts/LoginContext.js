@@ -4,8 +4,8 @@ import axios from 'axios';
 var LoginContext = React.createContext();
 
 export class LoginContextProvider extends React.Component{
-    constructor(props){
-        super(props);
+    constructor(){
+        super();
         this.state = {
             loggedIn:false,
             userId:'',

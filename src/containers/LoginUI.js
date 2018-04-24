@@ -1,5 +1,6 @@
 import React from 'react';
 import {Button,Modal,ModalHeader,ModalBody,ModalFooter} from 'reactstrap';
+import PropTypes from 'prop-types';
 
 
 export default class LoginUI extends React.Component{
@@ -65,4 +66,15 @@ class LoginModal extends React.Component{
             </Modal>
         )
     }
+}
+
+LoginUI.propTypes = {
+    login: PropTypes.object
+}
+
+LoginModal.propTypes = {
+    loginHanlder: PropTypes.func,
+    isOpen: PropTypes.bool,
+    toggle: PropTypes.func,
+    className: PropTypes.string
 }

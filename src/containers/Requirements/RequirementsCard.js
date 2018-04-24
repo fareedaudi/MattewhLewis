@@ -7,6 +7,7 @@ import {
     CardText,
 } from 'reactstrap';
 import {ROOT_URL} from '../../api';
+import PropTypes from 'prop-types';
 
 export default class RequirementsCard extends React.Component{
     constructor(props){
@@ -14,7 +15,7 @@ export default class RequirementsCard extends React.Component{
         this.state = {
             selectedProgram:{},
             showSJCCourses:false,
-            selectedProgramId:-1
+            selectedProgramId:"-1"
         }
         this.handleProgramSelection = this.handleProgramSelection.bind(this);
         this.toggleSJCCourses = this.toggleSJCCourses.bind(this);
@@ -32,7 +33,7 @@ export default class RequirementsCard extends React.Component{
             this.setState({
                 selectedProgram:{},
                 showSJCCourses:false,
-                selectedProgramId:-1
+                selectedProgramId:'-1'
             });
         }
     }
@@ -64,7 +65,7 @@ export default class RequirementsCard extends React.Component{
     }
 
     realSelection(ev){
-        return ev.target.value !== -1
+        return ev.target.value !== '-1'
     }
 
     render(){
@@ -175,3 +176,23 @@ const SelectedRequirements = (props) => {
     )
 
 };
+
+RequirementsCard.propTypes = {
+    university: PropTypes.object
+}
+
+ProgramSelector.propTypes = {
+    programs: PropTypes.array,
+    selectedProgramId: PropTypes.string,
+    handleSelection: PropTypes.func
+}
+
+SJCCourseFilter.propTypes = {
+    showSJCCourses: PropTypes.bool,
+    toggle: PropTypes.func
+}
+
+SelectedRequirements.propTypes = {
+    selectedRequirements: PropTypes.object,
+    showSJCCourses: PropTypes.bool
+}

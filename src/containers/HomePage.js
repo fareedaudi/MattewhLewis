@@ -1,8 +1,8 @@
 import React from 'react';
 import {Container,Jumbotron} from 'reactstrap';
 
-function HomePage(props){
-    return (
+const HomePage = () =>
+    (
         <Container float="true" style={{paddingTop:'70px'}}>
             <Jumbotron style={{textAlign:"center", marginTop:"35px"}}>
             <h1>Degree Mapping Toolkit</h1>
@@ -12,6 +12,6 @@ function HomePage(props){
             </Jumbotron>
         </Container>
     )
-}
+
 
 export default HomePage;

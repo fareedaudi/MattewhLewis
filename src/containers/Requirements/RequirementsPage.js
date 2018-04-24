@@ -4,6 +4,7 @@ import RequirementsCard from './RequirementsCard';
 import EditorCard from './EditorCard';
 import {ROOT_URL} from '../../api';
 import LoginContext from '../../contexts/LoginContext';
+import PropTypes from 'prop-types';
 
 
 export default class RequirementsPage extends React.Component{
@@ -20,7 +21,7 @@ export default class RequirementsPage extends React.Component{
         this.fetchUniversityProgramsAndUpdateState(univ_id);
         if(this.props.universities.length > 0){
             this.setState({
-                university:this.props.universities.filter((univ)=>(univ.university_id == univ_id))[0]
+                university:this.props.universities.filter((univ)=>(String(univ.university_id) === univ_id))[0]
             });
         }
     }
@@ -29,7 +30,7 @@ export default class RequirementsPage extends React.Component{
         let univ_id = nextProps.match.params.univ_id;
         this.fetchUniversityProgramsAndUpdateState(univ_id);
         this.setState({
-            university:nextProps.universities.filter((univ)=>(univ.university_id == univ_id))[0]
+            university:nextProps.universities.filter((univ)=>(String(univ.university_id) === univ_id))[0]
         });
         
     }
@@ -74,3 +75,6 @@ export default class RequirementsPage extends React.Component{
 
 }
 
+RequirementsPage.propTypes = {
+    universities: PropTypes.array,
+}

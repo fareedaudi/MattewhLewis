@@ -3,8 +3,8 @@ import React from 'react';
 var UniversityContext = React.createContext({});
 
 export class UniversityContextProvider extends React.Component{
-    constructor(props){
-        super(props);
+    constructor(){
+        super();
         this.state = {
             universities:[],
             selectedUniversity:{},

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {Container,Nav,NavItem,NavLink,Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from 'reactstrap';
 import LoginUI from '../containers/LoginUI';
 import LoginContext from '../contexts/LoginContext';
+import PropTypes from 'prop-types';
 
 
 
@@ -122,4 +123,8 @@ export default class HeaderUI extends React.Component {
       </Container>
     )
   }
+}
+
+HeaderUI.propTypes = {
+  universities: PropTypes.array
 }

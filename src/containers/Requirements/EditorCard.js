@@ -8,6 +8,7 @@ import {
     ListGroupItem,
     Tooltip
 } from 'reactstrap';
+import PropTypes from 'prop-types';
 
 
 export default class EditorCard extends React.Component{
@@ -76,7 +77,7 @@ class SavedMaps extends React.Component{
                 <ListGroup>
                     {this.props.savedMaps.map(
                         (savedMap) => (
-                            <SavedMapTile key={savedMap.map_id} id={savedMap.map_id} name={savedMap.map_name}/>
+                            <SavedMapTile key={savedMap.map_id} id={String(savedMap.map_id)} name={savedMap.map_name}/>
                         )
                     )}
                     <CreateMapTile/>
@@ -170,4 +171,23 @@ class MapEditor extends React.Component{
             </CardText>
         )
     }
+}
+
+EditorCard.propTypes = {
+    login: PropTypes.object,
+}
+
+SavedMaps.propTypes = {
+    savedMaps: PropTypes.array
+}
+
+SavedMapTile.propTypes= {
+    name: PropTypes.string,
+    id: PropTypes.string
+}
+
+MapActionButton.propTypes = {
+    type: PropTypes.string,
+    map_id: PropTypes.string,
+    activated: PropTypes.bool
 }
