@@ -3,9 +3,8 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import HeaderUI from './containers/HeaderUI.js';
 import Footer from './components/Footer.js';
-import {Switch, Route, BrowserRouter, withRouter} from 'react-router-dom';
+import {Route} from 'react-router-dom';
 import HomePage from './containers/HomePage';
-import Requirements from './containers/Requirements';
 import RequirementsPage from './containers/Requirements/RequirementsPage';
 import {UNIVERSITIES_URL} from './api';
 
@@ -51,12 +50,6 @@ class App extends React.Component{
       response => (response.json())
     ).then(
       univList => {
-        var univNameMap = univList.reduce((obj,univ) => {
-          var id = univ.university_id;
-          var name = univ.university_name;
-          obj[id]=name;
-          return obj;
-        },{});
         this.setState(
           {
             universities:univList
