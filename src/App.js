@@ -17,12 +17,12 @@ class App extends React.Component{
       universities:[],
       univNameMap:{}
     };
+    this.loadUniversitiesIntoState();
   }
 
   
   componentDidMount(){
     // Get list of all universities
-    this.loadUniversitiesIntoState();
   }
   
   componentWillReceiveProps(nextProps){

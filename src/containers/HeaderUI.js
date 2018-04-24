@@ -23,12 +23,6 @@ export default class HeaderUI extends React.Component {
     }
   }
 
-  handleUniversitySelection(ev){
-    let univ_id = ev.target.key;
-    this.activateRequirements();
-    this.props.blah.push(`/requirements/${univ_id}`)
-  }
-
   activateHome(){
     this.setState({
       homeActive:true,
