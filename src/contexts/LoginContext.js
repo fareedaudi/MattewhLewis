@@ -11,17 +11,27 @@ export class LoginContextProvider extends React.Component{
             userId:'',
             userEmail:'',
             token:null,
+            timeRemaining:0
         }
         this.loadLoginData = this.loadLoginData.bind(this);
         this.updateLoginData = this.updateLoginData.bind(this);
         this.loginFromCredentials = this.loginFromCredentials.bind(this);
         this.logout = this.logout.bind(this);
+        this.tick = this.tick.bind(this);
+        this.resetCountdown = this.resetCountdown.bind(this);
+        this.externalLoadLoginData = this.externalLoadLoginData.bind(this);
     }
     
     componentDidMount(){
         var token = sessionStorage.getItem('jwtToken');
         if(token !== null){
             this.loadLoginData(token);
+        }
+    }
+
+    externalLoadLoginData(){
+        if(this.state.token){
+            this.loadLoginData(this.state.token);
         }
         
     }
@@ -31,14 +41,17 @@ export class LoginContextProvider extends React.Component{
             'http://localhost:8000/load_login_data', {token}
             ).then(
                response => response.data
-            ).then(
+            ).then( 
                 (loginDetails) => {
                     if(loginDetails){
+                        if(loginDetails.loggedIn){
+                            this.resetCountdown();
+                        }
                         this.setState( {
                             loggedIn:loginDetails.loggedIn,
                             userId:loginDetails.userId,
                             userEmail:loginDetails.userEmail,
-                            token:token
+                            token:loginDetails.token
                         });
                     }
                 }
@@ -59,32 +72,55 @@ export class LoginContextProvider extends React.Component{
         axios.post(
             'http://localhost:8000/login', {loginEmail,loginPassword}
             ).then(
-               response => response.data
+               response => {
+                   this.resetCountdown();
+                   return response.data;
+                }
             ).then(
                 (loginDetails) => {
                     if(loginDetails.loggedIn){
                         this.updateLoginData(loginDetails);
                     }
-                    
                 }
             );
     }
 
+    resetCountdown(){
+        clearInterval(this.timer);
+        this.timer = setInterval(this.tick,1000);
+        this.setState({
+            timeRemaining:10*60
+        });
+    }
+
+    tick(){
+        this.setState({
+            timeRemaining:this.state.timeRemaining - 1
+        })
+        if(this.state.timeRemaining<=0){
+            this.logout();
+        }
+    }
+
     logout(){
+        console.log('Logging out!');
         this.updateLoginData({
             loggedIn:false,
             userId:null,
             userEmail:'',
             token:null,
+            timeRemaining:0
         });
+        clearInterval(this.timer);
     }
 
     render(){
+        console.log(this.state.timeRemaining);
         return(
         <LoginContext.Provider value={{
             state:this.state,
             actions:{
-                loadLoginData:this.loadLoginData,
+                loadLoginData:this.externalLoadLoginData,
                 updateLoginData:this.updateLoginData,
                 loginFromCredentials:this.loginFromCredentials,
                 logout:this.logout
@@ -93,6 +129,22 @@ export class LoginContextProvider extends React.Component{
             {this.props.children}
         </LoginContext.Provider>
         )
+    }
+}
+
+export function WithLogin(LoginConsumer){
+    return class extends React.Component {
+        render(){
+            return (
+                <LoginContext.Consumer>
+                    {
+                        (login) => (
+                            <LoginConsumer login={login} {...this.props}/>
+                        )
+                    }
+                </LoginContext.Consumer>
+            )
+        }
     }
 }
 

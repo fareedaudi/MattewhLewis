@@ -2,8 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {Container,Nav,NavItem,NavLink,Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from 'reactstrap';
 import LoginUI from '../containers/LoginUI';
-import LoginContext from '../contexts/LoginContext';
+import {WithLogin} from '../contexts/LoginContext';
 import PropTypes from 'prop-types';
+
 
 
 
@@ -29,7 +30,8 @@ export default class HeaderUI extends React.Component {
       homeActive:true,
       requirementsActive:false,
       programsActive:false
-    })
+    });
+    this.props.login.actions.loadLoginData();
   }
 
   activatePrograms(){
@@ -38,6 +40,7 @@ export default class HeaderUI extends React.Component {
       requirementsActive:false,
       programsActive:true
     });
+    this.props.login.actions.loadLoginData();
   }
 
   activateRequirements(){
@@ -47,6 +50,7 @@ export default class HeaderUI extends React.Component {
       requirementsActive:true,
       programsActive:false
     });
+    this.props.login.actions.loadLoginData();
   }
 
   toggleProgram() {
@@ -61,10 +65,8 @@ export default class HeaderUI extends React.Component {
     })
   }
 
-  componentDidUpdate(){
-  }
-
   render(){
+    const LoginButton = WithLogin(LoginUI);
     return (
       <Container className="fixed-top" style={{paddingTop: '10px', background: 'rgba(255, 255, 255, 9.0)'}}>
       <h5>SJC Degree Mapping Toolkit</h5>
@@ -90,6 +92,7 @@ export default class HeaderUI extends React.Component {
                 key={obj.university_id} 
                 to={"/requirements/"+obj.university_id} 
                 tag={Link}
+                onClick={this.activateRequirements}
                 >{obj.university_name}</DropdownItem>
                 // Refreshes entire page, because router doesn't trigger re-rendering of components (for AJAX, etc.)
               ))}
@@ -109,13 +112,7 @@ export default class HeaderUI extends React.Component {
 
 
         <NavItem className="ml-auto">
-        <LoginContext.Consumer>
-            {
-              (login) => (
-                <LoginUI login={login}/>
-              )
-            }
-          </LoginContext.Consumer>
+        <LoginButton/>
         </NavItem>
         </Nav>
 
@@ -123,8 +120,4 @@ export default class HeaderUI extends React.Component {
       </Container>
     )
   }
-}
-
-HeaderUI.propTypes = {
-  universities: PropTypes.array
 }

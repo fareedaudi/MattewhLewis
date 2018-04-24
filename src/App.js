@@ -7,6 +7,7 @@ import {Route} from 'react-router-dom';
 import HomePage from './containers/HomePage';
 import RequirementsPage from './containers/Requirements/RequirementsPage';
 import {UNIVERSITIES_URL} from './api';
+import {WithLogin} from './contexts/LoginContext';
 
 
 class App extends React.Component{
@@ -33,9 +34,10 @@ class App extends React.Component{
   }
 
   render(){
+    const Header = WithLogin(HeaderUI);
     return (
       <div>
-        <HeaderUI universities={this.state.universities}/>   
+        <Header universities={this.state.universities}/>   
         <Route exact path="/" render={() => <HomePage/> }/>
         <Route exact path="/requirements/:univ_id" render={(props) => <RequirementsPage {...props} universities={this.state.universities}/>}/>
         <Footer/>
