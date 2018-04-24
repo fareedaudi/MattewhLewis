@@ -3,10 +3,10 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import HeaderUI from './containers/HeaderUI.js';
 import Footer from './components/Footer.js';
-import {Switch, Route} from 'react-router-dom';
+import {Switch, Route, BrowserRouter, withRouter} from 'react-router-dom';
 import HomePage from './containers/HomePage';
 import Requirements from './containers/Requirements';
-import RequirementsPage from './containers/RequirementsPage';
+import RequirementsPage from './containers/Requirements/RequirementsPage';
 import {UNIVERSITIES_URL} from './api';
 
 
@@ -19,20 +19,27 @@ class App extends React.Component{
     };
   }
 
+  
   componentDidMount(){
     // Get list of all universities
     this.loadUniversitiesIntoState();
   }
   
+  componentWillReceiveProps(nextProps){
+
+  }
+
+  shouldComponentUpdate(){
+    return true;
+  }
+
   render(){
     return (
       <div>
-      <HeaderUI universities={this.state.universities}/>
-          <Switch>    
-              <Route exact path="/" render={() => <HomePage/> }/>
-              <Route exact path="/requirements/:univ_id" render={(props) => <RequirementsPage {...props} universities={this.state.universities}/>}/>
-          </Switch>
-      <Footer/>
+        <HeaderUI universities={this.state.universities}/>   
+        <Route exact path="/" render={() => <HomePage/> }/>
+        <Route exact path="/requirements/:univ_id" render={(props) => <RequirementsPage {...props} universities={this.state.universities}/>}/>
+        <Footer/>
       </div>
     )
   }
