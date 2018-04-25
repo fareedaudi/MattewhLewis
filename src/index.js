@@ -6,10 +6,9 @@ import {BrowserRouter} from 'react-router-dom';
 import {LoginContextProvider} from './contexts/LoginContext';
 
 
-
 ReactDOM.render(
     <BrowserRouter>
     <LoginContextProvider>
-        <App />
+        <App/>
     </LoginContextProvider>
     </BrowserRouter>, document.getElementById('root'));

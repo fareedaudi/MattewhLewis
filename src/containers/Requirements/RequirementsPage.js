@@ -3,8 +3,8 @@ import {Container, Col,Row} from 'reactstrap';
 import RequirementsCard from './RequirementsCard';
 import EditorCard from './EditorCard';
 import {ROOT_URL} from '../../api';
-import LoginContext from '../../contexts/LoginContext';
 import PropTypes from 'prop-types';
+import {WithLogin} from '../../contexts/LoginContext';
 
 
 export default class RequirementsPage extends React.Component{
@@ -36,23 +36,19 @@ export default class RequirementsPage extends React.Component{
     }
 
     render(){
+        const Requirements = WithLogin(RequirementsCard);
+        const Editor = WithLogin(EditorCard);
         return(
             <Container style={{paddingTop:'100px'}}>
                 <Row>
                     <Col xs="8">
-                        <RequirementsCard 
+                        <Requirements 
                             university={this.state.university} 
                             programs={this.state.programs}
                         />
                     </Col>
                     <Col xs="4">
-                        <LoginContext.Consumer>
-                            {
-                                (login)=>(
-                                    <EditorCard login={login}/>
-                                )
-                            }
-                        </LoginContext.Consumer>
+                        <Editor/>
                     </Col>
                 </Row>
             </Container>

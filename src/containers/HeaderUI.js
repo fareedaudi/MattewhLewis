@@ -44,7 +44,6 @@ export default class HeaderUI extends React.Component {
   }
 
   activateRequirements(){
-    console.log('requirements fired!');
     this.setState({
       homeActive:false,
       requirementsActive:true,
@@ -120,4 +119,8 @@ export default class HeaderUI extends React.Component {
       </Container>
     )
   }
+}
+
+HeaderUI.propTypes = {
+  universities:PropTypes.array.isRequired
 }

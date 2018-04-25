@@ -26,6 +26,7 @@ export default class RequirementsCard extends React.Component{
         if(this.realSelection(ev)){
             this.getSelectedProgramDataAndSetState(ev.target.value);
         }
+        this.props.login.actions.loadLoginData();
     }
 
     componentWillReceiveProps(nextProps){
@@ -62,6 +63,7 @@ export default class RequirementsCard extends React.Component{
         this.setState({
             showSJCCourses:!this.state.showSJCCourses
         });
+        this.props.login.actions.loadLoginData();
     }
 
     realSelection(ev){

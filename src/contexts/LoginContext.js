@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import {Modal,ModalHeader,ModalBody,ModalFooter,Button} from 'reactstrap';
 
 var LoginContext = React.createContext();
 
@@ -11,7 +12,8 @@ export class LoginContextProvider extends React.Component{
             userId:'',
             userEmail:'',
             token:null,
-            timeRemaining:0
+            timeRemaining:0,
+            stayLoggedInModalOpen:false
         }
         this.loadLoginData = this.loadLoginData.bind(this);
         this.updateLoginData = this.updateLoginData.bind(this);
@@ -20,6 +22,8 @@ export class LoginContextProvider extends React.Component{
         this.tick = this.tick.bind(this);
         this.resetCountdown = this.resetCountdown.bind(this);
         this.externalLoadLoginData = this.externalLoadLoginData.bind(this);
+        this.toggleStayLoggedInModal = this.toggleStayLoggedInModal.bind(this)
+        this.stayLoggedInHandler = this.stayLoggedInHandler.bind(this);
     }
     
     componentDidMount(){
@@ -47,12 +51,7 @@ export class LoginContextProvider extends React.Component{
                         if(loginDetails.loggedIn){
                             this.resetCountdown();
                         }
-                        this.setState( {
-                            loggedIn:loginDetails.loggedIn,
-                            userId:loginDetails.userId,
-                            userEmail:loginDetails.userEmail,
-                            token:loginDetails.token
-                        });
+                        this.updateLoginData(loginDetails);
                     }
                 }
             );
@@ -99,11 +98,12 @@ export class LoginContextProvider extends React.Component{
         })
         if(this.state.timeRemaining<=0){
             this.logout();
+        } else if(this.state.timeRemaining===30 && this.state.stayLoggedInModalOpen === false){
+            this.toggleStayLoggedInModal();
         }
     }
 
     logout(){
-        console.log('Logging out!');
         this.updateLoginData({
             loggedIn:false,
             userId:null,
@@ -112,10 +112,23 @@ export class LoginContextProvider extends React.Component{
             timeRemaining:0
         });
         clearInterval(this.timer);
+        if(this.state.stayLoggedInModalOpen){
+            this.toggleStayLoggedInModal();
+        }
+    }
+
+    toggleStayLoggedInModal(){
+        this.setState({
+            stayLoggedInModalOpen:!this.state.stayLoggedInModalOpen
+        });
+    }
+
+    stayLoggedInHandler(){
+        this.toggleStayLoggedInModal();
+        this.externalLoadLoginData();
     }
 
     render(){
-        console.log(this.state.timeRemaining);
         return(
         <LoginContext.Provider value={{
             state:this.state,
@@ -126,12 +139,36 @@ export class LoginContextProvider extends React.Component{
                 logout:this.logout
             }
         }}>
+            <StayLoggedInModal 
+                isOpen={this.state.stayLoggedInModalOpen} 
+                toggle={this.toggleStayLoggedInModal}
+                timeRemaining={this.state.timeRemaining}
+                stayLoggedInHandler={this.stayLoggedInHandler}
+                />
             {this.props.children}
         </LoginContext.Provider>
         )
     }
 }
 
+const StayLoggedInModal = (props) => (
+    <Modal isOpen={props.isOpen} toggle={props.toggle} className={props.className}>
+        <ModalHeader toggle={props.toggle}>Stay Logged In?</ModalHeader>
+        <ModalBody>
+            <p>
+                {`You will be logged out in ${props.timeRemaining} seconds due to inactivity.`}
+            </p>
+            <p>
+                Would you like to stay logged in?
+            </p>
+        </ModalBody>
+        <ModalFooter>
+            <Button color="secondary" onClick={props.toggle}>Nah.</Button>
+            <Button color="primary" onClick={props.stayLoggedInHandler}>Yes, please.</Button>
+        </ModalFooter>
+    </Modal>
+);
+            
 export function WithLogin(LoginConsumer){
     return class extends React.Component {
         render(){
