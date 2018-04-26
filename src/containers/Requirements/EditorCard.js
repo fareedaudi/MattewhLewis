@@ -11,6 +11,7 @@ import {
 import PropTypes from 'prop-types';
 
 
+
 export default class EditorCard extends React.Component{
     constructor(props){
         super(props);
@@ -34,11 +35,25 @@ export default class EditorCard extends React.Component{
         }
     }
 
+    shouldComponentUpdate(nextProps,nextState){
+        if([
+            this.state === nextState,
+            this.props.universities === nextProps.universities,
+            this.props.programs === nextProps.programs,
+            this.props.login.state.loggedIn === nextProps.login.state.loggedIn
+        ].every((condition) => (condition))) {return false;}
+         else {
+        return true;
+      }
+    }
+
+
     render(){
         var instructions = (this.state.editMode)?
             'Edit courses for degree components, below.':
             'View your saved maps below, or create a new map!';
         let loggedIn = this.props.login.state.loggedIn;
+        console.log('Editor card rendered!');
         return (
             <Card>
                 <CardHeader>
@@ -175,6 +190,8 @@ class MapEditor extends React.Component{
 
 EditorCard.propTypes = {
     login: PropTypes.object,
+    universities: PropTypes.array.isRequired,
+    programs: PropTypes.array.isRequired
 }
 
 SavedMaps.propTypes = {

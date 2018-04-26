@@ -14,7 +14,18 @@ export default class LoginUI extends React.Component{
         this.logoutHandler = props.login.actions.logout.bind(this);
     }
 
+    shouldComponentUpdate(nextProps,nextState){
+        if(((this.state === nextState) && (this.props.login.state.loggedIn === nextProps.login.state.loggedIn))){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
     render(){
+        console.log('LoginUI updated!');
+        console.log(this.props);
         return(
             (!this.props.login.state.loggedIn)?
             <div>

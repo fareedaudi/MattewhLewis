@@ -129,9 +129,14 @@ export class LoginContextProvider extends React.Component{
     }
 
     render(){
+        let {loggedIn, userId, userEmail} = this.state;
         return(
         <LoginContext.Provider value={{
-            state:this.state,
+            state:{
+                loggedIn,
+                userId,
+                userEmail
+            },
             actions:{
                 loadLoginData:this.externalLoadLoginData,
                 updateLoginData:this.updateLoginData,

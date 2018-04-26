@@ -48,7 +48,7 @@ export default class RequirementsPage extends React.Component{
                         />
                     </Col>
                     <Col xs="4">
-                        <Editor/>
+                        <Editor universities={this.props.universities} programs={this.state.programs}/>
                     </Col>
                 </Row>
             </Container>
