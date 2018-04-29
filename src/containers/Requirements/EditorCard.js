@@ -17,23 +17,10 @@ export default class EditorCard extends React.Component{
         super(props);
         this.state = {
             editMode:false,
-            loggedIn:false,
-            savedMaps:[
-                {
-                    map_id: 1,
-                    map_name: "Matt's Map Has a Super Long Name",
-                    map_univ_id: 1,
-                    map_prog_id: 6,
-                },
-                {
-                    map_id: 2,
-                    map_name: "Chris' Map",
-                    map_univ_id: 1,
-                    map_prog_id: 14
-                }
-            ]
+            savedMaps:[]
         }
     }
+
 
     shouldComponentUpdate(nextProps,nextState){
         if([
@@ -53,7 +40,6 @@ export default class EditorCard extends React.Component{
             'Edit courses for degree components, below.':
             'View your saved maps below, or create a new map!';
         let loggedIn = this.props.login.state.loggedIn;
-        console.log('Editor card rendered!');
         return (
             <Card>
                 <CardHeader>
@@ -67,7 +53,7 @@ export default class EditorCard extends React.Component{
                         {
                         this.state.editMode ?
                         <MapEditor/>:
-                        <SavedMaps savedMaps={this.state.savedMaps}/>
+                        <SavedMaps login={this.props.login}/>
                         }
                     </CardBody>:
                     <CardBody>
@@ -83,6 +69,42 @@ export default class EditorCard extends React.Component{
 
 class SavedMaps extends React.Component{
 
+    constructor(props){
+        super(props);
+        this.state = {
+            savedMaps:[]
+        }
+    }
+
+    componentDidMount(){
+        if(this.props.login.state.loggedIn){
+            fetch(
+                `http://localhost:8000/maps_by_user_id/${this.props.login.state.userId}`
+            ).then(
+                response => response.json()
+            ).then(
+                mapData => {
+                    this.setState({
+                        savedMaps:mapData
+                    });
+                }
+            );
+        }
+    }
+
+    shouldComponentUpdate(nextProps,nextState){
+        if(this.state.savedMaps !== nextState.savedMaps){
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    componentWillUnMount(){
+        this._mounted = false;
+    }
+
     render(){
         return (
             <div>
@@ -90,9 +112,9 @@ class SavedMaps extends React.Component{
             </CardText>
                 <h6>Saved Maps</h6>
                 <ListGroup>
-                    {this.props.savedMaps.map(
+                    {this.state.savedMaps.map(
                         (savedMap) => (
-                            <SavedMapTile key={savedMap.map_id} id={String(savedMap.map_id)} name={savedMap.map_name}/>
+                            <SavedMapTile key={Math.random()} id={String(savedMap.map_id)} name={savedMap.map_name}/>
                         )
                     )}
                     <CreateMapTile/>

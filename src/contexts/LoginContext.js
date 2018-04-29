@@ -13,7 +13,8 @@ export class LoginContextProvider extends React.Component{
             userEmail:'',
             token:null,
             timeRemaining:0,
-            stayLoggedInModalOpen:false
+            stayLoggedInModalOpen:false,
+            recentlyActive:false,
         }
         this.loadLoginData = this.loadLoginData.bind(this);
         this.updateLoginData = this.updateLoginData.bind(this);
@@ -24,6 +25,7 @@ export class LoginContextProvider extends React.Component{
         this.externalLoadLoginData = this.externalLoadLoginData.bind(this);
         this.toggleStayLoggedInModal = this.toggleStayLoggedInModal.bind(this)
         this.stayLoggedInHandler = this.stayLoggedInHandler.bind(this);
+        this.makeRecentlyActive = this.makeRecentlyActive.bind(this);
     }
     
     componentDidMount(){
@@ -57,6 +59,8 @@ export class LoginContextProvider extends React.Component{
             );
     }
 
+    
+
     updateLoginData(loginDetails){
         this.setState({
             loggedIn:loginDetails.loggedIn,
@@ -88,8 +92,18 @@ export class LoginContextProvider extends React.Component{
         clearInterval(this.timer);
         this.timer = setInterval(this.tick,1000);
         this.setState({
-            timeRemaining:10*60
+            timeRemaining:10*60,
+            recentlyActive:false
         });
+    }
+
+    makeRecentlyActive(){
+        console.log('Activity!');
+        if(!this.state.recentlyActive){
+            this.setState({
+                recentlyActive:true
+            });
+        }
     }
 
     tick(){
@@ -99,7 +113,11 @@ export class LoginContextProvider extends React.Component{
         if(this.state.timeRemaining<=0){
             this.logout();
         } else if(this.state.timeRemaining===30 && this.state.stayLoggedInModalOpen === false){
-            this.toggleStayLoggedInModal();
+            if(this.state.recentlyActive){
+                this.externalLoadLoginData();
+            } else{
+                this.toggleStayLoggedInModal();
+            }
         }
     }
 
@@ -138,7 +156,7 @@ export class LoginContextProvider extends React.Component{
                 userEmail
             },
             actions:{
-                loadLoginData:this.externalLoadLoginData,
+                makeRecentlyActive:this.makeRecentlyActive,
                 updateLoginData:this.updateLoginData,
                 loginFromCredentials:this.loginFromCredentials,
                 logout:this.logout

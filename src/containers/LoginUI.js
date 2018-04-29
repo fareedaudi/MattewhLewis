@@ -24,8 +24,6 @@ export default class LoginUI extends React.Component{
 
 
     render(){
-        console.log('LoginUI updated!');
-        console.log(this.props);
         return(
             (!this.props.login.state.loggedIn)?
             <div>

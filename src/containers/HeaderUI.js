@@ -38,7 +38,7 @@ export default class HeaderUI extends React.Component {
       requirementsActive:false,
       programsActive:false
     });
-    this.props.login.actions.loadLoginData();
+    this.props.login.actions.makeRecentlyActive();
   }
 
   activatePrograms(){
@@ -47,7 +47,7 @@ export default class HeaderUI extends React.Component {
       requirementsActive:false,
       programsActive:true
     });
-    this.props.login.actions.loadLoginData();
+    this.props.login.actions.makeRecentlyActive();
   }
 
   activateRequirements(){
@@ -56,7 +56,7 @@ export default class HeaderUI extends React.Component {
       requirementsActive:true,
       programsActive:false
     });
-    this.props.login.actions.loadLoginData();
+    this.props.login.actions.makeRecentlyActive();
   }
 
   toggleProgram() {
@@ -73,7 +73,6 @@ export default class HeaderUI extends React.Component {
 
   render(){
     const LoginButton = WithLogin(LoginUI);
-    console.log('Header updated!');
     return (
       <Container className="fixed-top" style={{paddingTop: '10px', background: 'rgba(255, 255, 255, 9.0)'}}>
       <h5>SJC Degree Mapping Toolkit</h5>
