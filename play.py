@@ -1,12 +1,22 @@
-course = {
-    'id': 3,
-    'name': 'math!'
+from app.models import db, Map
+
+map1 = {
+    'user_id':1,
+    'map_name':'Pre-Geology @ UHCL',
+    'prog_id':4,
 }
 
-courses = [course]*3
+map2 = {
+    'user_id':1,
+    'map_name':'Pre-Dentistry @ UH',
+    'prog_id':6,
+}
 
-list_ = {
-    k:v for k,v in zip(('program_id','program_name','components'),(course['id'],course['name'],['test' for i in range(10)]))
-    }
+map3 = {
+    'user_id':1,
+    'map_name':'Accounting @ UHD',
+    'prog_id':1
+}
 
-print(list_)
+for map in [map1,map2,map3]:
+    db.session.delete(map)

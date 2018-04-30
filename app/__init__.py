@@ -7,7 +7,6 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 app.config.from_object(Config)
-print(app.config)
 login = LoginManager(app)
 app.debug = True
 CORS(app)
