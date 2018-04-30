@@ -207,11 +207,9 @@ class User(UserMixin,db.Model):
     email = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     maps = db.relationship('Map', backref='user',lazy=True)
-    
     def generate_auth_token(self,expiration=600):
         s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
         return s.dumps({ 'id': self.id })
-
     @staticmethod
     def verify_auth_token(token):
         s = Serializer(app.config['SECRET_KEY'])
@@ -234,6 +232,7 @@ class User(UserMixin,db.Model):
         return '<User {}>'.format(self.email)
 
 class Map(db.Model):
+
     __tablename__ = "map"
     id = db.Column(db.Integer, primary_key=True)
     map_name = db.Column(db.String(255), nullable=False)
@@ -299,6 +298,7 @@ class Map(db.Model):
         'Institutional Option':['inst_opt_1','inst_opt_2'],
         'Transfer Path':[f'trans_{i}' for i in range(1,7)]
     }
+    
     def get_dict(self):
         dict_ = self.__dict__
         dict_.pop('_sa_instance_state',None)
