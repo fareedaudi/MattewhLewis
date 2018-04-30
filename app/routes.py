@@ -106,7 +106,6 @@ def login():
         return json.jsonify({
             "logged_in":False,
             "email":None}),401
-    print(type(user.id))
     return json.jsonify({
         'loggedIn':True,
         'userId':user.id,
@@ -123,6 +122,7 @@ def load_login_data():
     if(token != None):
         user = User.verify_auth_token(token)
     if(user):
+        token = user.generate_auth_token().decode('ascii')
         return json.jsonify({
             'loggedIn':True,
             'userId':user.id,

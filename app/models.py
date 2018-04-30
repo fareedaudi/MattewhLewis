@@ -208,7 +208,7 @@ class User(UserMixin,db.Model):
     password_hash = db.Column(db.String(128))
     maps = db.relationship('Map', backref='user',lazy=True)
     
-    def generate_auth_token(self,expiration=600):
+    def generate_auth_token(self,expiration=10*60):
         s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
         return s.dumps({ 'id': self.id })
 
