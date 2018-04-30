@@ -64,6 +64,7 @@ export class LoginContextProvider extends React.Component{
     
 
     updateLoginData(loginDetails){
+        console.log(loginDetails.loggedIn);
         this.setState({
             loggedIn:loginDetails.loggedIn,
             userId:loginDetails.userId,
@@ -109,6 +110,7 @@ export class LoginContextProvider extends React.Component{
     }
 
     tick(){
+        console.log(this.state.timeRemaining);
         this.setState({
             timeRemaining:this.state.timeRemaining - 1
         })
