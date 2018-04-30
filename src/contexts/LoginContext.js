@@ -49,8 +49,10 @@ export class LoginContextProvider extends React.Component{
                response => response.data
             ).then( 
                 (loginDetails) => {
+                    console.log('Log in attempted!');
                     if(loginDetails){
                         if(loginDetails.loggedIn){
+                            console.log('log in details retrieved!');
                             this.resetCountdown();
                         }
                         this.updateLoginData(loginDetails);

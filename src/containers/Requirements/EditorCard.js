@@ -6,7 +6,12 @@ import {
     CardText,
     ListGroup,
     ListGroupItem,
-    Tooltip
+    Tooltip,
+    Modal,
+    ModalBody,
+    ModalFooter,
+    ModalHeader,
+    Button
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 
@@ -74,6 +79,14 @@ class SavedMaps extends React.Component{
         this.state = {
             savedMaps:[]
         }
+        this.deleteMap = this.deleteMap.bind(this);
+        this.shareMap = this.shareMap.bind(this);
+        this.approveMap = this.approveMap.bind(this);
+        this.mapActionHandlers = {
+            deleteMap:this.deleteMap,
+            shareMap:this.shareMap,
+            approveMap:this.approveMap
+        }
     }
 
     componentDidMount(){
@@ -92,6 +105,19 @@ class SavedMaps extends React.Component{
         }
     }
 
+    deleteMap(map_id){
+        this.setState({
+            savedMaps:this.state.savedMaps.filter((savedMap)=>(savedMap.id!==Number(map_id)))
+        });
+        // MAKE AUTHENTICATED AJAX CALL TO DELETE MAP
+    }
+
+    shareMap(map_id){
+    }
+
+    approveMap(map_id){
+    }
+
     shouldComponentUpdate(nextProps,nextState){
         if(this.state.savedMaps !== nextState.savedMaps){
             return true;
@@ -101,9 +127,6 @@ class SavedMaps extends React.Component{
 
     }
 
-    componentWillUnMount(){
-        this._mounted = false;
-    }
 
     render(){
         return (
@@ -114,7 +137,7 @@ class SavedMaps extends React.Component{
                 <ListGroup>
                     {this.state.savedMaps.map(
                         (savedMap) => (
-                            <SavedMapTile key={Math.random()} id={String(savedMap.map_id)} name={savedMap.map_name}/>
+                            <SavedMapTile key={Math.random()} id={String(savedMap.id)} name={savedMap.map_name} mapActionHandlers={this.mapActionHandlers}/>
                         )
                     )}
                     <CreateMapTile/>
@@ -125,22 +148,47 @@ class SavedMaps extends React.Component{
 }
 
 class SavedMapTile extends React.Component{
+    constructor(props){
+        super(props);
+        this.state = {
+            deleteMapModalOpen:false,
+        }
+        this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
+    }
+
+    toggleDeleteModal(){
+        this.setState({
+            deleteMapModalOpen:!this.state.deleteMapModalOpen
+        });
+    }
+
+
     render(){
-        return (
+        var deleteMap, shareMap, approveMap;
+        ({deleteMap, shareMap, approveMap} = this.props.mapActionHandlers);
+        return (<div className="saved-map-tile">
             <ListGroupItem className="justify-content-between d-flex">
                 <a href="" onClick={(ev)=>{ev.preventDefault();}} style={{maxWidth:"200px"}}>{this.props.name}</a>
                 <span className="pull-right">
-                    <MapActionButton type="approve" map_id={this.props.id}/>&nbsp;&nbsp;
-                    <MapActionButton type="share" activated={true} map_id={this.props.id}/>&nbsp;&nbsp;
-                    <MapActionButton type="delete" map_id={this.props.id}/>
+                    <MapActionButton type="approve" map_id={this.props.id} handler={approveMap}/>&nbsp;&nbsp;
+                    <MapActionButton type="share" activated={true} map_id={this.props.id} handler={shareMap}/>&nbsp;&nbsp;
+                    <MapActionButton type="delete" map_id={this.props.id} handler={this.toggleDeleteModal}/>
                 </span>
             </ListGroupItem>
+            <DeleteMapModal
+                isOpen={this.state.deleteMapModalOpen} 
+                toggle={this.toggleDeleteModal}
+                map_name={this.props.name}
+                handler={deleteMap}
+                map_id={this.props.id}
+            />
+            </div>
         )
     }
 }
 
 const CreateMapTile = (props) => (
-    <ListGroupItem color="primary" tag="a" href="#">
+    <ListGroupItem color="primary" tag="a" href="#" onClick={(ev)=>{ev.preventDefault();}}>
         <span className="fa fa-plus"/>&nbsp;&nbsp;Create a new map.
     </ListGroupItem>
 );
@@ -154,17 +202,14 @@ class MapActionButton extends React.Component{
         this.FAClassMap = {
             approve:{
                 faClass:'fa fa-paper-plane',
-                handler:null,
                 tooltipText:'Submit for approval.'
             },
             share:{
                 faClass:'fa fa-share-alt',
-                handler:null,
                 tooltipText:'Share with collaborators.'
             },
             delete:{
                 faClass:'fa fa-trash',
-                handler:null,
                 tooltipText:'Delete map.'
             }
         }
@@ -173,19 +218,18 @@ class MapActionButton extends React.Component{
     }
 
     render(){
-        let buttonId = this.props.type + this.props.map_id
+        let buttonId = this.props.type + this.props.map_id;
+        var style = {
+            cursor:"pointer",
+            color:(this.props.activated)?"green":"black"
+        }
         return (
             <span>
                 <span 
                     className={this.FAClassMap[this.props.type].faClass} 
-                    style={
-                        {
-                            cursor:"pointer",
-                            color:(this.props.activated)?"green":"black"
-                        }
-                    }
+                    style={style}
                     id={buttonId}
-                    
+                    onClick={this.props.handler}
                 />
                 <Tooltip 
                     placement="top" 
@@ -198,8 +242,21 @@ class MapActionButton extends React.Component{
     }
 }
 
-class MapEditor extends React.Component{
+const DeleteMapModal = (props) => (
+    <Modal isOpen={props.isOpen} toggle={props.toggle} className={props.className}>
+        <ModalHeader toggle={props.toggle}>Delete <strong>{props.map_name}</strong>?</ModalHeader>
+        <ModalBody>
+        <p>This action is irreversible.</p>
+        <p>Are you sure you want to delete this map?</p>
+        </ModalBody>
+        <ModalFooter>
+            <Button color="secondary" onClick={props.toggle}>Close</Button>
+            <Button color="danger" onClick={()=>{props.handler(props.map_id)}}>Let's Do This!</Button>
+        </ModalFooter>
+    </Modal>
+);
 
+class MapEditor extends React.Component{
 
     render(){
         return (
