@@ -14,7 +14,6 @@ import {
     Button,
     Form,
     FormGroup,
-    Col,
     Label,
     Input,
     FormText,
@@ -100,7 +99,7 @@ class SavedMaps extends React.Component{
     componentDidMount(){
         if(this.props.login.state.loggedIn){
             fetch(
-                `http://localhost:8000/maps_by_user_id/${this.props.login.state.userId}`
+                `http://localhost:5000/maps_by_user_id/${this.props.login.state.userId}`
             ).then(
                 response => response.json()
             ).then(
@@ -116,7 +115,7 @@ class SavedMaps extends React.Component{
     deleteMap(map_id){
         var token = sessionStorage.getItem('jwtToken');
         axios.post(
-            'http://localhost:8000/delete_map', {token, map_id}
+            'http://localhost:5000/delete_map', {token, map_id}
             ).then(
                response => response.data
             ).then(
@@ -243,9 +242,7 @@ class CreateMapTile extends React.Component{
     }
 
     class CreateMapModal extends React.Component{
-        constructor(props){
-            super(props);
-        }
+
 
         render(){
             return (

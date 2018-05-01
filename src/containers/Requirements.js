@@ -36,7 +36,7 @@ export default class Requirements extends React.Component {
         });
         if(showRequirements){
             fetch(
-                'http://localhost:8000/requirements_by_program/'+selectedProgram
+                'http://localhost:5000/requirements_by_program/'+selectedProgram
             ).then(
                 response => response.json()
             ).then(
@@ -52,7 +52,7 @@ export default class Requirements extends React.Component {
 
     componentDidMount(){
         fetch(
-            'http://localhost:8000/programs_by_university/'+this.state.univ_id
+            'http://localhost:5000/programs_by_university/'+this.state.univ_id
         ).then(
             response => response.json()
         ).then(
@@ -75,7 +75,7 @@ export default class Requirements extends React.Component {
             var univ_id = nextProps.match.params.univ_id;
             this.resetState(univ_id);
             fetch(
-                'http://localhost:8000/programs_by_university/'+univ_id
+                'http://localhost:5000/programs_by_university/'+univ_id
             ).then(
                 response => response.json()
             ).then(

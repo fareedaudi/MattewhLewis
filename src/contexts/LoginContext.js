@@ -44,15 +44,13 @@ export class LoginContextProvider extends React.Component{
 
     loadLoginData(token){
         axios.post(
-            'http://localhost:8000/load_login_data', {token}
+            'http://localhost:5000/load_login_data', {token}
             ).then(
                response => response.data
             ).then( 
                 (loginDetails) => {
-                    console.log('Log in attempted!');
                     if(loginDetails){
                         if(loginDetails.loggedIn){
-                            console.log('log in details retrieved!');
                             this.resetCountdown();
                         }
                         this.updateLoginData(loginDetails);
@@ -64,7 +62,6 @@ export class LoginContextProvider extends React.Component{
     
 
     updateLoginData(loginDetails){
-        console.log(loginDetails.loggedIn);
         this.setState({
             loggedIn:loginDetails.loggedIn,
             userId:loginDetails.userId,
@@ -76,7 +73,7 @@ export class LoginContextProvider extends React.Component{
 
     loginFromCredentials({loginEmail,loginPassword}){
         axios.post(
-            'http://localhost:8000/login', {loginEmail,loginPassword}
+            'http://localhost:5000/login', {loginEmail,loginPassword}
             ).then(
                response => {
                    this.resetCountdown();
