@@ -19,4 +19,6 @@ map3 = {
 }
 
 for map in [map1,map2,map3]:
-    db.session.delete(map)
+    db.session.add(Map(**map))
+
+db.session.commit()

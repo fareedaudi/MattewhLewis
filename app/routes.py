@@ -179,6 +179,29 @@ def load_login_data():
 def logout():
     return 'check console'
 
+
+@app.route('/delete_map',methods=['POST'])
+def delete_map():
+    user = None
+    form_data = json.loads(request.data)
+    token = form_data['token']
+    map_id = form_data['map_id']
+    if(token and map_id):
+        user = User.verify_auth_token(token)
+    if(user):
+        map_ = db.session.query(Map).get(map_id)
+        db.session.delete(map_)
+        db.session.commit()
+        return json.jsonify({
+            'mapDeleted':True
+        })
+    else:
+        return json.jsonify({
+            'mapDeleted':False
+        })
+
+
+
 api.add_resource(Universities,'/universities')
 api.add_resource(ProgramsByUniv,'/programs_by_university/<int:univ_id>')
 api.add_resource(RequirementsByProgram,'/requirements_by_program/<int:prog_id>')
