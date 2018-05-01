@@ -44,7 +44,7 @@ export class LoginContextProvider extends React.Component{
 
     loadLoginData(token){
         axios.post(
-            '/load_login_data', {token}
+            'http://localhost:5000/load_login_data', {token}
             ).then(
                response => response.data
             ).then( 
@@ -73,7 +73,7 @@ export class LoginContextProvider extends React.Component{
 
     loginFromCredentials({loginEmail,loginPassword}){
         axios.post(
-            '/login', {loginEmail,loginPassword}
+            'http://localhost:5000/login', {loginEmail,loginPassword}
             ).then(
                response => {
                    this.resetCountdown();
