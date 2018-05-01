@@ -11,9 +11,17 @@ import {
     ModalBody,
     ModalFooter,
     ModalHeader,
-    Button
+    Button,
+    Form,
+    FormGroup,
+    Col,
+    Label,
+    Input,
+    FormText,
+    FormFeedback
 } from 'reactstrap';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 
 
 
@@ -106,10 +114,21 @@ class SavedMaps extends React.Component{
     }
 
     deleteMap(map_id){
-        this.setState({
-            savedMaps:this.state.savedMaps.filter((savedMap)=>(savedMap.id!==Number(map_id)))
-        });
-        // MAKE AUTHENTICATED AJAX CALL TO DELETE MAP
+        var token = sessionStorage.getItem('jwtToken');
+        axios.post(
+            'http://localhost:8000/delete_map', {token, map_id}
+            ).then(
+               response => response.data
+            ).then(
+                (result) => {
+                    console.log(result);
+                    if(result.mapDeleted){
+                        this.setState({
+                            savedMaps:this.state.savedMaps.filter((savedMap)=>(savedMap.id!==Number(map_id)))
+                        });
+                    }
+                }
+            );
     }
 
     shareMap(map_id){
@@ -154,6 +173,7 @@ class SavedMapTile extends React.Component{
             deleteMapModalOpen:false,
         }
         this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
+        this.deleteMap = this.deleteMap.bind(this);
     }
 
     toggleDeleteModal(){
@@ -162,10 +182,16 @@ class SavedMapTile extends React.Component{
         });
     }
 
+    deleteMap(map_id){
+        console.log("attempting delete!");
+        this.toggleDeleteModal();
+        this.props.mapActionHandlers.deleteMap(map_id);
+    }
+
 
     render(){
-        var deleteMap, shareMap, approveMap;
-        ({deleteMap, shareMap, approveMap} = this.props.mapActionHandlers);
+        var shareMap, approveMap;
+        ({shareMap, approveMap} = this.props.mapActionHandlers);
         return (<div className="saved-map-tile">
             <ListGroupItem className="justify-content-between d-flex">
                 <a href="" onClick={(ev)=>{ev.preventDefault();}} style={{maxWidth:"200px"}}>{this.props.name}</a>
@@ -179,7 +205,7 @@ class SavedMapTile extends React.Component{
                 isOpen={this.state.deleteMapModalOpen} 
                 toggle={this.toggleDeleteModal}
                 map_name={this.props.name}
-                handler={deleteMap}
+                handler={() => {this.deleteMap(this.props.id);}}
                 map_id={this.props.id}
             />
             </div>
@@ -187,11 +213,80 @@ class SavedMapTile extends React.Component{
     }
 }
 
-const CreateMapTile = (props) => (
-    <ListGroupItem color="primary" tag="a" href="#" onClick={(ev)=>{ev.preventDefault();}}>
-        <span className="fa fa-plus"/>&nbsp;&nbsp;Create a new map.
-    </ListGroupItem>
-);
+class CreateMapTile extends React.Component{
+    constructor(props){
+        super(props);
+        this.state = {
+            createMapModalOpen:false,
+        }
+        this.toggleCreateMapModal = (ev) => {ev.preventDefault();this.setState({createMapModalOpen:!this.state.createMapModalOpen});};
+        this.createMapHandler = this.createMapHandler.bind(this);
+    }
+
+    createMapHandler(){
+        console.log('Map created!');
+    }
+
+    render(){
+        var isOpen = this.state.createMapModalOpen;
+        var toggle = this.toggleCreateMapModal;
+        var handler = this.createMapHandler;
+        return (
+            <div id="create-map-modal">
+                <ListGroupItem color="primary" tag="a" href="#" onClick={toggle}>
+                    <span className="fa fa-plus"/>&nbsp;&nbsp;Create a new map.
+                </ListGroupItem>
+                <CreateMapModal isOpen={isOpen} toggle={toggle} handler={handler}/>
+            </div>
+            );
+        }
+    }
+
+    class CreateMapModal extends React.Component{
+        constructor(props){
+            super(props);
+        }
+
+        render(){
+            return (
+                    <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={this.props.className}>
+                        <ModalHeader toggle={this.props.toggle}>Create new degree map.</ModalHeader>
+                        <ModalBody>
+                        <Form>
+                            <FormGroup>
+                                <Label for="transferInstitution">Transfer Institution</Label>
+                                <Input type="select" name="transfer-institution" id="transferInstitution" placeholder="Please select a transfer institution." invalid={true}/>
+                                <FormText>To what institution are you aligning this map?</FormText>
+                                <FormFeedback>You did good!</FormFeedback>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="program">Program</Label>
+                                <Input type="select" name="program" id="program" placeholder="Please select a program."/>
+                                <FormText>To what program are you aligning this map?</FormText>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="mapName">Name</Label>
+                                <Input type="text" name="name" id="mapName" placeholder="E.g., German Basket Weaving Specialization"/>
+                                <FormText>Pick something specific.</FormText>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="collaborators">Collaborators</Label>
+                                <Input type="text" name="collaborators" id="collaborators" placeholder="E.g., matthew.lewis@sjcd.edu"/>
+                                <FormText>Add some co-conspirators!</FormText>
+                            </FormGroup>
+                        </Form>
+
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button color="secondary" onClick={this.props.toggle}>Close</Button>
+                            <Button color="danger" onClick={this.props.handler}>Submit</Button>
+                        </ModalFooter>
+                    </Modal>
+                );
+            }
+        }
+
+
 
 class MapActionButton extends React.Component{
     constructor(props){
