@@ -1,2 +1,2 @@
-const APIRoot = 'http://localhost:5000';
+const APIRoot = '';
 const universities = '/universities';

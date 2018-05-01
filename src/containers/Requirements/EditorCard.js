@@ -99,7 +99,7 @@ class SavedMaps extends React.Component{
     componentDidMount(){
         if(this.props.login.state.loggedIn){
             fetch(
-                `http://localhost:5000/maps_by_user_id/${this.props.login.state.userId}`
+                `/maps_by_user_id/${this.props.login.state.userId}`
             ).then(
                 response => response.json()
             ).then(
@@ -115,7 +115,7 @@ class SavedMaps extends React.Component{
     deleteMap(map_id){
         var token = sessionStorage.getItem('jwtToken');
         axios.post(
-            'http://localhost:5000/delete_map', {token, map_id}
+            '/delete_map', {token, map_id}
             ).then(
                response => response.data
             ).then(
