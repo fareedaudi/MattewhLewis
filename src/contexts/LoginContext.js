@@ -4,6 +4,8 @@ import {Modal,ModalHeader,ModalBody,ModalFooter,Button} from 'reactstrap';
 
 var LoginContext = React.createContext();
 
+var loginDuration = 600;
+
 export class LoginContextProvider extends React.Component{
     constructor(){
         super();
@@ -12,20 +14,20 @@ export class LoginContextProvider extends React.Component{
             userId:'',
             userEmail:'',
             token:null,
-            timeRemaining:0,
             stayLoggedInModalOpen:false,
             recentlyActive:false,
+            loggedInAt:0,
+            countDown:0,
         }
         this.loadLoginData = this.loadLoginData.bind(this);
         this.updateLoginData = this.updateLoginData.bind(this);
         this.loginFromCredentials = this.loginFromCredentials.bind(this);
         this.logout = this.logout.bind(this);
-        this.tick = this.tick.bind(this);
-        this.resetCountdown = this.resetCountdown.bind(this);
         this.externalLoadLoginData = this.externalLoadLoginData.bind(this);
         this.toggleStayLoggedInModal = this.toggleStayLoggedInModal.bind(this)
         this.stayLoggedInHandler = this.stayLoggedInHandler.bind(this);
         this.makeRecentlyActive = this.makeRecentlyActive.bind(this);
+        this.setTime = this.setTime.bind(this);
     }
     
     componentDidMount(){
@@ -51,7 +53,7 @@ export class LoginContextProvider extends React.Component{
                 (loginDetails) => {
                     if(loginDetails){
                         if(loginDetails.loggedIn){
-                            this.resetCountdown();
+                            this.setTime();
                         }
                         this.updateLoginData(loginDetails);
                     }
@@ -76,7 +78,7 @@ export class LoginContextProvider extends React.Component{
             'http://localhost:5000/login', {loginEmail,loginPassword}
             ).then(
                response => {
-                   this.resetCountdown();
+                   this.setTime();
                    return response.data;
                 }
             ).then(
@@ -88,13 +90,17 @@ export class LoginContextProvider extends React.Component{
             );
     }
 
-    resetCountdown(){
-        clearInterval(this.timer);
-        this.timer = setInterval(this.tick,1000);
-        this.setState({
-            timeRemaining:10*60,
-            recentlyActive:false
-        });
+    setTime = () => {
+        this.setState(
+            {
+                loggedInAt:Date.now()
+            },
+            () => {
+                clearInterval(this.timer);
+                this.timer = setInterval(this.tock,1000);
+            }
+        )
+
     }
 
     makeRecentlyActive(){
@@ -106,19 +112,25 @@ export class LoginContextProvider extends React.Component{
         }
     }
 
-    tick(){
-        console.log(this.state.timeRemaining);
-        this.setState({
-            timeRemaining:this.state.timeRemaining - 1
-        })
-        if(this.state.timeRemaining<=0){
+    tock = () => {
+        let timeElapsed = Math.floor((Date.now() - this.state.loggedInAt)/1000);
+        let timeRemaining = loginDuration - timeElapsed;
+        if(timeRemaining < 0){
             this.logout();
-        } else if(this.state.timeRemaining===30 && this.state.stayLoggedInModalOpen === false){
+        } else if(timeRemaining === 30 && !this.state.stayLoggedInModalOpen){
             if(this.state.recentlyActive){
                 this.externalLoadLoginData();
             } else{
-                this.toggleStayLoggedInModal();
-            }
+                this.setState({
+                    countDown:30
+                },
+                this.toggleStayLoggedInModal
+            );
+            } 
+        } else if(timeRemaining < 30){
+            this.setState({
+                countDown:timeRemaining
+            });
         }
     }
 
@@ -128,7 +140,7 @@ export class LoginContextProvider extends React.Component{
             userId:null,
             userEmail:'',
             token:null,
-            timeRemaining:0
+            loggedInAt:0
         });
         clearInterval(this.timer);
         if(this.state.stayLoggedInModalOpen){
@@ -145,6 +157,10 @@ export class LoginContextProvider extends React.Component{
     stayLoggedInHandler(){
         this.toggleStayLoggedInModal();
         this.externalLoadLoginData();
+    }
+
+    dontStayLoggedInHandler(){
+        this.setState({});
     }
 
     render(){
@@ -166,7 +182,7 @@ export class LoginContextProvider extends React.Component{
             <StayLoggedInModal 
                 isOpen={this.state.stayLoggedInModalOpen} 
                 toggle={this.toggleStayLoggedInModal}
-                timeRemaining={this.state.timeRemaining}
+                timeRemaining={this.state.countDown}
                 stayLoggedInHandler={this.stayLoggedInHandler}
                 />
             {this.props.children}

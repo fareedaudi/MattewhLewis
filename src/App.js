@@ -14,23 +14,28 @@ class App extends React.Component{
   constructor(){
     super();
     this.state = {
-      universities:[],
-      univNameMap:{}
+      universities:[]
     };
+  }
+
+  componentDidMount(){
     this.loadUniversitiesIntoState();
   }
 
-  
-  componentDidMount(){
-    // Get list of all universities
-  }
-  
-  componentWillReceiveProps(nextProps){
-
-  }
-
-  shouldComponentUpdate(){
-    return true;
+  loadUniversitiesIntoState(){
+    fetch(
+      UNIVERSITIES_URL
+    ).then(
+      response => (response.json())
+    ).then(
+      universities => {
+        this.setState(
+          {
+            universities
+          }
+        );
+      }
+    );
   }
 
   render(){
@@ -45,21 +50,8 @@ class App extends React.Component{
     )
   }
 
-  loadUniversitiesIntoState(){
-    fetch(
-      UNIVERSITIES_URL
-    ).then(
-      response => (response.json())
-    ).then(
-      univList => {
-        this.setState(
-          {
-            universities:univList
-          }
-        );
-      }
-    );
-  }
+
+
 } 
 
 export default App;
