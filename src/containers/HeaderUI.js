@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import {Container,Nav,NavItem,NavLink,Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from 'reactstrap';
 import LoginUI from '../containers/LoginUI';
 import {WithLogin} from '../contexts/LoginContext';
@@ -80,8 +79,6 @@ export default class HeaderUI extends React.Component {
           <NavItem>
             <NavLink 
               className={this.state.homeActive?"active":""}
-              tag={Link} // Hacky work-around for proper routing.
-              to="/"
               onClick={this.activateHome}
               >
               Home
@@ -95,26 +92,14 @@ export default class HeaderUI extends React.Component {
             <DropdownMenu>
               {this.props.universities.map((obj) => (
                 <DropdownItem 
-                key={obj.university_id} 
-                to={"/requirements/"+obj.university_id} 
-                tag={Link}
-                onClick={this.activateRequirements}
+                  key={obj.university_id} 
+                  onClick={this.props.selectionHandler}
+                  value={obj.university_id}
                 >{obj.university_name}</DropdownItem>
                 // Refreshes entire page, because router doesn't trigger re-rendering of components (for AJAX, etc.)
               ))}
             </DropdownMenu>
           </Dropdown>
-
-        <Dropdown nav isOpen={this.state.requirementDropdownOpen} toggle={this.toggleRequirement}>
-          <DropdownToggle className={this.state.programsActive?"active":""} nav caret>
-            University Programs by SJC Course
-          </DropdownToggle>
-          <DropdownMenu>
-            {this.props.universities.map((obj) => (
-              <DropdownItem key={obj.university_id} onClick={this.activatePrograms}>{obj.university_name}</DropdownItem>
-            ))}
-          </DropdownMenu>
-        </Dropdown>
 
 
         <NavItem className="ml-auto">

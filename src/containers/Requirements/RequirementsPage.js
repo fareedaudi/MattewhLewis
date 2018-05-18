@@ -11,31 +11,38 @@ export default class RequirementsPage extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            university:{},
-            programs:[]
+            university:this.props.university,
+            programs:[],
         }
+        this.renderCount = 0;
     }
 
     componentDidMount(){
-        let univ_id = this.props.match.params.univ_id;
-        this.fetchUniversityProgramsAndUpdateState(univ_id);
-        if(this.props.universities.length > 0){
-            this.setState({
-                university:this.props.universities.filter((univ)=>(String(univ.university_id) === univ_id))[0]
-            });
+        let universityId = this.props.university.university_id;
+        this.fetchUniversityProgramsAndUpdateState(universityId);
+    }
+
+    static getDerivedStateFromProps(nextProps,prevState){
+        if(prevState.university !== nextProps.university){
+            return {
+                programs:[]
+            }
+        } else{
+            return null;
         }
     }
 
-    componentWillReceiveProps(nextProps){
-        let univ_id = nextProps.match.params.univ_id;
-        this.fetchUniversityProgramsAndUpdateState(univ_id);
-        this.setState({
-            university:nextProps.universities.filter((univ)=>(String(univ.university_id) === univ_id))[0]
-        });
-        
+    componentDidUpdate(prevProps,prevState){
+        if(this.props.university !== prevProps.university){
+            let universityId = this.props.university.university_id;
+            this.fetchUniversityProgramsAndUpdateState(universityId);
+        }
+
     }
 
     render(){
+        this.renderCount += 1;
+        console.log(`RequirementsPage rendered ${this.renderCount} time with: `,this.state);
         const Requirements = WithLogin(RequirementsCard);
         const Editor = WithLogin(EditorCard);
         return(
@@ -43,21 +50,23 @@ export default class RequirementsPage extends React.Component{
                 <Row>
                     <Col xs="8">
                         <Requirements 
-                            university={this.state.university} 
+                            university={this.props.university} 
                             programs={this.state.programs}
                         />
                     </Col>
                     <Col xs="4">
-                        <Editor universities={this.props.universities} programs={this.state.programs}/>
+                        <Editor 
+                            university={this.props.university} 
+                            programs={this.state.programs}/>
                     </Col>
                 </Row>
             </Container>
         )
     }
 
-    fetchUniversityProgramsAndUpdateState(univ_id){
+    fetchUniversityProgramsAndUpdateState(universityId){
         fetch(
-            `${ROOT_URL}/programs_by_university/${univ_id}`,
+            `${ROOT_URL}/programs_by_university/${universityId}`,
         ).then(
             response => response.json()
         ).then(
@@ -72,5 +81,5 @@ export default class RequirementsPage extends React.Component{
 }
 
 RequirementsPage.propTypes = {
-    universities: PropTypes.array,
+    university: PropTypes.object,
 }

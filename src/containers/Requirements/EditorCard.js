@@ -17,10 +17,11 @@ import {
     Label,
     Input,
     FormText,
-    FormFeedback
+    FormFeedback,
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import {Typeahead} from 'react-bootstrap-typeahead';
 
 
 
@@ -37,7 +38,6 @@ export default class EditorCard extends React.Component{
     shouldComponentUpdate(nextProps,nextState){
         if([
             this.state === nextState,
-            this.props.universities === nextProps.universities,
             this.props.programs === nextProps.programs,
             this.props.login.state.loggedIn === nextProps.login.state.loggedIn
         ].every((condition) => (condition))) {return false;}
@@ -64,10 +64,15 @@ export default class EditorCard extends React.Component{
                         </CardText>
                         {
                         this.state.editMode ?
-                        <MapEditor/>:
-                        <SavedMaps login={this.props.login}/>
+                        <MapEditor/>
+                        :
+                        <SavedMaps 
+                            login={this.props.login} 
+                            university={this.props.university}
+                            programs={this.props.programs}/>
                         }
-                    </CardBody>:
+                    </CardBody>
+                    :
                     <CardBody>
                         <CardText>
                             Please login to view and edit maps. 
@@ -97,9 +102,11 @@ class SavedMaps extends React.Component{
     }
 
     componentDidMount(){
+        let univId = this.props.university.university_id;
+        let userId = this.props.login.state.userId;
         if(this.props.login.state.loggedIn){
             fetch(
-                `http://localhost:5000/maps_by_user_id/${this.props.login.state.userId}`
+                `http://localhost:5000/maps?userId=${userId}&univId=${univId}`
             ).then(
                 response => response.json()
             ).then(
@@ -151,14 +158,17 @@ class SavedMaps extends React.Component{
             <div>
             <CardText id="map-editor">
             </CardText>
-                <h6>Saved Maps</h6>
+                <h6>Saved Maps:</h6>
+                <h6>{this.props.university.university_name}</h6>
                 <ListGroup>
                     {this.state.savedMaps.map(
                         (savedMap) => (
                             <SavedMapTile key={Math.random()} id={String(savedMap.id)} name={savedMap.map_name} mapActionHandlers={this.mapActionHandlers}/>
                         )
                     )}
-                    <CreateMapTile/>
+                    <CreateMapTile 
+                        university={this.props.university}
+                        programs={this.props.programs} />
                 </ListGroup>
                 </div>
         )
@@ -235,7 +245,12 @@ class CreateMapTile extends React.Component{
                 <ListGroupItem color="primary" tag="a" href="#" onClick={toggle}>
                     <span className="fa fa-plus"/>&nbsp;&nbsp;Create a new map.
                 </ListGroupItem>
-                <CreateMapModal isOpen={isOpen} toggle={toggle} handler={handler}/>
+                <CreateMapModal 
+                    isOpen={isOpen} 
+                    toggle={toggle} 
+                    handler={handler} 
+                    university={this.props.university}
+                    programs={this.props.programs}/>
             </div>
             );
         }
@@ -243,42 +258,117 @@ class CreateMapTile extends React.Component{
 
     class CreateMapModal extends React.Component{
 
+        constructor(props){
+            super(props);
+            this.state = {
+                selectedProgramId:-1,
+                selectedUniversityId:this.props.university.university_id,
+                newMapName:'',
+                newCollaboratorText:'',
+                newMapCollaborators:[],
+                selected:[]
+            }
+        }
+
+        handleProgramSelection = (ev) => {
+            let selectedProgramId = Number(ev.target.value);
+            this.setState({
+                selectedProgramId
+            });
+        }
+
+        handleNameChange = (ev) => {
+            let newMapName = ev.target.value;
+            this.setState({
+                newMapName
+            });
+        }
+
+        handleCollaboratorAdd = ([selectedCollaborator]) => {
+            if(selectedCollaborator){
+                let newMapCollaborators = this.state.newMapCollaborators.concat(selectedCollaborator);
+                console.log(newMapCollaborators);
+                this.setState({
+                    newMapCollaborators,
+                    selected:[]
+                });
+
+            }
+        }
 
         render(){
             return (
-                    <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={this.props.className}>
-                        <ModalHeader toggle={this.props.toggle}>Create new degree map.</ModalHeader>
-                        <ModalBody>
-                        <Form>
-                            <FormGroup>
-                                <Label for="transferInstitution">Transfer Institution</Label>
-                                <Input type="select" name="transfer-institution" id="transferInstitution" placeholder="Please select a transfer institution." invalid={true}/>
-                                <FormText>To what institution are you aligning this map?</FormText>
-                                <FormFeedback>You did good!</FormFeedback>
-                            </FormGroup>
-                            <FormGroup>
-                                <Label for="program">Program</Label>
-                                <Input type="select" name="program" id="program" placeholder="Please select a program."/>
-                                <FormText>To what program are you aligning this map?</FormText>
-                            </FormGroup>
-                            <FormGroup>
-                                <Label for="mapName">Name</Label>
-                                <Input type="text" name="name" id="mapName" placeholder="E.g., German Basket Weaving Specialization"/>
-                                <FormText>Pick something specific.</FormText>
-                            </FormGroup>
-                            <FormGroup>
-                                <Label for="collaborators">Collaborators</Label>
-                                <Input type="text" name="collaborators" id="collaborators" placeholder="E.g., matthew.lewis@sjcd.edu"/>
-                                <FormText>Add some co-conspirators!</FormText>
-                            </FormGroup>
-                        </Form>
+                <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={this.props.className}>
+                    <ModalHeader toggle={this.props.toggle}>Create new degree map.</ModalHeader>
+                    <ModalBody>
+                    <Label for="mapName">Transfer Institution</Label>
+                    <h6>{this.props.university.university_name}</h6>
+                    <Form>
+                        <FormGroup>
+                            <Label for="program">Program</Label>
+                            <Input 
+                                type="select" 
+                                name="program" 
+                                id="program" 
+                                placeholder="Please select a program." 
+                                invalid={true} 
+                                value={this.state.selectedProgramId}
+                                onChange={this.handleProgramSelection}
+                            >
+                                <option value="-1">Please select a program.</option>
+                                {this.props.programs.map(
+                                    program => <option key={program.program_id} value={program.program_id}>{program.program_name}</option>
+                                    )
+                                }
+                            </Input>
+                            <FormText>To what program are you aligning this map?</FormText>
+                            <FormFeedback>You did good!</FormFeedback>
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="mapName">Name</Label>
+                            <Input 
+                                type="text" 
+                                name="name" 
+                                id="mapName" 
+                                placeholder="E.g., German Basket Weaving Specialization"
+                                value={this.state.newMapName}
+                                onChange={this.handleNameChange}
+                            />
+                            <FormText>Pick something specific.</FormText>
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="collaborators">Collaborators</Label>
+                            <Typeahead 
+                                type="text"
+                                name="collaborators"
+                                id="collaborators"
+                                placeholder="E.g., matthew.lewis@sjcd.edu"
+                                options={['matthew.lewis@sjcd.edu','chris.duke@sjcd.edu']}
+                                onChange={this.handleCollaboratorAdd}
+                                selectHintOnEnter={true}
+                                selected={this.state.selected}
+                            />
+                            <FormText>Add some co-conspirators!</FormText>
+                            <ListGroup>
+                                {this.state.newMapCollaborators.map(
+                                    (collaborator)=><ListGroupItem 
+                                                        key={collaborator+Math.random()} 
+                                                        color="success"
+                                                        style={{padding: "3px 10px"}}
+                                                    >
+                                                        {collaborator}
+                                                    </ListGroupItem>
+                                )}
+                            </ListGroup>
+                        </FormGroup>
+                    </Form>
 
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="secondary" onClick={this.props.toggle}>Close</Button>
-                            <Button color="danger" onClick={this.props.handler}>Submit</Button>
-                        </ModalFooter>
-                    </Modal>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="secondary" onClick={this.props.toggle}>Close</Button>
+                        <Button color="danger" onClick={this.props.handler}>Submit</Button>
+                    </ModalFooter>
+                </Modal>
                 );
             }
         }
@@ -361,7 +451,6 @@ class MapEditor extends React.Component{
 
 EditorCard.propTypes = {
     login: PropTypes.object,
-    universities: PropTypes.array.isRequired,
     programs: PropTypes.array.isRequired
 }
 
