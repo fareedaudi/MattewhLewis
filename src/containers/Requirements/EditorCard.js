@@ -303,6 +303,15 @@ class CreateMapTile extends React.Component{
             }
         }
 
+        removeCollaborator = (ev) => {
+            ev.preventDefault();
+            let collaboratorToRemove = ev.target.parentElement.parentElement.getAttribute("id");
+            let newMapCollaborators = this.state.newMapCollaborators.filter(
+                collaborator => collaborator !== collaboratorToRemove
+            );
+            this.setState({newMapCollaborators});
+        }
+
         render(){
             return (
                 <Modal isOpen={this.props.isOpen} toggle={this.openClose} className={this.props.className}>
@@ -359,11 +368,15 @@ class CreateMapTile extends React.Component{
                             <ListGroup>
                                 {this.state.newMapCollaborators.map(
                                     (collaborator)=><ListGroupItem 
-                                                        key={collaborator+Math.random()} 
+                                                        key={collaborator} 
+                                                        id={collaborator}
                                                         color="success"
                                                         style={{padding: "3px 10px"}}
                                                     >
                                                         {collaborator}
+                                                        <button type="button" className="close" aria-label="Close" onClick={this.removeCollaborator}>
+                                                            <span aria-hidden="true">×</span>
+                                                        </button>
                                                     </ListGroupItem>
                                 )}
                             </ListGroup>
