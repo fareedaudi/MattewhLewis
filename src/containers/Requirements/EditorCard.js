@@ -22,6 +22,7 @@ import {
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import {Typeahead} from 'react-bootstrap-typeahead';
+import {ROOT_URL} from '../../api';
 
 
 
@@ -30,10 +31,13 @@ export default class EditorCard extends React.Component{
         super(props);
         this.state = {
             editMode:false,
-            savedMaps:[]
+            collaborators:[]
         }
     }
 
+    componentDidMount(){
+        this.getCollaborators();
+    }
 
     shouldComponentUpdate(nextProps,nextState){
         if([
@@ -46,6 +50,11 @@ export default class EditorCard extends React.Component{
       }
     }
 
+    toggleEditMode = () => {
+        this.setState({
+            editMode:!this.state.editMode
+        });
+    }
 
     render(){
         var instructions = (this.state.editMode)?
@@ -64,12 +73,16 @@ export default class EditorCard extends React.Component{
                         </CardText>
                         {
                         this.state.editMode ?
-                        <MapEditor/>
+                        <MapEditor
+                            toggleEditMode={this.toggleEditMode}    
+                        />
                         :
                         <SavedMaps 
                             login={this.props.login} 
                             university={this.props.university}
-                            programs={this.props.programs}/>
+                            programs={this.props.programs}
+                            collaborators={this.state.collaborators}
+                            toggleEditMode={this.toggleEditMode}/>
                         }
                     </CardBody>
                     :
@@ -81,6 +94,22 @@ export default class EditorCard extends React.Component{
                 }
             </Card>
         )
+    }
+
+    getCollaborators = () => {
+        axios.get(
+            `${ROOT_URL}/user_emails`
+        ).then(
+            response => response.data
+        ).then(
+            collaborators => {
+                this.setState({collaborators},
+                ()=> {
+                    console.log(this.state.collaborators);
+                    console.log('Collaborators returned!');
+                });
+            }
+        );
     }
 }
 
@@ -101,7 +130,7 @@ class SavedMaps extends React.Component{
         }
     }
 
-    componentDidMount(){
+    getSavedMaps = () => {
         let univId = this.props.university.university_id;
         let userId = this.props.login.state.userId;
         if(this.props.login.state.loggedIn){
@@ -117,6 +146,10 @@ class SavedMaps extends React.Component{
                 }
             );
         }
+    }
+
+    componentDidMount(){
+        this.getSavedMaps();
     }
 
     deleteMap(map_id){
@@ -151,8 +184,8 @@ class SavedMaps extends React.Component{
 
     }
 
-
     render(){
+        console.log(this.state.savedMaps);
         return (
             <div>
             <CardText id="map-editor">
@@ -162,12 +195,21 @@ class SavedMaps extends React.Component{
                 <ListGroup>
                     {this.state.savedMaps.map(
                         (savedMap) => (
-                            <SavedMapTile key={Math.random()} id={String(savedMap.id)} name={savedMap.map_name} mapActionHandlers={this.mapActionHandlers}/>
+                            <SavedMapTile 
+                                key={Math.random()} 
+                                id={String(savedMap.id)} 
+                                name={savedMap.map_name} 
+                                mapActionHandlers={this.mapActionHandlers}
+                                login={this.props.login}
+                                toggleEditMode={this.props.toggleEditMode}/>
                         )
                     )}
                     <CreateMapTile 
                         university={this.props.university}
-                        programs={this.props.programs} />
+                        programs={this.props.programs} 
+                        login={this.props.login}
+                        getSavedMaps={this.getSavedMaps}
+                        collaborators={this.props.collaborators}/>
                 </ListGroup>
                 </div>
         )
@@ -175,6 +217,7 @@ class SavedMaps extends React.Component{
 }
 
 class SavedMapTile extends React.Component{
+        
     constructor(props){
         super(props);
         this.state = {
@@ -191,17 +234,23 @@ class SavedMapTile extends React.Component{
     }
 
     deleteMap(map_id){
+        this.props.login.actions.makeRecentlyActive();
         this.toggleDeleteModal();
         this.props.mapActionHandlers.deleteMap(map_id);
     }
 
+    launchMapEditor = (ev) => {
+        ev.preventDefault();
+        console.log(ev.target.getAttribute('id'));
+        this.props.toggleEditMode();
+    }
 
     render(){
         var shareMap, approveMap;
         ({shareMap, approveMap} = this.props.mapActionHandlers);
         return (<div className="saved-map-tile">
             <ListGroupItem className="justify-content-between d-flex">
-                <a href="" onClick={(ev)=>{ev.preventDefault();}} style={{maxWidth:"200px"}}>{this.props.name}</a>
+                <a id={this.props.id} href="" onClick={this.launchMapEditor} style={{maxWidth:"200px"}}>{this.props.name}</a>
                 <span className="pull-right">
                     <MapActionButton type="approve" map_id={this.props.id} handler={approveMap}/>&nbsp;&nbsp;
                     <MapActionButton type="share" activated={true} map_id={this.props.id} handler={shareMap}/>&nbsp;&nbsp;
@@ -230,8 +279,33 @@ class CreateMapTile extends React.Component{
         this.createMapHandler = this.createMapHandler.bind(this);
     }
 
-    createMapHandler(){
-        console.log('Map created!');
+    createMapHandler(mapState){
+        if(this.validMap(mapState)){
+            let token = sessionStorage.getItem('jwtToken');
+            this.props.login.actions.makeRecentlyActive();
+            axios.post(
+                `${ROOT_URL}/create_map`, {mapState,token}
+                ).then(
+                    response => {
+                        if(response.data.mapCreated){
+                            this.setState({
+                                createMapModalOpen:!this.state.createMapModalOpen
+                            });
+                            this.props.getSavedMaps();
+                        }
+                    }
+            )
+        } else {
+            console.log("errah!");
+        }
+    }
+
+    validMap = (mapState) => {
+        if(mapState.selectedProgramId === -1){
+            return false;
+        } else {
+            return true;
+        }
     }
 
     render(){
@@ -248,7 +322,9 @@ class CreateMapTile extends React.Component{
                     toggle={toggle} 
                     handler={handler} 
                     university={this.props.university}
-                    programs={this.props.programs}/>
+                    programs={this.props.programs}
+                    collaborators={this.props.collaborators}
+                    login={this.props.login}/>
             </div>
             );
         }
@@ -308,7 +384,15 @@ class CreateMapTile extends React.Component{
             this.setState({newMapCollaborators});
         }
 
+        createMapHandler = (mapState) => {
+            if(mapState.selectedProgramId!==-1){
+                this.props.handler(mapState);
+                this.setState(this.defaultState);
+            }
+        }
+
         render(){
+            let modalState = this.state;
             return (
                 <Modal isOpen={this.props.isOpen} toggle={this.openClose} className={this.props.className}>
                     <ModalHeader toggle={this.openClose}>Create new degree map.</ModalHeader>
@@ -323,7 +407,6 @@ class CreateMapTile extends React.Component{
                                 name="program" 
                                 id="program" 
                                 placeholder="Please select a program." 
-                                invalid={true} 
                                 value={this.state.selectedProgramId}
                                 onChange={this.handleProgramSelection}
                             >
@@ -355,7 +438,9 @@ class CreateMapTile extends React.Component{
                                 name="collaborators"
                                 id="collaborators"
                                 placeholder="E.g., matthew.lewis@sjcd.edu"
-                                options={['matthew.lewis@sjcd.edu','chris.duke@sjcd.edu']}
+                                options={this.props.collaborators.filter(
+                                    collaborator => collaborator !== this.props.login.state.userEmail
+                                    )}
                                 onChange={this.handleCollaboratorAdd}
                                 selectHintOnEnter={true}
                                 selected={this.state.selected}
@@ -382,7 +467,7 @@ class CreateMapTile extends React.Component{
                     </ModalBody>
                     <ModalFooter>
                         <Button color="secondary" onClick={this.openClose}>Close</Button>
-                        <Button color="danger" onClick={this.props.handler}>Submit</Button>
+                        <Button color="danger" onClick={()=>this.createMapHandler(modalState)}>Submit</Button>
                     </ModalFooter>
                 </Modal>
                 );
@@ -458,9 +543,12 @@ class MapEditor extends React.Component{
 
     render(){
         return (
-            <CardText id="map-editor">
-                <h6>Map Editor</h6>
-            </CardText>
+            <div>
+            <h6>Map Editor</h6>
+                <CardText id="map-editor">
+                </CardText>
+            <Button color="secondary" onClick={this.props.toggleEditMode}>Close</Button>
+            </div>
         )
     }
 }
