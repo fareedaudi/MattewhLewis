@@ -71,6 +71,12 @@ components_requirements = db.Table(
     db.Column('requirement_id', db.ForeignKey('requirement.id'), primary_key=True)
 )
 
+users_maps = db.Table(
+    'users_maps', 
+    db.Column('user_id', db.ForeignKey('user.id'), primary_key=True),
+    db.Column('map_id', db.ForeignKey('map.id'), primary_key=True)
+    )
+
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -207,6 +213,11 @@ class User(UserMixin,db.Model):
     email = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     maps = db.relationship('Map', backref='user',lazy=True)
+    maps = db.relationship(
+        "Map", 
+        secondary=users_maps,
+        back_populates="users"
+        )
     
     def generate_auth_token(self,expiration=10*60):
         s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
@@ -236,8 +247,9 @@ class User(UserMixin,db.Model):
 class Map(db.Model):
     __tablename__ = "map"
     id = db.Column(db.Integer, primary_key=True)
-    map_name = db.Column(db.String(255), nullable=False)
+    map_name = db.Column(db.String(255), nullable=True)
     prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
+    univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     comm_010_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
     comm_010_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
@@ -259,6 +271,8 @@ class Map(db.Model):
     trans_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
     trans_3 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
     trans_4 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
+    trans_5 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
+    trans_6 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
     empty_dict = {
         'id':'',
         'prog_id':'',
@@ -305,3 +319,8 @@ class Map(db.Model):
         for key in dict_:
             self.empty_dict[key] = dict_[key]
         return self.empty_dict
+    users = db.relationship(
+        "User", 
+        secondary=users_maps,
+        back_populates="maps"
+        )
