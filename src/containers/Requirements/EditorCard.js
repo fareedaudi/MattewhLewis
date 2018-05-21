@@ -127,7 +127,6 @@ class SavedMaps extends React.Component{
                response => response.data
             ).then(
                 (result) => {
-                    console.log(result);
                     if(result.mapDeleted){
                         this.setState({
                             savedMaps:this.state.savedMaps.filter((savedMap)=>(savedMap.id!==Number(map_id)))
@@ -192,7 +191,6 @@ class SavedMapTile extends React.Component{
     }
 
     deleteMap(map_id){
-        console.log("attempting delete!");
         this.toggleDeleteModal();
         this.props.mapActionHandlers.deleteMap(map_id);
     }
@@ -292,10 +290,8 @@ class CreateMapTile extends React.Component{
         handleCollaboratorAdd = ([selectedCollaborator]) => {
             let currentCollaborators = this.state.newMapCollaborators;
             let isNewCollaborator = currentCollaborators.indexOf(selectedCollaborator) < 0;
-            console.log(isNewCollaborator);
             if(selectedCollaborator &&  isNewCollaborator){
                 let newMapCollaborators = this.state.newMapCollaborators.concat(selectedCollaborator);
-                console.log(newMapCollaborators);
                 this.setState({
                     newMapCollaborators
                 });
