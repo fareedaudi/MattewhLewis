@@ -260,7 +260,7 @@ class CreateMapTile extends React.Component{
 
         constructor(props){
             super(props);
-            this.state = {
+            this.defaultState = {
                 selectedProgramId:-1,
                 selectedUniversityId:this.props.university.university_id,
                 newMapName:'',
@@ -268,6 +268,13 @@ class CreateMapTile extends React.Component{
                 newMapCollaborators:[],
                 selected:[]
             }
+            this.state = this.defaultState;
+
+        }
+
+        openClose = (ev) => {
+            this.setState(this.defaultState);
+            this.props.toggle(ev);
         }
 
         handleProgramSelection = (ev) => {
@@ -298,8 +305,8 @@ class CreateMapTile extends React.Component{
 
         render(){
             return (
-                <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={this.props.className}>
-                    <ModalHeader toggle={this.props.toggle}>Create new degree map.</ModalHeader>
+                <Modal isOpen={this.props.isOpen} toggle={this.openClose} className={this.props.className}>
+                    <ModalHeader toggle={this.openClose}>Create new degree map.</ModalHeader>
                     <ModalBody>
                     <Label for="mapName">Transfer Institution</Label>
                     <h6>{this.props.university.university_name}</h6>
@@ -365,7 +372,7 @@ class CreateMapTile extends React.Component{
 
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="secondary" onClick={this.props.toggle}>Close</Button>
+                        <Button color="secondary" onClick={this.openClose}>Close</Button>
                         <Button color="danger" onClick={this.props.handler}>Submit</Button>
                     </ModalFooter>
                 </Modal>
