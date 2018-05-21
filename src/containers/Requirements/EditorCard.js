@@ -264,12 +264,10 @@ class CreateMapTile extends React.Component{
                 selectedProgramId:-1,
                 selectedUniversityId:this.props.university.university_id,
                 newMapName:'',
-                newCollaboratorText:'',
                 newMapCollaborators:[],
                 selected:[]
             }
             this.state = this.defaultState;
-
         }
 
         openClose = (ev) => {
@@ -292,15 +290,17 @@ class CreateMapTile extends React.Component{
         }
 
         handleCollaboratorAdd = ([selectedCollaborator]) => {
-            if(selectedCollaborator){
+            let currentCollaborators = this.state.newMapCollaborators;
+            let isNewCollaborator = currentCollaborators.indexOf(selectedCollaborator) < 0;
+            console.log(isNewCollaborator);
+            if(selectedCollaborator &&  isNewCollaborator){
                 let newMapCollaborators = this.state.newMapCollaborators.concat(selectedCollaborator);
                 console.log(newMapCollaborators);
                 this.setState({
-                    newMapCollaborators,
-                    selected:[]
+                    newMapCollaborators
                 });
-
             }
+            this.setState({selected:[]});
         }
 
         removeCollaborator = (ev) => {
