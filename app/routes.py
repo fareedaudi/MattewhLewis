@@ -39,6 +39,10 @@ def get_dict(map_):
     }
     dict_ = map_.__dict__
     dict_.pop('_sa_instance_state',None)
+    users = dict_.pop('users',None)
+    empty_dict['users']= []
+    for user in users:
+        empty_dict['users'].append(user.id)
     for key in dict_:
         empty_dict[key] = dict_[key]
     return empty_dict
@@ -134,7 +138,29 @@ class RequirementsByProgram(Resource):
 class MapsByUserId(Resource):
     def get(self,user_id):
         maps = db.session.query(Map).filter_by(user_id=user_id).all()
-        return [get_dict(map) for map in maps]
+        return [get_dict(map_) for map_ in maps]
+
+
+@app.route('/maps',methods=['GET'])
+def maps():
+    user_id = request.args.get('userId')
+    univ_id = request.args.get('univId')
+    if(user_id and univ_id):
+        user = db.session.query(User).get(user_id)
+        univ_maps = db.session.query(Map).filter(Map.univ_id==univ_id)
+        maps = [map_ for map_ in univ_maps if user in map_.users]
+        return JSON.dumps([get_dict(map_) for map_ in maps])
+    return 'No params',404
+
+@app.route('/maps_by_user',methods=['GET'])
+def maps_by_user():
+    user_id = request.args.get('userId')
+    if(user_id):
+        user = db.session.query(User).get(user_id)
+        maps = [map_ for map_ in db.session.query(Map).all() if user in map_.users]
+        return JSON.dumps([get_dict(map_) for map_ in maps])
+    else:
+        return 'No params',404
 
 @app.route('/login',methods=['POST'])
 def login():
@@ -146,7 +172,6 @@ def login():
         return json.jsonify({
             "logged_in":False,
             "email":None}),401
-    print(type(user.id))
     return json.jsonify({
         'loggedIn':True,
         'userId':user.id,
@@ -163,6 +188,7 @@ def load_login_data():
     if(token != None):
         user = User.verify_auth_token(token)
     if(user):
+        token = user.generate_auth_token().decode('ascii')
         return json.jsonify({
             'loggedIn':True,
             'userId':user.id,
@@ -179,7 +205,61 @@ def load_login_data():
 def logout():
     return 'check console'
 
+
+@app.route('/delete_map',methods=['POST'])
+def delete_map():
+    user = None
+    form_data = json.loads(request.data)
+    token = form_data['token']
+    map_id = form_data['map_id']
+    if(token and map_id):
+        user = User.verify_auth_token(token)
+    if(user):
+        map_ = db.session.query(Map).get(map_id)
+        db.session.delete(map_)
+        db.session.commit()
+        return json.jsonify({
+            'mapDeleted':True
+        })
+    else:
+        return json.jsonify({
+            'mapDeleted':False
+        })
+
+
+@app.route('/create_map',methods=['POST'])
+def create_map():
+    user = None
+    form_data = json.loads(request.data)
+    token = form_data['token']
+    if(token != None):
+        user = User.verify_auth_token(token)
+    if(user):
+        print('Map workin!')
+        map_data = form_data['mapState']
+        new_map = Map(
+            user_id=user.id,
+            univ_id=map_data['selectedUniversityId'],
+            map_name=map_data['newMapName'],
+            prog_id=map_data['selectedProgramId']
+            )
+        new_map.users.append(user)
+        for collaborator in map_data['newMapCollaborators']:
+            coll_user = db.session.query(User).filter(User.email==collaborator)[0]
+            new_map.users.append(coll_user)
+        db.session.add(new_map)
+        db.session.commit()
+        return json.jsonify({
+            'mapCreated':True
+        })
+    return '',401
+
+@app.route('/user_emails',methods=['GET'])
+def user_emails():
+    users = db.session.query(User).all()
+    user_emails = [user.email for user in users]
+    return JSON.dumps(user_emails)
+
 api.add_resource(Universities,'/universities')
 api.add_resource(ProgramsByUniv,'/programs_by_university/<int:univ_id>')
 api.add_resource(RequirementsByProgram,'/requirements_by_program/<int:prog_id>')
-api.add_resource(MapsByUserId,'/maps_by_user_id/<int:user_id>')
