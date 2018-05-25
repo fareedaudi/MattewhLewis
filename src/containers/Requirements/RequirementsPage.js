@@ -87,7 +87,9 @@ export default class RequirementsPage extends React.Component{
                     <Col xs="4">
                         <Editor key={this.props.university.university_id}
                             university={this.props.university} 
-                            programs={this.state.programs}/>
+                            programs={this.state.programs}
+                            selectedProgram={this.state.selectedProgram}
+                            />
                     </Col>
                 </Row>
             </Container>

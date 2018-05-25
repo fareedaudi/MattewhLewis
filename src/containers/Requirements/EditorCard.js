@@ -33,16 +33,13 @@ export default class EditorCard extends React.Component{
             editMode:false,
             collaborators:[]
         }
-        console.log('Editor Card constructor called!');
     }
 
     componentDidMount(){
-        console.log('EditorCard component mounted');
         this.getCollaborators();
     }
 
     componentWillUnmount(){
-        console.log('EditorCard unmounted!');
     }
 
     shouldComponentUpdate(nextProps,nextState){
@@ -64,7 +61,6 @@ export default class EditorCard extends React.Component{
     }
 
     render(){
-        console.log('EditorCard re-rendered!');
         var instructions = (this.state.editMode)?
             'Edit courses for degree components, below.':
             'View your saved maps below, or create a new map!';
