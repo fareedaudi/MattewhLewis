@@ -254,7 +254,7 @@ class SavedMapTile extends React.Component{
     launchMapEditor = (ev) => {
         ev.preventDefault();
         this.props.toggleEditMode();
-
+        this.props.getSelectedProgramAndSetState(this.props.progId);
     }
 
     render(){
