@@ -33,18 +33,25 @@ export default class EditorCard extends React.Component{
             editMode:false,
             collaborators:[]
         }
+        console.log('Editor Card constructor called!');
     }
 
     componentDidMount(){
+        console.log('EditorCard component mounted');
         this.getCollaborators();
+    }
+
+    componentWillUnmount(){
+        console.log('EditorCard unmounted!');
     }
 
     shouldComponentUpdate(nextProps,nextState){
         if([
             this.state === nextState,
             this.props.programs === nextProps.programs,
-            this.props.login.state.loggedIn === nextProps.login.state.loggedIn
-        ].every((condition) => (condition))) {return false;}
+            this.props.login.state.loggedIn === nextProps.login.state.loggedIn,
+        ].every(x=>x)) {
+            return false;}
          else {
         return true;
       }
@@ -57,6 +64,7 @@ export default class EditorCard extends React.Component{
     }
 
     render(){
+        console.log('EditorCard re-rendered!');
         var instructions = (this.state.editMode)?
             'Edit courses for degree components, below.':
             'View your saved maps below, or create a new map!';
@@ -105,8 +113,6 @@ export default class EditorCard extends React.Component{
             collaborators => {
                 this.setState({collaborators},
                 ()=> {
-                    console.log(this.state.collaborators);
-                    console.log('Collaborators returned!');
                 });
             }
         );
@@ -185,7 +191,6 @@ class SavedMaps extends React.Component{
     }
 
     render(){
-        console.log(this.state.savedMaps);
         return (
             <div>
             <CardText id="map-editor">
@@ -241,7 +246,6 @@ class SavedMapTile extends React.Component{
 
     launchMapEditor = (ev) => {
         ev.preventDefault();
-        console.log(ev.target.getAttribute('id'));
         this.props.toggleEditMode();
     }
 
@@ -540,18 +544,73 @@ const DeleteMapModal = (props) => (
 );
 
 class MapEditor extends React.Component{
+    
+    constructor(props){
+        super(props);
+        this.state = {
+            comm_010_1:-1,
+            comm_010_2:-1,
+            math_020:-1,
+            sci_030_1:-1,
+            sci_030_2:-1,
+            phil_040:-1,
+            arts_050:-1,
+            hist_060_1:-1,
+            hist_060_2:-1,
+            gov_070_1:-1,
+            gov_070_2:-1,
+            soc_080:-1,
+            comp_090_1:-1,
+            comp_090_1:-1,
+            inst_op_1:-1,
+            inst_op_2:-1,
+            trans_1:-1,
+            trans_2:-1,
+            trans_3:-1,
+            trans_4:-1,
+            trans_5:-1,
+            trans_6:-1,
+            components:[]
+        }
+    }
+
+    componentDidMount(){
+        this.getComponentsFromServer();
+    }
+
+    getComponentsFromServer = () => {
+        axios.get(
+            `${ROOT_URL}/degree_components`
+        ).then(
+            response => response.data
+        ).then(
+            components => {this.setState({components});}
+        );
+    }
 
     render(){
         return (
             <div>
             <h6>Map Editor</h6>
-                <CardText id="map-editor">
-                </CardText>
+            <Form>
+                {this.state.components.map(
+                    (component) => 
+                    <FormGroup key={component.name}>
+                    <Label>{component.name}</Label>
+                    {component.fields.map(
+                        (field) =>
+                        <Input type="select" key={field}/>
+                    )}
+                    </FormGroup>
+                )}
+            </Form>
             <Button color="secondary" onClick={this.props.toggleEditMode}>Close</Button>
             </div>
         )
     }
 }
+
+
 
 EditorCard.propTypes = {
     login: PropTypes.object,

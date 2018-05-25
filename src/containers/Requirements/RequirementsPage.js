@@ -6,26 +6,58 @@ import {ROOT_URL} from '../../api';
 import PropTypes from 'prop-types';
 import {WithLogin} from '../../contexts/LoginContext';
 
+const Requirements = WithLogin(RequirementsCard);
+const Editor = WithLogin(EditorCard);
 
 export default class RequirementsPage extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            university:this.props.university,
+            university:{},
             programs:[],
+            selectedProgram:{
+                program_id:-1
+            }
         }
         this.renderCount = 0;
     }
 
+    getSelectedProgramDataAndSetState = (programId) => {
+        fetch(
+            `${ROOT_URL}/requirements_by_program/${programId}`
+        ).then(
+            response => response.json()
+        ).then(
+            programData => {
+                this.setState({
+                    selectedProgram:programData
+                });
+            }
+        );
+    }
+
+    resetSelectedProgram = () => {
+        let selectedProgram = {
+            program_id:-1,
+        };
+        this.setState({selectedProgram});
+    } // Pass this in props
+
     componentDidMount(){
         let universityId = this.props.university.university_id;
         this.fetchUniversityProgramsAndUpdateState(universityId);
+        this.setState({
+            university:this.props.university
+        });
     }
 
     static getDerivedStateFromProps(nextProps,prevState){
         if(prevState.university !== nextProps.university){
             return {
-                programs:[]
+                programs:[],
+                selectedProgram:{
+                    program_id:-1.
+                }
             }
         } else{
             return null;
@@ -37,14 +69,9 @@ export default class RequirementsPage extends React.Component{
             let universityId = this.props.university.university_id;
             this.fetchUniversityProgramsAndUpdateState(universityId);
         }
-
     }
 
     render(){
-        this.renderCount += 1;
-        console.log(`RequirementsPage rendered ${this.renderCount} time with: `,this.state);
-        const Requirements = WithLogin(RequirementsCard);
-        const Editor = WithLogin(EditorCard);
         return(
             <Container style={{paddingTop:'100px'}}>
                 <Row>
@@ -52,10 +79,13 @@ export default class RequirementsPage extends React.Component{
                         <Requirements 
                             university={this.props.university} 
                             programs={this.state.programs}
+                            selectedProgram={this.state.selectedProgram}
+                            getSelectedProgramDataAndSetState={this.getSelectedProgramDataAndSetState}
+                            resetSelectedProgram={this.resetSelectedProgram}
                         />
                     </Col>
                     <Col xs="4">
-                        <Editor 
+                        <Editor key={this.props.university.university_id}
                             university={this.props.university} 
                             programs={this.state.programs}/>
                     </Col>

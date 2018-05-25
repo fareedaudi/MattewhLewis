@@ -13,18 +13,17 @@ export default class RequirementsCard extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            selectedProgram:{},
             showSJCCourses:false,
-            selectedProgramId:"-1"
         }
         this.handleProgramSelection = this.handleProgramSelection.bind(this);
         this.toggleSJCCourses = this.toggleSJCCourses.bind(this);
     }
 
     handleProgramSelection(ev){
-        this.setSelectorToSelected(ev.target.value);
         if(this.realSelection(ev)){
-            this.getSelectedProgramDataAndSetState(ev.target.value);
+            this.props.getSelectedProgramDataAndSetState(ev.target.value);
+        } else {
+            this.props.resetSelectedProgram();
         }
         this.props.login.actions.makeRecentlyActive();
     }
@@ -32,31 +31,10 @@ export default class RequirementsCard extends React.Component{
     componentWillReceiveProps(nextProps){
         if(nextProps.university !== this.props.university){
             this.setState({
-                selectedProgram:{},
                 showSJCCourses:false,
-                selectedProgramId:'-1'
             });
+            this.props.resetSelectedProgram();
         }
-    }
-
-    setSelectorToSelected(selectedProgramId){
-        this.setState({
-            selectedProgramId:selectedProgramId
-        });
-    }
-
-    getSelectedProgramDataAndSetState(prog_id){
-        fetch(
-            `${ROOT_URL}/requirements_by_program/${prog_id}`
-        ).then(
-            response => response.json()
-        ).then(
-            programData => {
-                this.setState({
-                    selectedProgram:programData
-                });
-            }
-        )
     }
 
     toggleSJCCourses(){
@@ -83,8 +61,8 @@ export default class RequirementsCard extends React.Component{
                     <div style={{textAlign:'center'}}>
                         <ProgramSelector 
                             programs={this.props.programs}
-                            selectedProgramId={this.state.selectedProgramId}
-                            handleSelection={this.handleProgramSelection} 
+                            selectedProgramId={String(this.props.selectedProgram.program_id)}
+                            handleSelection={this.handleProgramSelection}
                         />
                         <SJCCourseFilter
                             showSJCCourses={this.state.showSJCCourses}
@@ -92,9 +70,9 @@ export default class RequirementsCard extends React.Component{
                         />
                     </div>
                 </CardBody>
-                { this.state.selectedProgramId !== '-1' &&
+                { String(this.props.selectedProgram.program_id) !== '-1' &&
                 <SelectedRequirements 
-                    program={this.state.selectedProgram}
+                    program={this.props.selectedProgram}
                     showSJCCourses={this.state.showSJCCourses}
                 />
                 }
