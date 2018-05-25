@@ -172,12 +172,16 @@ def login():
         return json.jsonify({
             "logged_in":False,
             "email":None}),401
-    return json.jsonify({
-        'loggedIn':True,
-        'userId':user.id,
-        'userEmail':user.email,
-        'token':user.generate_auth_token().decode('ascii')
+    else:
+        all_maps = db.session.query(Map).all()
+        user_maps = [map_ for map_ in all_maps if user in map_.users]
+        return json.jsonify({
+            'loggedIn':True,
+            'userId':user.id,
+            'userEmail':user.email,
+            'token':user.generate_auth_token().decode('ascii'),
     })
+
 
 
 @app.route('/load_login_data',methods=['POST'])
@@ -188,12 +192,14 @@ def load_login_data():
     if(token != None):
         user = User.verify_auth_token(token)
     if(user):
+        all_maps = db.session.query(Map).all()
+        user_maps = [map_ for map_ in all_maps if user in map_.users]
         token = user.generate_auth_token().decode('ascii')
         return json.jsonify({
             'loggedIn':True,
             'userId':user.id,
             'userEmail':user.email,
-            'token':token
+            'token':token,
         })
     else:
         return json.jsonify({
@@ -259,6 +265,18 @@ def user_emails():
     users = db.session.query(User).all()
     user_emails = [user.email for user in users]
     return JSON.dumps(user_emails)
+
+@app.route('/degree_components',methods=['GET'])
+def degree_components():
+    components = Map.component_areas
+    return JSON.dumps(
+        [
+            {
+                'name':area,
+                'fields':[field for field in components[area]]
+            } for area in components
+        ]
+    )
 
 api.add_resource(Universities,'/universities')
 api.add_resource(ProgramsByUniv,'/programs_by_university/<int:univ_id>')
