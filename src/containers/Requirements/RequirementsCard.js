@@ -6,7 +6,6 @@ import {
     CardBody,
     CardText,
 } from 'reactstrap';
-import {ROOT_URL} from '../../api';
 import PropTypes from 'prop-types';
 
 export default class RequirementsCard extends React.Component{

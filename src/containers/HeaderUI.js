@@ -5,7 +5,7 @@ import {WithLogin} from '../contexts/LoginContext';
 import PropTypes from 'prop-types';
 
 
-
+const LoginButton = WithLogin(LoginUI);
 
 export default class HeaderUI extends React.Component {
   constructor(props){
@@ -71,7 +71,7 @@ export default class HeaderUI extends React.Component {
   }
 
   render(){
-    const LoginButton = WithLogin(LoginUI);
+    
     return (
       <Container className="fixed-top" style={{paddingTop: '10px', background: 'rgba(255, 255, 255, 9.0)'}}>
       <h5>SJC Degree Mapping Toolkit</h5>

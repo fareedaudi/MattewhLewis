@@ -47,6 +47,7 @@ export default class EditorCard extends React.Component{
             this.state === nextState,
             this.props.programs === nextProps.programs,
             this.props.login.state.loggedIn === nextProps.login.state.loggedIn,
+            this.props.university === nextProps.university,
         ].every(x=>x)) {
             return false;}
          else {
@@ -86,7 +87,9 @@ export default class EditorCard extends React.Component{
                             university={this.props.university}
                             programs={this.props.programs}
                             collaborators={this.state.collaborators}
-                            toggleEditMode={this.toggleEditMode}/>
+                            toggleEditMode={this.toggleEditMode}
+                            getSelectedProgramAndSetState={this.props.getSelectedProgramAndSetState}
+                            />
                         }
                     </CardBody>
                     :
@@ -132,8 +135,7 @@ class SavedMaps extends React.Component{
         }
     }
 
-    getSavedMaps = () => {
-        let univId = this.props.university.university_id;
+    getSavedMaps = (univId) => {
         let userId = this.props.login.state.userId;
         if(this.props.login.state.loggedIn){
             fetch(
@@ -151,7 +153,13 @@ class SavedMaps extends React.Component{
     }
 
     componentDidMount(){
-        this.getSavedMaps();
+        this.getSavedMaps(this.props.university.university_id);
+    }
+
+    componentWillReceiveProps(nextProps){
+        if(this.props.university !== nextProps.university){
+            this.getSavedMaps(nextProps.university.university_id);
+        }
     }
 
     deleteMap(map_id){
@@ -177,14 +185,14 @@ class SavedMaps extends React.Component{
     approveMap(map_id){
     }
 
-    shouldComponentUpdate(nextProps,nextState){
+/*    shouldComponentUpdate(nextProps,nextState){
         if(this.state.savedMaps !== nextState.savedMaps){
             return true;
         } else {
             return false;
         }
 
-    }
+    } */
 
     render(){
         return (
@@ -200,9 +208,12 @@ class SavedMaps extends React.Component{
                                 key={Math.random()} 
                                 id={String(savedMap.id)} 
                                 name={savedMap.map_name} 
+                                progId={savedMap.prog_id}
                                 mapActionHandlers={this.mapActionHandlers}
                                 login={this.props.login}
-                                toggleEditMode={this.props.toggleEditMode}/>
+                                toggleEditMode={this.props.toggleEditMode}
+                                getSelectedProgramAndSetState={this.props.getSelectedProgramAndSetState}
+                                />
                         )
                     )}
                     <CreateMapTile 
@@ -243,6 +254,7 @@ class SavedMapTile extends React.Component{
     launchMapEditor = (ev) => {
         ev.preventDefault();
         this.props.toggleEditMode();
+
     }
 
     render(){
@@ -557,7 +569,7 @@ class MapEditor extends React.Component{
             gov_070_2:-1,
             soc_080:-1,
             comp_090_1:-1,
-            comp_090_1:-1,
+            comp_090_2:-1,
             inst_op_1:-1,
             inst_op_2:-1,
             trans_1:-1,

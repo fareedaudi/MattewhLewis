@@ -85,11 +85,12 @@ export default class RequirementsPage extends React.Component{
                         />
                     </Col>
                     <Col xs="4">
-                        <Editor key={this.props.university.university_id}
+                        <Editor 
                             university={this.props.university} 
                             programs={this.state.programs}
                             selectedProgram={this.state.selectedProgram}
-                            />
+                            getSelectedProgramAndSetState={this.getSelectedProgramDataAndSetState}
+                        />
                     </Col>
                 </Row>
             </Container>

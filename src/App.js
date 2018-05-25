@@ -8,6 +8,7 @@ import RequirementsPage from './containers/Requirements/RequirementsPage';
 import {UNIVERSITIES_URL} from './api';
 import {WithLogin} from './contexts/LoginContext';
 
+const Header = WithLogin(HeaderUI);
 
 class App extends React.Component{
   constructor(){
@@ -45,7 +46,7 @@ class App extends React.Component{
   }
 
   render(){
-    const Header = WithLogin(HeaderUI);
+    
     let universities = this.state.universities;
     let selectedUniversityId = this.state.selectedUniversityId;
     let university = universities.filter((univ)=>(String(univ.university_id)===selectedUniversityId))[0];
