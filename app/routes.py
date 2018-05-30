@@ -304,6 +304,12 @@ def appify_map(map_):
         'univ_id':map_.univ_id,
         'user_id':map_.user_id,
         'prog_id':map_.prog_id,
+        'users':[
+            {
+                'id':id,
+                'email':db.session.query(User).get(int(id)).email
+            } for id in get_dict(map_)['users']
+        ],
         'components':[
             {
                 'comp_name':area,
