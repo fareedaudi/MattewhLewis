@@ -39,7 +39,7 @@ def get_dict(map_):
     }
     dict_ = map_.__dict__
     dict_.pop('_sa_instance_state',None)
-    users = dict_.pop('users',None)
+    users = dict_.pop('users',[])
     empty_dict['users']= []
     for user in users:
         empty_dict['users'].append(user.id)
@@ -281,3 +281,44 @@ def degree_components():
 api.add_resource(Universities,'/universities')
 api.add_resource(ProgramsByUniv,'/programs_by_university/<int:univ_id>')
 api.add_resource(RequirementsByProgram,'/requirements_by_program/<int:prog_id>')
+
+@app.route('/saved_maps_by_user',methods=['POST'])
+def saved_maps_by_user():
+    user = None
+    form_data = json.loads(request.data)
+    token = form_data['token']
+    if(token != None):
+        if(token != None):
+            user = User.verify_auth_token(token)
+    if(user):
+        all_maps = db.session.query(Map).all()
+        user_saved_maps = [appify_map(map_) for map_ in all_maps if user in map_.users]
+        return JSON.dumps(user_saved_maps)
+    return 'Error!',401
+
+def appify_map(map_):
+    components = Map.component_areas
+    return {
+        'id':map_.id,
+        'name':map_.map_name,
+        'univ_id':map_.univ_id,
+        'user_id':map_.user_id,
+        'prog_id':map_.prog_id,
+        'components':[
+            {
+                'comp_name':area,
+                'fields':[
+                    {
+                        'name':field,
+                        'course': {
+                            'id':get_dict(map_)[field],
+                            'name':'',
+                            'rubric':'',
+                            'number':''
+                        }
+                        
+                    } for field in components[area]
+                ]
+            } for area in components
+        ] 
+    }
