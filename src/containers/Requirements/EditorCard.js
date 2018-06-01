@@ -24,8 +24,6 @@ import axios from 'axios';
 import {Typeahead} from 'react-bootstrap-typeahead';
 import {ROOT_URL} from '../../api';
 
-
-
 export default class EditorCard extends React.Component{
     constructor(props){
         super(props);
@@ -41,18 +39,23 @@ export default class EditorCard extends React.Component{
 
     componentWillUnmount(){
     }
-
+/*
     shouldComponentUpdate(nextProps,nextState){
         if([
             this.state === nextState,
             this.props.programs === nextProps.programs,
             this.props.login.state.loggedIn === nextProps.login.state.loggedIn,
             this.props.university === nextProps.university,
+            this.props.savedMaps === nextProps.savedMaps
         ].every(x=>x)) {
             return false;}
          else {
         return true;
       }
+    }
+*/
+    componentWillReceiveProps(nextProps){
+        console.log('Editor, componentWillReceiveProps:',nextProps);
     }
 
     toggleEditMode = () => {
@@ -89,6 +92,7 @@ export default class EditorCard extends React.Component{
                             collaborators={this.state.collaborators}
                             toggleEditMode={this.toggleEditMode}
                             getSelectedProgramAndSetState={this.props.getSelectedProgramAndSetState}
+                            savedMaps={this.props.savedMaps}
                             />
                         }
                     </CardBody>
@@ -160,6 +164,7 @@ class SavedMaps extends React.Component{
         if(this.props.university !== nextProps.university){
             this.getSavedMaps(nextProps.university.university_id);
         }
+        console.log('Saved maps, componentWillReceiveProps:',nextProps);
     }
 
     deleteMap(map_id){
@@ -195,6 +200,7 @@ class SavedMaps extends React.Component{
     } */
 
     render(){
+        console.log('Saved Maps:',this.props.savedMaps);
         return (
             <div>
             <CardText id="map-editor">
@@ -205,7 +211,7 @@ class SavedMaps extends React.Component{
                     {this.state.savedMaps.map(
                         (savedMap) => (
                             <SavedMapTile 
-                                key={Math.random()} 
+                                key={savedMap.map_name+savedMap.id} 
                                 id={String(savedMap.id)} 
                                 name={savedMap.map_name} 
                                 progId={savedMap.prog_id}
@@ -213,6 +219,7 @@ class SavedMaps extends React.Component{
                                 login={this.props.login}
                                 toggleEditMode={this.props.toggleEditMode}
                                 getSelectedProgramAndSetState={this.props.getSelectedProgramAndSetState}
+                                map={savedMap}
                                 />
                         )
                     )}
@@ -291,6 +298,14 @@ class CreateMapTile extends React.Component{
         this.createMapHandler = this.createMapHandler.bind(this);
     }
 
+    getSavedMaps(){
+        let token = sessionStorage.getItem('jwtToken')
+        axios.post(
+            `${ROOT_URL}/saved_maps_by_user`, {token}
+        )
+        .then(response=>response.data);
+    }
+
     createMapHandler(mapState){
         if(this.validMap(mapState)){
             let token = sessionStorage.getItem('jwtToken');
@@ -303,7 +318,7 @@ class CreateMapTile extends React.Component{
                             this.setState({
                                 createMapModalOpen:!this.state.createMapModalOpen
                             });
-                            this.props.getSavedMaps();
+                            this.props.getSavedMaps(this.props.university.university_id);
                         }
                     }
             )
@@ -623,10 +638,6 @@ class MapEditor extends React.Component{
 EditorCard.propTypes = {
     login: PropTypes.object,
     programs: PropTypes.array.isRequired
-}
-
-SavedMaps.propTypes = {
-    savedMaps: PropTypes.array
 }
 
 SavedMapTile.propTypes= {

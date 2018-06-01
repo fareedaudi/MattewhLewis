@@ -90,6 +90,7 @@ export default class RequirementsPage extends React.Component{
                             programs={this.state.programs}
                             selectedProgram={this.state.selectedProgram}
                             getSelectedProgramAndSetState={this.getSelectedProgramDataAndSetState}
+                            savedMaps={this.props.savedMaps}
                         />
                     </Col>
                 </Row>

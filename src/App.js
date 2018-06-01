@@ -7,8 +7,10 @@ import HomePage from './containers/HomePage';
 import RequirementsPage from './containers/Requirements/RequirementsPage';
 import {UNIVERSITIES_URL} from './api';
 import {WithLogin} from './contexts/LoginContext';
+import {WithSavedMaps} from './contexts/SavedMapsContext';
 
 const Header = WithLogin(HeaderUI);
+const Requirements = WithSavedMaps(RequirementsPage);
 
 class App extends React.Component{
   constructor(){
@@ -54,7 +56,7 @@ class App extends React.Component{
       <div>
         <Header universities={this.state.universities} selectionHandler={this.onUniversitySelection}/>
         {selectedUniversityId !== -1?
-          <RequirementsPage university={university}/>
+          <Requirements university={university}/>
         :
           <HomePage/>
         }}   

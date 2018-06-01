@@ -64,13 +64,13 @@ export class LoginContextProvider extends React.Component{
     
 
     updateLoginData(loginDetails){
+        sessionStorage.setItem('jwtToken',loginDetails.token);
         this.setState({
             loggedIn:loginDetails.loggedIn,
             userId:loginDetails.userId,
             userEmail:loginDetails.userEmail,
             token:loginDetails.token
         });
-        sessionStorage.setItem('jwtToken',loginDetails.token);
     }
 
     loginFromCredentials({loginEmail,loginPassword}){
@@ -217,6 +217,23 @@ export function WithLogin(LoginConsumer){
                     {
                         (login) => (
                             <LoginConsumer login={login} {...this.props}/>
+                        )
+                    }
+                </LoginContext.Consumer>
+            )
+        }
+    }
+}
+
+
+export function WithLoginStatus(LoginStateConsumer){
+    return class extends React.Component {
+        render(){
+            return (
+                <LoginContext.Consumer>
+                    {
+                        (login) => (
+                            <LoginStateConsumer loggedIn={login.state.loggedIn} {...this.props}/>
                         )
                     }
                 </LoginContext.Consumer>
