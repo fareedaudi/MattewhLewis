@@ -288,12 +288,13 @@ def saved_maps_by_user():
     form_data = json.loads(request.data)
     token = form_data['token']
     if(token != None):
-        if(token != None):
-            user = User.verify_auth_token(token)
+        print('token present!')
+        user = User.verify_auth_token(token)
     if(user):
         all_maps = db.session.query(Map).all()
         user_saved_maps = [appify_map(map_) for map_ in all_maps if user in map_.users]
         return JSON.dumps(user_saved_maps)
+    print('no user!')
     return 'Error!',401
 
 def appify_map(map_):
