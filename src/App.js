@@ -27,7 +27,6 @@ class App extends React.Component{
 
   onUniversitySelection = (ev) => {
     let selectedUniversityId = ev.target.value;
-    console.log('Sanity check');
     this.setState({selectedUniversityId});
   }
 

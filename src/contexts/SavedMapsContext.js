@@ -13,7 +13,8 @@ export class SavedMapsContextProvider extends React.Component{
         this.mapActionHandlers = {
             deleteMap:this.deleteMap,
             shareMap:this.shareMap,
-            approveMap:this.approveMap
+            approveMap:this.approveMap,
+            getSavedMaps:this.getSavedMaps
         }
     }
 
@@ -47,9 +48,7 @@ export class SavedMapsContextProvider extends React.Component{
     }
 
     componentWillReceiveProps(nextProps){
-        console.log('From componentWillReceiveProps',nextProps);
         if(!this.props.loggedIn && nextProps.loggedIn){
-            console.log('savedmaps API called!');
             this.getSavedMaps();
         } else if(this.props.loggedIn && !nextProps.loggedIn){
             this.resetSavedMaps({});
@@ -70,8 +69,6 @@ export class SavedMapsContextProvider extends React.Component{
         .then(savedMaps=>{
             this.setState({savedMaps});
         }).catch((error)=>{
-            console.log(sessionStorage.getItem('jwtToken'));
-            console.log('API error',error);
     
         })
     }
