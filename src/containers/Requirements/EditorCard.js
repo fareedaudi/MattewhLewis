@@ -23,6 +23,7 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import {Typeahead} from 'react-bootstrap-typeahead';
 import {ROOT_URL} from '../../api';
+import { WithMapActionHandlers } from '../../contexts/SavedMapsContext';
 
 export default class EditorCard extends React.Component{
     constructor(props){
@@ -39,7 +40,7 @@ export default class EditorCard extends React.Component{
 
     componentWillUnmount(){
     }
-/*
+
     shouldComponentUpdate(nextProps,nextState){
         if([
             this.state === nextState,
@@ -53,7 +54,8 @@ export default class EditorCard extends React.Component{
         return true;
       }
     }
-*/
+
+
     componentWillReceiveProps(nextProps){
         console.log('Editor, componentWillReceiveProps:',nextProps);
     }
@@ -129,14 +131,6 @@ class SavedMaps extends React.Component{
         this.state = {
             savedMaps:[]
         }
-        this.deleteMap = this.deleteMap.bind(this);
-        this.shareMap = this.shareMap.bind(this);
-        this.approveMap = this.approveMap.bind(this);
-        this.mapActionHandlers = {
-            deleteMap:this.deleteMap,
-            shareMap:this.shareMap,
-            approveMap:this.approveMap
-        }
     }
 
     getSavedMaps = (univId) => {
@@ -167,28 +161,6 @@ class SavedMaps extends React.Component{
         console.log('Saved maps, componentWillReceiveProps:',nextProps);
     }
 
-    deleteMap(map_id){
-        var token = sessionStorage.getItem('jwtToken');
-        axios.post(
-            'http://localhost:5000/delete_map', {token, map_id}
-            ).then(
-               response => response.data
-            ).then(
-                (result) => {
-                    if(result.mapDeleted){
-                        this.setState({
-                            savedMaps:this.state.savedMaps.filter((savedMap)=>(savedMap.id!==Number(map_id)))
-                        });
-                    }
-                }
-            );
-    }
-
-    shareMap(map_id){
-    }
-
-    approveMap(map_id){
-    }
 
 /*    shouldComponentUpdate(nextProps,nextState){
         if(this.state.savedMaps !== nextState.savedMaps){
@@ -208,14 +180,13 @@ class SavedMaps extends React.Component{
                 <h6>Saved Maps:</h6>
                 <h6>{this.props.university.university_name}</h6>
                 <ListGroup>
-                    {this.state.savedMaps.map(
+                    {this.props.savedMaps.filter(savedMap => savedMap.univ_id === this.props.university.university_id).map(
                         (savedMap) => (
                             <SavedMapTile 
-                                key={savedMap.map_name+savedMap.id} 
+                                key={savedMap.name+savedMap.id} 
                                 id={String(savedMap.id)} 
-                                name={savedMap.map_name} 
+                                name={savedMap.name} 
                                 progId={savedMap.prog_id}
-                                mapActionHandlers={this.mapActionHandlers}
                                 login={this.props.login}
                                 toggleEditMode={this.props.toggleEditMode}
                                 getSelectedProgramAndSetState={this.props.getSelectedProgramAndSetState}
@@ -235,7 +206,7 @@ class SavedMaps extends React.Component{
     }
 }
 
-class SavedMapTile extends React.Component{
+class SavedMapTileActionless extends React.Component{
         
     constructor(props){
         super(props);
@@ -287,6 +258,8 @@ class SavedMapTile extends React.Component{
         )
     }
 }
+
+const SavedMapTile = WithMapActionHandlers(SavedMapTileActionless);
 
 class CreateMapTile extends React.Component{
     constructor(props){

@@ -10,6 +10,36 @@ export class SavedMapsContextProvider extends React.Component{
         this.state = {
             savedMaps:[]
         }
+        this.mapActionHandlers = {
+            deleteMap:this.deleteMap,
+            shareMap:this.shareMap,
+            approveMap:this.approveMap
+        }
+    }
+
+    deleteMap = (map_id) => {
+        var token = sessionStorage.getItem('jwtToken');
+        axios.post(
+            'http://localhost:5000/delete_map', {token, map_id}
+            ).then(
+            response => response.data
+            ).then(
+                (result) => {
+                    if(result.mapDeleted){
+                        this.setState({
+                            savedMaps:this.state.savedMaps.filter((savedMap)=>(savedMap.id!==Number(map_id)))
+                        });
+                    }
+                }
+            );
+    }
+
+    shareMap = () => {
+
+    }
+
+    approveMap = () => {
+
     }
 
     componentDidMount(){
@@ -48,7 +78,7 @@ export class SavedMapsContextProvider extends React.Component{
 
     render(){
         return (
-        <SavedMapsContext.Provider value={this.state}>
+        <SavedMapsContext.Provider value={{savedMaps:this.state.savedMaps,mapActionHandlers:this.mapActionHandlers}}>
             {this.props.children}
         </SavedMapsContext.Provider>
         )
@@ -61,8 +91,24 @@ export function WithSavedMaps(SavedMapsConsumer){
             return (
                 <SavedMapsContext.Consumer>
                     {
-                        (savedMaps) => (
-                            <SavedMapsConsumer savedMaps={savedMaps} {...this.props}/>
+                        (savedMapsContext) => (
+                            <SavedMapsConsumer savedMaps={savedMapsContext.savedMaps} {...this.props}/>
+                        )
+                    }
+                </SavedMapsContext.Consumer>
+            )
+        }
+    }
+}
+
+export function WithMapActionHandlers(SavedMapsConsumer){
+    return class extends React.Component{
+        render(){
+            return (
+                <SavedMapsContext.Consumer>
+                    {
+                        (savedMapsContext) => (
+                            <SavedMapsConsumer mapActionHandlers={savedMapsContext.mapActionHandlers} {...this.props}/>
                         )
                     }
                 </SavedMapsContext.Consumer>
