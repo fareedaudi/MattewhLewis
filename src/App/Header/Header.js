@@ -1,13 +1,10 @@
 import React from 'react';
 import {Container,Nav,NavItem,NavLink,Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from 'reactstrap';
-import LoginUI from '../containers/LoginUI';
-import {WithLogin} from '../contexts/LoginContext';
-import PropTypes from 'prop-types';
+import LoginButton from './LoginButton/LoginButton';
+import {WithLogin} from '../../contexts/LoginContext';
 
 
-const LoginButton = WithLogin(LoginUI);
-
-export default class HeaderUI extends React.Component {
+class HeaderComponent extends React.Component {
   constructor(props){
     super(props);
     this.toggleProgram = this.toggleProgram.bind(this);
@@ -113,6 +110,5 @@ export default class HeaderUI extends React.Component {
   }
 }
 
-HeaderUI.propTypes = {
-  universities:PropTypes.array.isRequired
-}
+const Header = WithLogin(HeaderComponent);
+export default Header;

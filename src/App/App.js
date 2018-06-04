@@ -1,16 +1,10 @@
 import React from 'react';
-import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import HeaderUI from './containers/HeaderUI.js';
-import Footer from './components/Footer.js';
-import HomePage from './containers/HomePage';
-import RequirementsPage from './containers/Requirements/RequirementsPage';
-import {UNIVERSITIES_URL} from './api';
-import {WithLogin} from './contexts/LoginContext';
-import {WithSavedMaps} from './contexts/SavedMapsContext';
-
-const Header = WithLogin(HeaderUI);
-const Requirements = WithSavedMaps(RequirementsPage);
+import Header from './Header/Header';
+import Footer from './Footer';
+import HomePage from './HomePage';
+import Requirements from './Requirements/Requirements';
+import {UNIVERSITIES_URL} from '../api';
 
 class App extends React.Component{
   constructor(){

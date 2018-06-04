@@ -1,15 +1,12 @@
 import React from 'react';
 import {Container, Col,Row} from 'reactstrap';
-import RequirementsCard from './RequirementsCard';
-import EditorCard from './EditorCard';
+import ProgramViewer from '../../App/Requirements/ProgramViewer/ProgramViewer';
 import {ROOT_URL} from '../../api';
-import PropTypes from 'prop-types';
-import {WithLogin} from '../../contexts/LoginContext';
+import MapEditor from '../../App/Requirements/MapEditor/MapEditor';
+import { WithSavedMaps } from '../../contexts/SavedMapsContext';
 
-const Requirements = WithLogin(RequirementsCard);
-const Editor = WithLogin(EditorCard);
 
-export default class RequirementsPage extends React.Component{
+class RequirementsComponent extends React.Component{
     constructor(props){
         super(props);
         this.state = {
@@ -76,7 +73,7 @@ export default class RequirementsPage extends React.Component{
             <Container style={{paddingTop:'100px'}}>
                 <Row>
                     <Col xs="8">
-                        <Requirements 
+                        <ProgramViewer 
                             university={this.props.university} 
                             programs={this.state.programs}
                             selectedProgram={this.state.selectedProgram}
@@ -85,7 +82,7 @@ export default class RequirementsPage extends React.Component{
                         />
                     </Col>
                     <Col xs="4">
-                        <Editor 
+                        <MapEditor 
                             university={this.props.university} 
                             programs={this.state.programs}
                             selectedProgram={this.state.selectedProgram}
@@ -114,6 +111,6 @@ export default class RequirementsPage extends React.Component{
 
 }
 
-RequirementsPage.propTypes = {
-    university: PropTypes.object,
-}
+const Requirements = WithSavedMaps(RequirementsComponent);
+
+export default Requirements;
