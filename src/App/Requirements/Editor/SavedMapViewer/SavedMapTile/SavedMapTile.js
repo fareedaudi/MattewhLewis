@@ -2,6 +2,7 @@ import React from 'react';
 import {ListGroupItem} from 'reactstrap';
 import MapActionButton from './MapActionButton';
 import DeleteMapModal from './DeleteMapModal';
+import {WithMapActionHandlers} from '../../../../../contexts/SavedMapsContext';
 
 class SavedMapTileActionless extends React.Component{
         
@@ -57,3 +58,5 @@ class SavedMapTileActionless extends React.Component{
 }
 
 const SavedMapTile = WithMapActionHandlers(SavedMapTileActionless);
+
+export default SavedMapTile;

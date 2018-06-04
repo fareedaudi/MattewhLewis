@@ -2,7 +2,7 @@ import React from 'react';
 import {Tooltip} from 'reactstrap';
 
 
-class MapActionButton extends React.Component{
+export default class MapActionButton extends React.Component{
     constructor(props){
         super(props);
         this.state = {

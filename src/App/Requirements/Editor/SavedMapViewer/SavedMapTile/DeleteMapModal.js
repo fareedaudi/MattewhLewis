@@ -14,3 +14,5 @@ const DeleteMapModal = (props) => (
         </ModalFooter>
     </Modal>
 );
+
+export default DeleteMapModal;

@@ -1,6 +1,9 @@
 import React from 'react';
 import {ListGroupItem} from 'reactstrap';
 import CreateMapModal from './CreateMapModal';
+import axios from 'axios';
+import {ROOT_URL} from '../../../../../api';
+import {WithMapActionHandlers} from '../../../../../contexts/SavedMapsContext';
 
 class CreateMapTileComponent extends React.Component{
     constructor(props){
@@ -65,3 +68,4 @@ class CreateMapTileComponent extends React.Component{
 
 
 const CreateMapTile = WithMapActionHandlers(CreateMapTileComponent);
+export default CreateMapTile;

@@ -10,10 +10,13 @@ import {
     FormFeedback,
     ListGroup,
     ModalFooter,
+    FormText,
+    ListGroupItem,
+    Button
 } from 'reactstrap';
-import Typeahead from 'react-bootstrap-typeahead';
+import {Typeahead} from 'react-bootstrap-typeahead';
 
-class CreateMapModal extends React.Component{
+export default class CreateMapModal extends React.Component{
 
     constructor(props){
         super(props);

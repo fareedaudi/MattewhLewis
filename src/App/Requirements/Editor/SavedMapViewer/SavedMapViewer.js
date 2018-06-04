@@ -1,7 +1,7 @@
 import React from 'react';
 import { CardText, ListGroup } from 'reactstrap';
-import SavedMapTile from './SavedMapTile';
-import CreateMapTile from './CreateMapTile';
+import SavedMapTile from './SavedMapTile/SavedMapTile';
+import CreateMapTile from './CreateMapTile/CreateMapTile';
 
 export default class SavedMapViewer extends React.Component{
         render(){
