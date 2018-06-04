@@ -1,10 +1,11 @@
 import React from 'react';
 import axios from 'axios';
 import {ROOT_URL} from '../api';
+import { WithLoginStatus } from './LoginContext';
 
 var SavedMapsContext = React.createContext();
 
-export class SavedMapsContextProvider extends React.Component{
+class SavedMapsContextProviderComponent extends React.Component{
     constructor(props){
         super(props);
         this.state = {
@@ -81,6 +82,23 @@ export class SavedMapsContextProvider extends React.Component{
         )
     }
 }
+
+const SavedMapsContextProvider = WithLoginStatus(SavedMapsContextProviderComponent);
+export default SavedMapsContextProvider;
+
+
+export function ProvideSavedMapContext(Component){
+    return class extends React.Component{
+        render(){
+            return (
+                <SavedMapsContextProvider>
+                    <Component {...this.props}/>
+                </SavedMapsContextProvider>
+            )
+        }
+    }
+}
+
 
 export function WithSavedMaps(SavedMapsConsumer){
     return class extends React.Component{

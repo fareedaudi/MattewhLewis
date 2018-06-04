@@ -6,7 +6,7 @@ var LoginContext = React.createContext();
 
 var loginDuration = 600;
 
-export class LoginContextProvider extends React.Component{
+export default class LoginContextProvider extends React.Component{
     constructor(){
         super();
         this.state = {
@@ -208,6 +208,18 @@ const StayLoggedInModal = (props) => (
         </ModalFooter>
     </Modal>
 );
+
+export function ProvideLoginContext(Component){
+    return class extends React.Component{
+        render(){
+            return (
+                <LoginContextProvider>
+                    <Component {...this.props}/>
+                </LoginContextProvider>
+            )
+        }
+    }
+}
             
 export function WithLogin(LoginConsumer){
     return class extends React.Component {
@@ -241,5 +253,3 @@ export function WithLoginStatus(LoginStateConsumer){
         }
     }
 }
-
-export default LoginContext;

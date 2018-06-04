@@ -5,8 +5,11 @@ import Footer from './Footer';
 import HomePage from './HomePage';
 import Requirements from './Requirements/Requirements';
 import {UNIVERSITIES_URL} from '../api';
+import LoginContextProvider from '../contexts/LoginContext';
+import SavedMapsContextProvider from '../contexts/SavedMapsContext';
 
-class App extends React.Component{
+
+class AppComponent extends React.Component{
   constructor(){
     super();
     this.state = {
@@ -57,9 +60,22 @@ class App extends React.Component{
       </div>
     )
   }
+}
 
+const TopContextProvider = (Component) => {
+    return class extends React.Component{
+        render(){
+            return (
+                <LoginContextProvider>
+                    <SavedMapsContextProvider>
+                        <Component {...this.props}/>
+                    </SavedMapsContextProvider>
+                </LoginContextProvider>
+            );
+        }
+    }
+}
 
-
-} 
+const App = TopContextProvider(AppComponent);
 
 export default App;
