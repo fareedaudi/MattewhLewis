@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {ROOT_URL} from '../api';
 import { WithLoginStatus } from './LoginContext';
+import {PropTypes} from 'prop-types';
 
 var SavedMapsContext = React.createContext();
 
@@ -62,16 +63,16 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     getSavedMaps = () => {
-        var token = sessionStorage.getItem('jwtToken');
-        axios.post(
-            `${ROOT_URL}/saved_maps_by_user`, {token}
-        )
-        .then(response=>response.data)
-        .then(savedMaps=>{
-            this.setState({savedMaps});
-        }).catch((error)=>{
-    
-        })
+            var token = sessionStorage.getItem('jwtToken');
+            axios.post(
+                `${ROOT_URL}/saved_maps_by_user`, {token}
+            )
+            .then(response=>response.data)
+            .then(savedMaps=>{
+                this.setState({savedMaps});
+            }).catch((error)=>{
+        
+            })
     }
 
     render(){
@@ -130,4 +131,8 @@ export function WithMapActionHandlers(SavedMapsConsumer){
             )
         }
     }
+}
+
+SavedMapsContextProviderComponent.propTypes = {
+    loggedIn:PropTypes.bool.isRequired
 }

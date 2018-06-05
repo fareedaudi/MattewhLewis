@@ -1,10 +1,11 @@
 import React from 'react';
 import {ListGroupItem} from 'reactstrap';
+import PropTypes from 'prop-types';
 import MapActionButton from './MapActionButton';
 import DeleteMapModal from './DeleteMapModal';
 import {WithMapActionHandlers} from '../../../../../contexts/SavedMapsContext';
 
-class SavedMapTileActionless extends React.Component{
+class SavedMapTileComponent extends React.Component{
         
     constructor(props){
         super(props);
@@ -31,6 +32,7 @@ class SavedMapTileActionless extends React.Component{
         ev.preventDefault();
         this.props.toggleEditMode();
         this.props.getSelectedProgramAndSetState(this.props.progId);
+        this.props.setMapToEdit(this.props.id);
     }
 
     render(){
@@ -57,6 +59,18 @@ class SavedMapTileActionless extends React.Component{
     }
 }
 
-const SavedMapTile = WithMapActionHandlers(SavedMapTileActionless);
+SavedMapTileComponent.propTypes = {
+    id:PropTypes.string.isRequired,
+    name:PropTypes.string.isRequired,
+    progId:PropTypes.number.isRequired,
+    login:PropTypes.object.isRequired,
+    toggleEditMode:PropTypes.func.isRequired,
+    setMapToEdit:PropTypes.func.isRequired,
+    getSelectedProgramAndSetState:PropTypes.func.isRequired,
+    map:PropTypes.object.isRequired,
+    mapActionHandlers:PropTypes.object.isRequired
+}
+
+const SavedMapTile = WithMapActionHandlers(SavedMapTileComponent);
 
 export default SavedMapTile;

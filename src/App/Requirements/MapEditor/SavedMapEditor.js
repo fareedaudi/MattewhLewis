@@ -7,6 +7,7 @@ import {
     Button
 } from 'reactstrap';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 import {ROOT_URL} from '../../../api';
 
 export default class SavedMapEditor extends React.Component{
@@ -38,6 +39,7 @@ export default class SavedMapEditor extends React.Component{
             trans_6:-1,
             components:[]
         }
+        console.log('Constructor called!')
     }
 
     componentDidMount(){
@@ -55,9 +57,11 @@ export default class SavedMapEditor extends React.Component{
     }
 
     render(){
+        console.log(this.props.savedMapToEdit);
+        console.log(this.props.program);
         return (
             <div>
-            <h6>Map Editor</h6>
+            <h5>Map Editor</h5>
             <Form>
                 {this.state.components.map(
                     (component) => 
@@ -74,4 +78,9 @@ export default class SavedMapEditor extends React.Component{
             </div>
         )
     }
+}
+
+SavedMapEditor.propTypes = {
+    toggleEditMode:PropTypes.func.isRequired,
+    savedMapToEdit:PropTypes.object.isRequired
 }

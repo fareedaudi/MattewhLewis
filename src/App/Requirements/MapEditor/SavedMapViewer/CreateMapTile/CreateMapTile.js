@@ -2,6 +2,7 @@ import React from 'react';
 import {ListGroupItem} from 'reactstrap';
 import CreateMapModal from './CreateMapModal';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 import {ROOT_URL} from '../../../../../api';
 import {WithMapActionHandlers} from '../../../../../contexts/SavedMapsContext';
 
@@ -66,6 +67,13 @@ class CreateMapTileComponent extends React.Component{
         }
     }
 
+CreateMapTileComponent.propTypes = {
+    university:PropTypes.object.isRequired,
+    programs:PropTypes.array.isRequired,
+    login:PropTypes.object.isRequired,
+    collaborators:PropTypes.array.isRequired,
+    mapActionHandlers:PropTypes.object.isRequired
+}
 
 const CreateMapTile = WithMapActionHandlers(CreateMapTileComponent);
 export default CreateMapTile;

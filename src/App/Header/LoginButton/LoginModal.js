@@ -6,6 +6,7 @@ import {
     ModalFooter,
     Button
 } from 'reactstrap';
+import PropTypes from 'prop-types';
 
 export default class LoginModal extends React.Component{
     constructor(props){
@@ -44,4 +45,10 @@ export default class LoginModal extends React.Component{
             </Modal>
         )
     }
+}
+
+LoginModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    toggle: PropTypes.func.isRequired,
+    loginHandler: PropTypes.func.isRequired
 }

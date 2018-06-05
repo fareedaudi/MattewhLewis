@@ -15,6 +15,7 @@ import {
     Button
 } from 'reactstrap';
 import {Typeahead} from 'react-bootstrap-typeahead';
+import PropTypes from 'prop-types';
 
 export default class CreateMapModal extends React.Component{
 
@@ -158,4 +159,14 @@ export default class CreateMapModal extends React.Component{
             </Modal>
             );
         }
+    }
+
+    CreateMapModal.propTypes = {
+        isOpen:PropTypes.bool.isRequired,
+        toggle:PropTypes.func.isRequired,
+        handler:PropTypes.func.isRequired,
+        university:PropTypes.object.isRequired,
+        programs:PropTypes.array.isRequired,
+        collaborators:PropTypes.array.isRequired,
+        login:PropTypes.object.isRequired
     }

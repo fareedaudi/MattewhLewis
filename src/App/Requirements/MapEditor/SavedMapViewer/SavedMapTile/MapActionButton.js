@@ -1,5 +1,6 @@
 import React from 'react';
 import {Tooltip} from 'reactstrap';
+import PropTypes from 'prop-types';
 
 
 export default class MapActionButton extends React.Component{
@@ -49,4 +50,10 @@ export default class MapActionButton extends React.Component{
             </span>
       );
     }
+}
+
+MapActionButton.propTypes = {
+    type:PropTypes.string.isRequired,
+    map_id:PropTypes.string.isRequired,
+    handler:PropTypes.func.isRequired
 }

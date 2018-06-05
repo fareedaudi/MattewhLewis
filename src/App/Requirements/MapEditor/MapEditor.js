@@ -5,6 +5,7 @@ import {
     CardBody,
     CardText
 } from 'reactstrap';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import {ROOT_URL} from '../../../api';
 import SavedMapViewer from './SavedMapViewer/SavedMapViewer';
@@ -16,15 +17,13 @@ class MapEditorComponent extends React.Component{
         super(props);
         this.state = {
             editMode:false,
-            collaborators:[]
+            collaborators:[],
+            mapToEdit:'-1'
         }
     }
 
     componentDidMount(){
         this.getCollaborators();
-    }
-
-    componentWillUnmount(){
     }
 
     shouldComponentUpdate(nextProps,nextState){
@@ -41,13 +40,15 @@ class MapEditorComponent extends React.Component{
       }
     }
 
-
-    componentWillReceiveProps(nextProps){
-    }
-
     toggleEditMode = () => {
         this.setState({
             editMode:!this.state.editMode
+        });
+    }
+
+    setMapToEdit = (mapToEdit) => {
+        this.setState({
+            mapToEdit
         });
     }
 
@@ -56,6 +57,7 @@ class MapEditorComponent extends React.Component{
             'Edit courses for degree components, below.':
             'View your saved maps below, or create a new map!';
         let loggedIn = this.props.login.state.loggedIn;
+        let savedMapToEdit = this.props.savedMaps.filter(savedMap=>String(savedMap.id)===this.state.mapToEdit)[0];
         return (
             <Card>
                 <CardHeader>
@@ -69,7 +71,8 @@ class MapEditorComponent extends React.Component{
                         {
                         this.state.editMode ?
                         <SavedMapEditor
-                            toggleEditMode={this.toggleEditMode}    
+                            toggleEditMode={this.toggleEditMode}
+                            savedMapToEdit={savedMapToEdit}  
                         />
                         :
                         <SavedMapViewer
@@ -78,6 +81,7 @@ class MapEditorComponent extends React.Component{
                             programs={this.props.programs}
                             collaborators={this.state.collaborators}
                             toggleEditMode={this.toggleEditMode}
+                            setMapToEdit={this.setMapToEdit}
                             getSelectedProgramAndSetState={this.props.getSelectedProgramAndSetState}
                             savedMaps={this.props.savedMaps}
                             />
@@ -108,6 +112,16 @@ class MapEditorComponent extends React.Component{
         );
     }
 }
+
+
+MapEditorComponent.propTypes = {
+    university:PropTypes.object.isRequired,
+    programs:PropTypes.array.isRequired,
+    selectedProgram:PropTypes.object.isRequired,
+    savedMaps:PropTypes.array.isRequired,
+    login:PropTypes.object.isRequired
+}
+
 
 const MapEditor = WithLogin(MapEditorComponent);
 

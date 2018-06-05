@@ -1,5 +1,6 @@
 import React from 'react';
 import {Container, Col,Row} from 'reactstrap';
+import PropTypes from 'prop-types';
 import ProgramViewer from '../../App/Requirements/ProgramViewer/ProgramViewer';
 import {ROOT_URL} from '../../api';
 import MapEditor from '../../App/Requirements/MapEditor/MapEditor';
@@ -109,6 +110,10 @@ class RequirementsComponent extends React.Component{
         );
     }
 
+}
+
+RequirementsComponent.propTypes = {
+    university:PropTypes.object.isRequired
 }
 
 const Requirements = WithSavedMaps(RequirementsComponent);

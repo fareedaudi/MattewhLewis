@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const ProgramSelector = (props) => (
     <div id="program-selector">
@@ -15,5 +16,12 @@ const ProgramSelector = (props) => (
             )}
         </select>
     </div>);
+
+
+ProgramSelector.propTypes = {
+    programs:PropTypes.array.isRequired,
+    selectedProgramId:PropTypes.string.isRequired,
+    handleSelection:PropTypes.func.isRequired
+}
 
 export default ProgramSelector;

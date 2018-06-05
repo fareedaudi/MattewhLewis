@@ -1,14 +1,13 @@
 import React from 'react';
-import {
-    Container
-} from 'reactstrap';
+import {Container} from 'reactstrap';
+import PropTypes from 'prop-types';
 
 const SelectedRequirements = (props) => {
     var programName = props.program.program_name;
     var programLink = props.program.program_link;
     var components = props.program.components || [];
     var showSJCCourses = props.showSJCCourses;
-
+    console.log(props.program);
     return (
         <div id="selected-requirements">
             <hr/>
@@ -50,5 +49,10 @@ const SelectedRequirements = (props) => {
         </div>
     )
 };
+
+SelectedRequirements.propTypes = {
+    program:PropTypes.object.isRequired,
+    showSJCCourses:PropTypes.bool.isRequired
+}
 
 export default SelectedRequirements;

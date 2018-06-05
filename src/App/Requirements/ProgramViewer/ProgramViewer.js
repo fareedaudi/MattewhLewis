@@ -5,6 +5,7 @@ import {
     CardBody,
     CardText,
 } from 'reactstrap';
+import PropTypes from 'prop-types';
 import {WithLogin} from '../../../contexts/LoginContext';
 import ProgramSelector from './ProgramSelector';
 import SJCCourseFilter from './SJCCourseFilter';
@@ -81,6 +82,14 @@ class ProgramViewerComponent extends React.Component{
         )
     }
 
+}
+
+ProgramViewerComponent.propTypes = {
+    university:PropTypes.object.isRequired,
+    programs:PropTypes.array.isRequired,
+    selectedProgram:PropTypes.object.isRequired,
+    getSelectedProgramDataAndSetState:PropTypes.func.isRequired,
+    resetSelectedProgram:PropTypes.func.isRequired
 }
 
 const ProgramViewer = WithLogin(ProgramViewerComponent);

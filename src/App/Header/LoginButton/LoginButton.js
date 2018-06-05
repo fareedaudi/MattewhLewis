@@ -1,5 +1,6 @@
 import React from 'react';
 import {Button} from 'reactstrap';
+import PropTypes from 'prop-types';
 import {WithLogin} from '../../../contexts/LoginContext';
 import LoginModal from './LoginModal';
 
@@ -37,6 +38,10 @@ class LoginButtonComponent extends React.Component{
             </div>
         )
     }
+}
+
+LoginButtonComponent.propTypes = {
+    login:PropTypes.object.isRequired
 }
 
 const LoginButton = WithLogin(LoginButtonComponent);

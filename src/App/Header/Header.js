@@ -1,7 +1,9 @@
 import React from 'react';
 import {Container,Nav,NavItem,NavLink,Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from 'reactstrap';
+import PropTypes from 'prop-types';
 import LoginButton from './LoginButton/LoginButton';
 import {WithLogin} from '../../contexts/LoginContext';
+
 
 
 class HeaderComponent extends React.Component {
@@ -111,4 +113,10 @@ class HeaderComponent extends React.Component {
 }
 
 const Header = WithLogin(HeaderComponent);
+
 export default Header;
+
+Header.propTypes = {
+  universities:PropTypes.array.isRequired,
+  selectionHandler:PropTypes.func.isRequired
+}
