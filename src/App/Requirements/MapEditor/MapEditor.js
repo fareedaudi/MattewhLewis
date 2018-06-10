@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import {ROOT_URL} from '../../../api';
 import SavedMapViewer from './SavedMapViewer/SavedMapViewer';
-import SavedMapEditor from './SavedMapEditor';
+import SavedMapEditor from './SavedMapEditor/SavedMapEditor';
 import {WithLogin} from '../../../contexts/LoginContext';
 
 class MapEditorComponent extends React.Component{
@@ -32,7 +32,8 @@ class MapEditorComponent extends React.Component{
             this.props.programs === nextProps.programs,
             this.props.login.state.loggedIn === nextProps.login.state.loggedIn,
             this.props.university === nextProps.university,
-            this.props.savedMaps === nextProps.savedMaps
+            this.props.savedMaps === nextProps.savedMaps,
+            this.props.selectedProgram === nextProps.selectedProgram
         ].every(x=>x)) {
             return false;}
          else {
@@ -72,7 +73,8 @@ class MapEditorComponent extends React.Component{
                         this.state.editMode ?
                         <SavedMapEditor
                             toggleEditMode={this.toggleEditMode}
-                            savedMapToEdit={savedMapToEdit}  
+                            savedMapToEdit={savedMapToEdit}
+                            selectedProgram={this.props.selectedProgram}  
                         />
                         :
                         <SavedMapViewer

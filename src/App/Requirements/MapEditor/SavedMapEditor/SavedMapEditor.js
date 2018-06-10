@@ -8,7 +8,8 @@ import {
 } from 'reactstrap';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import {ROOT_URL} from '../../../api';
+import {ROOT_URL} from '../../../../api';
+import MapForm from './MapForm';
 
 export default class SavedMapEditor extends React.Component{
     
@@ -39,11 +40,13 @@ export default class SavedMapEditor extends React.Component{
             trans_6:-1,
             components:[]
         }
-        console.log('Constructor called!')
     }
 
     componentDidMount(){
         this.getComponentsFromServer();
+    }
+
+    componentWillReceiveProps(nextProps){
     }
 
     getComponentsFromServer = () => {
@@ -57,24 +60,12 @@ export default class SavedMapEditor extends React.Component{
     }
 
     render(){
-        console.log(this.props.savedMapToEdit);
-        console.log(this.props.program);
+        console.log('selecedProgram: ',this.props.selectedProgram);
+        let {name, components, prog_id} = this.props.savedMapToEdit;
         return (
             <div>
-            <h5>Map Editor</h5>
-            <Form>
-                {this.state.components.map(
-                    (component) => 
-                    <FormGroup key={component.name}>
-                    <Label>{component.name}</Label>
-                    {component.fields.map(
-                        (field) =>
-                        <Input type="select" key={field}/>
-                    )}
-                    </FormGroup>
-                )}
-            </Form>
-            <Button color="secondary" onClick={this.props.toggleEditMode}>Close</Button>
+                <MapForm savedMapToEdit={this.props.savedMapToEdit} selectedProgram={this.props.selectedProgram}/>
+                <Button color="secondary" onClick={this.props.toggleEditMode}>Close</Button>
             </div>
         )
     }

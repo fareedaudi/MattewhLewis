@@ -7,7 +7,6 @@ const SelectedRequirements = (props) => {
     var programLink = props.program.program_link;
     var components = props.program.components || [];
     var showSJCCourses = props.showSJCCourses;
-    console.log(props.program);
     return (
         <div id="selected-requirements">
             <hr/>
