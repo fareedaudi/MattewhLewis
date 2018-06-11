@@ -300,7 +300,7 @@ def saved_maps_by_user():
 def appify_map(map_):
     components = Map.component_areas
     univ_name = db.session.query(University).get(map_.univ_id).name
-    prog_name = db.session.query(Program).get(map_.univ_id).name
+    prog_name = db.session.query(Program).get(map_.prog_id).name
     return {
         'id':map_.id,
         'name':map_.map_name,
