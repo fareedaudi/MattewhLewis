@@ -53,12 +53,19 @@ class MapEditorComponent extends React.Component{
         });
     }
 
+    toggleEditModeOff = () => {
+        this.setState({
+            editMode:false
+        });
+    }
+
     render(){
         var instructions = (this.state.editMode)?
             'Edit courses for degree components, below.':
             'View your saved maps below, or create a new map!';
         let loggedIn = this.props.login.state.loggedIn;
-        let savedMapToEdit = this.props.savedMaps.filter(savedMap=>String(savedMap.id)===this.state.mapToEdit)[0];
+        let savedMapToEdit = this.props.savedMaps.filter(
+            savedMap=>String(savedMap.id)===this.state.mapToEdit)[0];
         return (
             <Card>
                 <CardHeader>
@@ -73,8 +80,9 @@ class MapEditorComponent extends React.Component{
                         this.state.editMode ?
                         <SavedMapEditor
                             toggleEditMode={this.toggleEditMode}
+                            toggleEditModeOff={this.toggleEditModeOff}
                             savedMapToEdit={savedMapToEdit}
-                            selectedProgram={this.props.selectedProgram}  
+                            selectedProgram={this.props.selectedProgram}
                         />
                         :
                         <SavedMapViewer

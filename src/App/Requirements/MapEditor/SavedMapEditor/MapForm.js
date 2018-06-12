@@ -147,6 +147,7 @@ export default class MapForm extends React.Component{
     }
 
     render(){
+        console.log('SavedMap: ',this.props.savedMapToEdit);
         let {name,univ_name,prog_name,components} = this.props.savedMapToEdit;
         let courseSelectionFields = components.map(
             component => (
