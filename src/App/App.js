@@ -4,60 +4,63 @@ import Header from './Header/Header';
 import Footer from './Footer';
 import HomePage from './HomePage';
 import Requirements from './Requirements/Requirements';
-import {UNIVERSITIES_URL} from '../api';
 import LoginContextProvider from '../contexts/LoginContext';
 import SavedMapsContextProvider from '../contexts/SavedMapsContext';
+import {ROOT_URL} from '../api';
+import {BrowserRouter} from 'react-router-dom';
+import {withFetching,UNIVERSITIES_URL} from '../api';
 
 
 class AppComponent extends React.Component{
-  constructor(){
-    super();
+  constructor(props){
+    super(props);
     this.state = {
-      universities:[],
       selectedUniversityId:-1,
+      coreRequirements:{}
     };
-  }
-
-  componentDidMount(){
-    this.loadUniversitiesIntoState();
   }
 
   onUniversitySelection = (ev) => {
     let selectedUniversityId = ev.target.value;
-    this.setState({selectedUniversityId});
+    if(selectedUniversityId !== this.state.selectedUniversityId){
+      this.setState({selectedUniversityId});
+    this.fetchCoreRequirements(selectedUniversityId);
+    }
   }
 
-  loadUniversitiesIntoState(){
+  fetchCoreRequirements = (universityId) => {
+    let coreRequirements;
     fetch(
-      UNIVERSITIES_URL
-    ).then(
-      response => (response.json())
-    ).then(
-      universities => {
-        this.setState(
-          {
-            universities
-          }
-        );
+      `${ROOT_URL}/get_core/${universityId}`
+    ).then(response => response.json()).then(
+      coreRequirements => {
+        this.setState({coreRequirements});
       }
-    );
+    )
   }
 
   render(){
-    
-    let universities = this.state.universities;
+    console.log(this.props.data);
+    var state = sessionStorage.getItem('prevMapState');
+    if(state){
+      console.log(JSON.parse(state));
+    }
+    let universities = this.props.data;
     let selectedUniversityId = this.state.selectedUniversityId;
     let university = universities.filter((univ)=>(String(univ.university_id)===selectedUniversityId))[0];
     return (
       <div>
-        <Header universities={this.state.universities} selectionHandler={this.onUniversitySelection}/>
+        <Header universities={universities} selectionHandler={this.onUniversitySelection}/>
+        
         {selectedUniversityId !== -1?
-          <Requirements university={university}/>
+          <Requirements university={university} coreRequirements={this.state.coreRequirements}/>
         :
           <HomePage/>
         }}   
+        
         <Footer/>
-      </div>
+        </div>
+      
     )
   }
 }
@@ -76,6 +79,8 @@ const TopContextProvider = (Component) => {
     }
 }
 
-const App = TopContextProvider(AppComponent);
+const AppWithFetching = withFetching(UNIVERSITIES_URL,[])(AppComponent);
+
+const App = TopContextProvider(AppWithFetching);
 
 export default App;

@@ -33,7 +33,8 @@ class MapEditorComponent extends React.Component{
             this.props.login.state.loggedIn === nextProps.login.state.loggedIn,
             this.props.university === nextProps.university,
             this.props.savedMaps === nextProps.savedMaps,
-            this.props.selectedProgram === nextProps.selectedProgram
+            this.props.selectedProgram === nextProps.selectedProgram,
+            this.props.coreRequirements === nextProps.coreRequirements
         ].every(x=>x)) {
             return false;}
          else {
@@ -66,6 +67,7 @@ class MapEditorComponent extends React.Component{
         let loggedIn = this.props.login.state.loggedIn;
         let savedMapToEdit = this.props.savedMaps.filter(
             savedMap=>String(savedMap.id)===this.state.mapToEdit)[0];
+        console.log('Map Editor:',this.props.coreRequirements);
         return (
             <Card>
                 <CardHeader>
@@ -83,6 +85,7 @@ class MapEditorComponent extends React.Component{
                             toggleEditModeOff={this.toggleEditModeOff}
                             savedMapToEdit={savedMapToEdit}
                             selectedProgram={this.props.selectedProgram}
+                            coreRequirements={this.props.coreRequirements}
                         />
                         :
                         <SavedMapViewer

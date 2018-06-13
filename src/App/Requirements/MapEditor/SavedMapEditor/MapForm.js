@@ -9,6 +9,7 @@ import {
     Label
 } from 'reactstrap';
 import PropTypes from 'prop-types';
+import {Prompt} from 'react-router-dom';
 
 export default class MapForm extends React.Component{
     constructor(props){
@@ -100,7 +101,7 @@ export default class MapForm extends React.Component{
 
     handleCourseSelection = (fieldName,{target:{value}}) => {
         if(value === "-2"){
-            console.log(`Unconventional course for ${fieldName}!`);
+            console.log(`Unconventional course selection for ${fieldName}!`);
             return;
         }
         let fieldObj = {};
@@ -147,7 +148,10 @@ export default class MapForm extends React.Component{
     }
 
     render(){
-        console.log('SavedMap: ',this.props.savedMapToEdit);
+        window.onbeforeunload = () => {
+            sessionStorage.setItem('prevMapState',JSON.stringify(this.state));
+            console.log(this.state);
+        }
         let {name,univ_name,prog_name,components} = this.props.savedMapToEdit;
         let courseSelectionFields = components.map(
             component => (
@@ -163,7 +167,7 @@ export default class MapForm extends React.Component{
                                         <option value={"-1"}> Please select a course.</option>
                                         <option value={"1"}>ENGL 1301 Composition I</option>
                                         <option value={"2"}>ENGL 1302 Composition I</option>
-                                        <option value={"-2"} onSelect={()=>{console.log(`${field.name} Clicked!`);}}>Select another course</option>
+                                        <option value={"-2"}>Select another course</option>
                                     </Input>
                         )}
                     </FormGroup>

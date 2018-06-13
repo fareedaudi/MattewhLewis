@@ -34,6 +34,18 @@ class RequirementsComponent extends React.Component{
         );
     }
 
+    fetchCoreRequirements = () => {
+        fetch(
+            `${ROOT_URL}/get_core/${this.props.university.university_id}`
+        ).then(
+            response => response.json()
+        ).then(
+            coreRequirements => {
+                console.log(coreRequirements);
+            }
+        )
+    }
+
     resetSelectedProgram = () => {
         let selectedProgram = {
             program_id:-1,
@@ -89,6 +101,7 @@ class RequirementsComponent extends React.Component{
                             selectedProgram={this.state.selectedProgram}
                             getSelectedProgramAndSetState={this.getSelectedProgramDataAndSetState}
                             savedMaps={this.props.savedMaps}
+                            coreRequirements={this.props.coreRequirements}
                         />
                     </Col>
                 </Row>

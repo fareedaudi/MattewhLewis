@@ -39,11 +39,13 @@ export default class SavedMapEditor extends React.Component{
     }
 
     render(){
-        console.log('selecedProgram: ',this.props.selectedProgram);
         let {name, components, prog_id} = this.props.savedMapToEdit;
         return (
             <div>
-                <MapForm savedMapToEdit={this.props.savedMapToEdit} selectedProgram={this.props.selectedProgram}/>
+                <MapForm 
+                    savedMapToEdit={this.props.savedMapToEdit} 
+                    selectedProgram={this.props.selectedProgram}
+                    coreRequirements={this.props.coreRequirements}/>
                 <Button color="secondary" onClick={this.props.toggleEditMode}>Close</Button>
             </div>
         )
