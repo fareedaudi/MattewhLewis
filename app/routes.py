@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, json, session
 from sqlalchemy import and_
 from app import app
-from app.models import db,University,Program,Component,Course,SJC,User,Map
+from app.models import db,University,Program,Component,Course,SJC,User,Map,Core
 from flask_login import current_user, login_user, logout_user
 from flask_restful import Resource,Api
 from pprint import pprint
@@ -300,7 +300,7 @@ def saved_maps_by_user():
 def appify_map(map_):
     components = Map.component_areas
     univ_name = db.session.query(University).get(map_.univ_id).name
-    prog_name = db.session.query(Program).get(map_.univ_id).name
+    prog_name = db.session.query(Program).get(map_.prog_id).name
     return {
         'id':map_.id,
         'name':map_.map_name,
@@ -333,3 +333,41 @@ def appify_map(map_):
             } for area in components
         ] 
     }
+
+@app.route('/get_core/<int:univ_id>')
+def get_core(univ_id):
+    core_dict = {}
+    univ = db.session.query(University).get(univ_id)
+    if(not univ):
+        return 'Error!',404
+    core_requirements = db.session.query(Core).filter(Core.univ_id==univ.id)
+    for req in core_requirements:
+        course = db.session.query(Course).get(req.course_id)
+        course = courseify(course)
+        if(core_dict.get(req.component_code)):
+            core_dict[req.component_code].append(course)
+        else:
+            core_dict[req.component_code] = [course]
+    return JSON.dumps(core_dict)
+
+
+def courseify(course):
+    course_dict = {
+        'id':course.id,
+        'rubric':course.rubric,
+        'number':course.number,
+        'name':course.name,
+        'hours':course.hours
+    }
+    sjc = {}
+    if(course.sjc_id):
+        SJC_course = db.session.query(SJC).get(course.sjc_id)
+        sjc = {
+            'sjc_id':SJC_course.id,
+            'sjc_name':SJC_course.name,
+            'sjc_rubric':SJC_course.rubric,
+            'sjc_number':SJC_course.number,
+            'sjc_hours':SJC_course.hours
+        }
+    course_dict['sjc_course'] = sjc
+    return course_dict
