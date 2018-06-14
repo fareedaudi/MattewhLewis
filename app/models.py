@@ -27,7 +27,9 @@ def load_user(id):
 class University(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250),nullable=False)
-
+    is_university = db.Column(db.Boolean)
+    FICE = db.Column(db.String(250))
+    SJC_trans_imp = db.Column(db.Integer)
 
 course_programs = db.Table(
     'course_programs', 
@@ -156,6 +158,12 @@ class Component(db.Model):
         back_populates="components"
     )
 
+class ProgramCoreRequirement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    core_component_id = db.Column(db.Integer)
+    prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
+    core_requirement_id = db.Column(db.Integer)
+
 class Requirement(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -177,6 +185,15 @@ class Requirement(db.Model):
         secondary=components_requirements,
         back_populates="requirements"
     )
+
+class Core(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
+    component_code = db.Column(db.String(250))
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
+    university = db.relationship("University", back_populates="core_courses")
+
+University.core_courses = db.relationship("Core", order_by=Core.component_code, back_populates="university")
 
 class ACGM(db.Model):
     __tablename__ = "ACGM"
