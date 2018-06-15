@@ -186,7 +186,7 @@ class Requirement(db.Model):
         back_populates="requirements"
     )
 
-class Core(db.Model):
+class Core(db.Model): # DEPRECATED.
     id = db.Column(db.Integer, primary_key=True)
     univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
     component_code = db.Column(db.String(250))
@@ -194,6 +194,31 @@ class Core(db.Model):
     university = db.relationship("University", back_populates="core_courses")
 
 University.core_courses = db.relationship("Core", order_by=Core.component_code, back_populates="university")
+
+class CoreComponent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(250))
+    hours = db.Column(db.Integer())
+    code = db.Column(db.String(250))
+
+
+class OtherComponent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(250))
+    hours = db.Column(db.Integer())
+    code = db.Column(db.String(250))
+class CoreRequirement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey(Course.id))
+    core_component_id = db.Column(db.Integer, db.ForeignKey(CoreComponent.id))
+
+
+
+class ProgramOtherRequirement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    other_component_id = db.Column(db.Integer, db.ForeignKey(OtherComponent.id))
+    prog_id = db.Column(db.Integer, db.ForeignKey(Program.id))
+
 
 class ACGM(db.Model):
     __tablename__ = "ACGM"
