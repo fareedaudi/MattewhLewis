@@ -50,7 +50,7 @@ def get_dict(map_):
 
 class Universities(Resource):
     def get(self):
-        universities = db.session.query(University).all()
+        universities = db.session.query(University).order_by(University.name).all()
         universities_list = [
             {k:v for k,v in zip(
                 ('university_id','university_name'),
