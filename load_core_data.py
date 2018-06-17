@@ -1,16 +1,32 @@
 import csv
-from app.models import db, University, Course, Core, ACGM, SJC
+from app.models import db, University, Course, Core, ACGM, SJC,CoreComponent,CoreRequirement
 
 CORE_CURRICULUM_CSV_FILE_LOCATION = './core_curriculum.csv'
 with open(CORE_CURRICULUM_CSV_FILE_LOCATION,'r') as CSV_FILE:
     reader = csv.reader(CSV_FILE)
-    print(reader.__next__())
+    reader.__next__() # Trim Header
     for (comp_code,rubric,number,TCCNS_rubric,TCCNS_number,course_name,SCH,FICE,school_name) in reader:
         comp_code = '0'+str(comp_code)
         FICE = '0'*(6-len(str(FICE)))+str(FICE)
         if(TCCNS_rubric == '.'):
             TCCNS_rubric = ''
         univ = db.session.query(University).filter(University.name==school_name).first()
+        univ_id = univ.id
+        course = db.session.query(Course).filter(Course.rubric==rubric).filter(Course.number==number).filter(Course.univ_id==univ.id).first()
+        course_id = course.id
+        core_component = db.session.query(CoreComponent).filter(CoreComponent.code==comp_code).first()
+        if(core_component):
+            core_component_id = core_component.id
+            core_requirement = CoreRequirement(
+                course_id=course_id,
+                core_component_id=core_component_id,
+                univ_id=univ_id
+            )
+            db.session.add(core_requirement)
+        db.session.commit()
+        
+            
+'''
         if(univ):
             if(not univ.FICE):
                 univ.FICE = FICE
@@ -23,8 +39,8 @@ with open(CORE_CURRICULUM_CSV_FILE_LOCATION,'r') as CSV_FILE:
             db.session.add(univ)
             db.session.commit()
             print('University created!')
-        course = db.session.query(Course).filter(Course.rubric==rubric).filter(Course.number==number).filter(Course.univ_id==univ.id).first()
-        if(not course):
+'''
+'''        if(not course):
             course = Course(
                 name=course_name,
                 univ_id=univ.id,
@@ -46,14 +62,7 @@ with open(CORE_CURRICULUM_CSV_FILE_LOCATION,'r') as CSV_FILE:
             db.session.add(course)
             db.session.commit()
             print('Course created!')
-        core_ = Core(
-            component_code=comp_code,
-            univ_id=univ.id,
-            course_id=course.id
-        )
-        db.session.add(core_)
-        db.session.commit()
-        print('Core created!')
+'''
             
         
 

@@ -211,7 +211,7 @@ class CoreRequirement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     course_id = db.Column(db.Integer, db.ForeignKey(Course.id))
     core_component_id = db.Column(db.Integer, db.ForeignKey(CoreComponent.id))
-
+    univ_id = db.Column(db.Integer, db.ForeignKey(University.id))
 
 
 class ProgramOtherRequirement(db.Model):

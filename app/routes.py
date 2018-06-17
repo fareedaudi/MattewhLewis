@@ -1,11 +1,12 @@
 from flask import render_template, redirect, url_for, request, json, session
 from sqlalchemy import and_
 from app import app
-from app.models import db,University,Program,Component,Course,SJC,User,Map,Core
+from app.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent
 from flask_login import current_user, login_user, logout_user
 from flask_restful import Resource,Api
 from pprint import pprint
 import json as JSON
+from functools import reduce
 
 api = Api(app)
 
@@ -336,11 +337,13 @@ def appify_map(map_):
 
 @app.route('/get_core/<int:univ_id>')
 def get_core(univ_id):
-    core_dict = {}
+    core = {}
     univ = db.session.query(University).get(univ_id)
     if(not univ):
         return 'Error!',404
-    core_requirements = db.session.query(Core).filter(Core.univ_id==univ.id)
+    core_requirements = db.session.query(CoreRequirement).filter(CoreRequirement.univ_id==univ_id).all()
+    core = reduce(add_requirement,core_requirements,{})
+    '''
     for req in core_requirements:
         course = db.session.query(Course).get(req.course_id)
         course = courseify(course)
@@ -348,8 +351,8 @@ def get_core(univ_id):
             core_dict[req.component_code].append(course)
         else:
             core_dict[req.component_code] = [course]
-    return JSON.dumps(core_dict)
-
+    '''
+    return JSON.dumps(core)
 
 def courseify(course):
     course_dict = {
@@ -371,3 +374,28 @@ def courseify(course):
         }
     course_dict['sjc_course'] = sjc
     return course_dict
+
+
+def add_requirement(acc,nextItem):
+    core_component_id = nextItem.id
+    component_details = get_component_details(nextItem.core_component_id)
+    code = component_details['code']
+    if(code not in acc):
+        acc[code] = {**component_details,'courses':[]}
+    course_details = get_course_details(nextItem.course_id)
+    acc[code]['courses'].append(course_details)
+    return acc
+
+
+def get_component_details(core_component_id):
+    core_component = db.session.query(CoreComponent).filter(CoreComponent.id==core_component_id).first()
+    return get_object_dict(core_component)
+
+def get_course_details(course_id):
+    course = db.session.query(Course).filter(Course.id==course_id).first()
+    return get_object_dict(course)
+
+def get_object_dict(sqlalchemy_object):
+    dict_ = sqlalchemy_object.__dict__
+    dict_.pop('_sa_instance_state',None)
+    return dict_
