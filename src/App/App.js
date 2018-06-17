@@ -40,7 +40,7 @@ class AppComponent extends React.Component{
   }
 
   render(){
-    console.log(this.props.data);
+    console.log(this.state.coreRequirements);
     var state = sessionStorage.getItem('prevMapState');
     if(state){
       console.log(JSON.parse(state));

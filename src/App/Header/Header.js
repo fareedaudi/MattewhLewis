@@ -88,7 +88,7 @@ class HeaderComponent extends React.Component {
             <DropdownToggle className={this.state.requirementsActive?"active":""} nav caret>
               University Requirements
             </DropdownToggle>
-            <DropdownMenu>
+            <DropdownMenu style={{maxHeight:"400px",overflowY:"scroll"}}>
               {this.props.universities.map((obj) => (
                 <DropdownItem 
                   key={obj.university_id} 
