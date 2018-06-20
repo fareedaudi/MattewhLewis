@@ -2,12 +2,17 @@ import csv
 from app.models import db,Course,CoreRequirement,CoreComponent,Program
 
 CURRICULUM_FILE = open('./UHCL_program_data.csv','r')
+found_programs = set()
+programs = set()
+
 reader = csv.reader(CURRICULUM_FILE)
 for degree_name,rubric_number,course_name,component_area,requirement_area,*_ in reader:
+    programs.add(degree_name)
     rubric,number = rubric_number.split(" ")
     course = db.session.query(Course).filter(Course.rubric==rubric,Course.number==number).first()
     program = db.session.query(Program).filter(Program.name==degree_name).first()
     if(program):
+        found_programs.add(degree_name)
         if(course):
             core_requirement = db.session.query(CoreRequirement).filter(CoreRequirement.course_id == course.id).first()
             if(core_requirement):
@@ -15,3 +20,4 @@ for degree_name,rubric_number,course_name,component_area,requirement_area,*_ in 
                 print(f'{rubric} {number} - {course_name} is a {core_component.name} requirement for {program.name}')
     else:
         print(f'No program: {degree_name}')
+print(programs.difference(found_programs))

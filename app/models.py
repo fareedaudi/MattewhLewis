@@ -207,6 +207,7 @@ class OtherComponent(db.Model):
     name = db.Column(db.String(250))
     hours = db.Column(db.Integer())
     code = db.Column(db.String(250))
+    
 class CoreRequirement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     course_id = db.Column(db.Integer, db.ForeignKey(Course.id))
