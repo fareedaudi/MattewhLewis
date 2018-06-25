@@ -201,12 +201,13 @@ class CoreComponent(db.Model):
     hours = db.Column(db.Integer())
     code = db.Column(db.String(250))
 
-
 class OtherComponent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
     hours = db.Column(db.Integer())
     code = db.Column(db.String(250))
+    univ_id = db.Column(db.Integer())
+    prog_id = db.Column(db.Integer())
     
 class CoreRequirement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -219,6 +220,7 @@ class ProgramOtherRequirement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     other_component_id = db.Column(db.Integer, db.ForeignKey(OtherComponent.id))
     prog_id = db.Column(db.Integer, db.ForeignKey(Program.id))
+    course_id = db.Column(db.Integer,db.ForeignKey(Course.id))
 
 
 class ACGM(db.Model):
