@@ -7,7 +7,6 @@ import Requirements from './Requirements/Requirements';
 import LoginContextProvider from '../contexts/LoginContext';
 import SavedMapsContextProvider from '../contexts/SavedMapsContext';
 import {ROOT_URL} from '../api';
-import {BrowserRouter} from 'react-router-dom';
 import {withFetching,UNIVERSITIES_URL} from '../api';
 
 
@@ -29,7 +28,6 @@ class AppComponent extends React.Component{
   }
 
   fetchCoreRequirements = (universityId) => {
-    let coreRequirements;
     fetch(
       `${ROOT_URL}/get_core/${universityId}`
     ).then(response => response.json()).then(
@@ -40,11 +38,6 @@ class AppComponent extends React.Component{
   }
 
   render(){
-    console.log(this.state.coreRequirements);
-    var state = sessionStorage.getItem('prevMapState');
-    if(state){
-      console.log(JSON.parse(state));
-    }
     let universities = this.props.data;
     let selectedUniversityId = this.state.selectedUniversityId;
     let university = universities.filter((univ)=>(String(univ.university_id)===selectedUniversityId))[0];

@@ -45,10 +45,6 @@ class SavedMapsContextProviderComponent extends React.Component{
 
     }
 
-    componentDidMount(){
-        this.getSavedMaps()
-    }
-
     componentWillReceiveProps(nextProps){
         if(!this.props.loggedIn && nextProps.loggedIn){
             this.getSavedMaps();
@@ -63,16 +59,16 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     getSavedMaps = () => {
-            var token = sessionStorage.getItem('jwtToken');
-            axios.post(
-                `${ROOT_URL}/saved_maps_by_user`, {token}
-            )
-            .then(response=>response.data)
-            .then(savedMaps=>{
-                this.setState({savedMaps});
-            }).catch((error)=>{
-        
-            })
+        var token = sessionStorage.getItem('jwtToken');
+        axios.post(
+            `${ROOT_URL}/saved_maps_by_user`, {token}
+        )
+        .then(response=>response.data)
+        .then(savedMaps=>{
+            this.setState({savedMaps});
+        }).catch((error)=>{
+    
+        })
     }
 
     render(){
