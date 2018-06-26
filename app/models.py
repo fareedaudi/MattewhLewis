@@ -37,6 +37,18 @@ course_programs = db.Table(
     db.Column('course_id', db.ForeignKey('course.id'), primary_key=True)
     )
 
+course_core_requirements = db.Table(
+    'course_core_requirements', 
+    db.Column('core_requirement_id', db.ForeignKey('core_requirement.id'), primary_key=True),
+    db.Column('course_id', db.ForeignKey('course.id'), primary_key=True)
+    )
+
+course_program_core_requirements = db.Table(
+    'course_program_core_requirements',
+    db.Column('course_id',db.ForeignKey('course.id'), primary_key=True),
+    db.Column('program_core_requirement_id',db.ForeignKey('program_core_requirement.id'),primary_key=True)
+)
+
 programs_sjc_courses = db.Table(
     'programs_sjc_courses', 
     db.Column('program_id', db.ForeignKey('program.id'), primary_key=True),
@@ -106,9 +118,20 @@ class Course(db.Model):
         secondary=requirements_courses,
         back_populates="courses"
     )
+    core_requirements = db.relationship(
+        "CoreRequirement",
+        secondary=course_core_requirements,
+        back_populates="courses"
+    )
     prerequisites = db.relationship("Course",post_update=True)
+    program_core_requirements = db.relationship(
+        "ProgramCoreRequirement",
+        secondary=course_program_core_requirements,
+        back_populates="courses"
+    )
 
 University.courses = db.relationship("Course", order_by=Course.id, back_populates="university")
+
 
 class Program(db.Model):
 
@@ -136,6 +159,10 @@ class Program(db.Model):
         "SJC", 
         secondary=programs_sjc_courses, 
         back_populates="programs")
+    core_requirements = db.relationship(
+        "ProgramCoreRequirement",
+        back_populates="program"
+    )
 
 
 class Component(db.Model):
@@ -160,9 +187,18 @@ class Component(db.Model):
 
 class ProgramCoreRequirement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    core_component_id = db.Column(db.Integer)
-    prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
-    core_requirement_id = db.Column(db.Integer)
+    name = db.Column(db.String(250))
+    code = db.Column(db.String(250))
+    prog_id = db.Column(db.Integer(), db.ForeignKey('program.id'))
+    program = db.relationship(
+        "Program",
+        back_populates="core_requirements"
+    )
+    courses = db.relationship(
+        "Course",
+        secondary=course_program_core_requirements,
+        back_populates="program_core_requirements"
+    )
 
 class Requirement(db.Model):
 
@@ -211,9 +247,16 @@ class OtherComponent(db.Model):
     
 class CoreRequirement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    course_id = db.Column(db.Integer, db.ForeignKey(Course.id))
-    core_component_id = db.Column(db.Integer, db.ForeignKey(CoreComponent.id))
+    name = db.Column(db.String(250))
     univ_id = db.Column(db.Integer, db.ForeignKey(University.id))
+    code = db.Column(db.String(250))
+    courses = db.relationship(
+        "Course", 
+        secondary=course_core_requirements, 
+        back_populates="core_requirements")
+    university = db.relationship("University",back_populates="core_requirements")
+
+University.core_requirements = db.relationship("CoreRequirement",order_by=CoreRequirement.id,back_populates="university")
 
 
 class ProgramOtherRequirement(db.Model):

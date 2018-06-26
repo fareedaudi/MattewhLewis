@@ -1,6 +1,19 @@
 import csv
 from app.models import db, University, Course, Core, ACGM, SJC,CoreComponent,CoreRequirement
 
+component_code_map = {
+    '010':'Communication',
+    '020':'Mathematics',
+    '030':'Life and Physical Sciences',
+    '040':'Language, Philosphy, and Culture',
+    '050':'Creative Arts',
+    '060':'American History',
+    '070':'Government/Political Science',
+    '080':'Social and Behavioral Sciences',
+    '090':'Component Area Option'
+}
+
+
 CORE_CURRICULUM_CSV_FILE_LOCATION = './core_curriculum.csv'
 with open(CORE_CURRICULUM_CSV_FILE_LOCATION,'r') as CSV_FILE:
     reader = csv.reader(CSV_FILE)
@@ -12,17 +25,20 @@ with open(CORE_CURRICULUM_CSV_FILE_LOCATION,'r') as CSV_FILE:
             TCCNS_rubric = ''
         univ = db.session.query(University).filter(University.name==school_name).first()
         univ_id = univ.id
-        course = db.session.query(Course).filter(Course.rubric==rubric).filter(Course.number==number).filter(Course.univ_id==univ.id).first()
+        course = db.session.query(Course).filter(Course.rubric==rubric,Course.number==number,Course.univ_id==univ.id).first()
         course_id = course.id
-        core_component = db.session.query(CoreComponent).filter(CoreComponent.code==comp_code).first()
-        if(core_component):
-            core_component_id = core_component.id
-            core_requirement = CoreRequirement(
-                course_id=course_id,
-                core_component_id=core_component_id,
-                univ_id=univ_id
+        core_req = db.session.query(CoreRequirement).filter(CoreRequirement.univ_id==univ_id,CoreRequirement.code==comp_code).first()
+        if(core_req):
+            core_req.courses.append(course)
+        else:
+            name = component_code_map.get(comp_code) if component_code_map.get(comp_code) else ''
+            core_req = CoreRequirement(
+                name=name,
+                code=comp_code,
+                univ_id=univ_id,
             )
-            db.session.add(core_requirement)
+            db.session.add(core_req)
+            core_req.courses.append(course)
         db.session.commit()
         
             

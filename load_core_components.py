@@ -1,4 +1,4 @@
-from app.models import db,CoreComponent
+from app.models import db,CoreRequirement
 
 component_code_map = {
     '010':{
@@ -40,24 +40,21 @@ component_code_map = {
         'name':'Social and Behavioral Sciences',
         'hours':3,
         'code':'080'
+    },
+    '090':{
+        'name':'Component Area Option',
+        'hours':6,
+        'code':'090'
     }
 }
 
-'''
+
 for code,dict_ in component_code_map.items():
+    univ_id=1
     name = dict_['name']
     hours = dict_['hours']
-    core_component = CoreComponent(name=name,hours=hours,code=code)
-    db.session.add(core_component)
+    core_req = CoreRequirement(name=name,code=code,univ_id=1)
+    db.session.add(core_req)
 
 db.session.commit()
-'''
 
-core_component = CoreComponent(
-    name="Component Area Option",
-    hours=6,
-    code='090'
-    )
-
-db.session.add(core_component)
-db.session.commit()
