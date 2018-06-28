@@ -136,6 +136,37 @@ class RequirementsByProgram(Resource):
                     ]))
           }
 
+@app.route('/reqs_by_program/<int:prog_id>')
+def reqs_by_program(prog_id):
+    program = db.session.query(Program).get(prog_id)
+    return JSON.dumps({
+        k:v for k,v in zip(
+            ('program_link','program_id','program_name','requirements'),
+            (program.link,program.id,program.name,[
+                {
+                    k:v for k,v in zip(
+                        ('requirement_id','requirement_name','requirement_code','courses'),
+                        (requirement.id,requirement.name,requirement.code,[
+                            {
+                                k:v for k,v in zip(
+                                    ('course_id','course_rubric','course_number','course_name','sjc_course'),
+                                    (course.id,course.rubric,course.number,course.name,{
+                                        k:v for k,v in zip(
+                                            ('sjc_id','sjc_rubric','sjc_number','sjc_name'),
+                                            (db.session.query(SJC).get(course.sjc_id).id,
+                                            db.session.query(SJC).get(course.sjc_id).rubric,
+                                            db.session.query(SJC).get(course.sjc_id).number,
+                                            db.session.query(SJC).get(course.sjc_id).name
+                                        ))
+                                    } if course.sjc else None)
+                                )
+                            }
+                        for course in requirement.courses])
+                    )
+                }    
+            for requirement in program.core_requirements]))
+    })
+
 class MapsByUserId(Resource):
     def get(self,user_id):
         maps = db.session.query(Map).filter_by(user_id=user_id).all()
@@ -260,6 +291,32 @@ def create_map():
             'mapCreated':True
         })
     return '',401
+
+@app.route('/update_collaborators',methods=['POST'])
+def update_collaborators():
+    user = None
+    form_data = json.loads(request.data)
+    token = form_data['token']
+    if(token != None):
+        user = User.verify_auth_token(token)
+    if(user):
+        map_id = form_data['map_id']
+        newMapCollaborators = form_data['newMapCollaborators']
+        map_ = db.session.query(Map).get(map_id)
+        for old_collaborator in map_.users:
+            if (old_collaborator != user) and (old_collaborator.email not in newMapCollaborators):
+                map_.users.remove(old_collaborator)
+        for email in newMapCollaborators:
+            collaborator = db.session.query(User).filter(User.email==email).first()
+            if collaborator not in map_.users:
+                map_.users.append(collaborator)
+        db.session.commit()
+        return json.jsonify({
+            'collaboratorsUpdated':True
+        })
+    return '',401
+            
+        
 
 @app.route('/user_emails',methods=['GET'])
 def user_emails():
