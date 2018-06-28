@@ -22,7 +22,7 @@ class RequirementsComponent extends React.Component{
 
     getSelectedProgramDataAndSetState = (programId) => {
         fetch(
-            `${ROOT_URL}/requirements_by_program/${programId}`
+            `${ROOT_URL}/reqs_by_program/${programId}`
         ).then(
             response => response.json()
         ).then(
@@ -82,6 +82,8 @@ class RequirementsComponent extends React.Component{
     }
 
     render(){
+        let selectedProgram = this.state.selectedProgram;
+        console.log({selectedProgram});
         return(
             <Container style={{paddingTop:'100px'}}>
                 <Row>

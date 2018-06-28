@@ -23,19 +23,10 @@ class AppComponent extends React.Component{
     let selectedUniversityId = ev.target.value;
     if(selectedUniversityId !== this.state.selectedUniversityId){
       this.setState({selectedUniversityId});
-    this.fetchCoreRequirements(selectedUniversityId);
     }
   }
 
-  fetchCoreRequirements = (universityId) => {
-    fetch(
-      `${ROOT_URL}/get_core/${universityId}`
-    ).then(response => response.json()).then(
-      coreRequirements => {
-        this.setState({coreRequirements});
-      }
-    )
-  }
+
 
   render(){
     let universities = this.props.data;

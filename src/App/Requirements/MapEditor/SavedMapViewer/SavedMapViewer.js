@@ -25,6 +25,7 @@ export default class SavedMapViewer extends React.Component{
                                     setMapToEdit={this.props.setMapToEdit}
                                     getSelectedProgramAndSetState={this.props.getSelectedProgramAndSetState}
                                     map={savedMap}
+                                    collaborators={this.props.collaborators}
                                     />
                             )
                         )}

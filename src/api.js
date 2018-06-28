@@ -40,7 +40,6 @@ export const withFetching = (url,structure={}) => (Comp) =>
                 .then(data => this.setState({data,isLoading:false}))
                 .catch(error => this.setState({error,isLoading:false}));
         }
-
         render(){
             return <Comp {...this.props} {...this.state}/>;
         }

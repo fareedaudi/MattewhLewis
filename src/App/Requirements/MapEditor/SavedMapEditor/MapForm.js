@@ -29,70 +29,14 @@ export default class MapForm extends React.Component{
                 return componentAreas;
             },
             {});
+        console.log({componentAreas});
         
         this.state = {
             mapName:name,
             dateCreated:'',
-            componentAreas
+            componentAreas,
         };
-        this.defaultCourseOptions = {
-            comm_010:[
-                {
-                    id:17,
-                    name:"Composition I",
-                    rubric:"ENGL",
-                    number:"1301"
-                },
-                {
-                    id:18,
-                    name:"Composition I(",
-                    rubric:"ENGL",
-                    number:"1302"
-                }
-            ],
-            math_020:[
-                {
-                    id:42,
-                    name:"Math for Business and Social Sciences",
-                    rubric:"MATH",
-                    number:"1324"
-                }
-            ],
-            sci_030:[
-                {
-                    id:12,
-                    name:"Biology for Science Majors I (lecture)",
-                    rubric:"BIOL",
-                    number:"1306"
-                },
-                {
-                    id:13,
-                    name:"Biology for Science Majors II (lecture)",
-                    rubric:"BIOL",
-                    number:"1307"
-                },
-                {
-                    id:44,
-                    name:"Anatomy & Physiology I (lecture)",
-                    rubric:"BIOL",
-                    number:"2301"
-                },
-                {
-                    id:45,
-                    name:"Anatomy & Physiology II (lecture)",
-                    rubric:"BIOL",
-                    number:"2302"
-                }
-            ],
-            phil_040: [
-                {
-                    id:33,
-                    name:"Introduction to the Humanities",
-                    rubric:"HUMA",
-                    number:"1301"
-                },
-            ]
-        }
+        this.selectedIds = new Set();
     }
 
     handleNameChange = ({target:{value}}) => {
@@ -105,45 +49,72 @@ export default class MapForm extends React.Component{
             return;
         }
         let fieldObj = {};
-        fieldObj[fieldName] = value
+        let previousSelectionId = this.state.componentAreas[fieldName];
+        if(String(previousSelectionId) !== '-1'){
+            this.selectedIds.delete(previousSelectionId);
+        }
+        this.selectedIds.add(value);
+        fieldObj[fieldName] = value;
         this.setState({
             componentAreas:{...this.state.componentAreas,...fieldObj}
         });
+        console.log(this.selectedIds);
+        console.log(fieldObj);
     }
 
-    componentDidUpdate(){
-        let {program_id, components} = this.props.selectedProgram;
+    getCoursesByCode = () => {
+        let {program_id, requirements} = this.props.selectedProgram;
         if(program_id !== -1){
-            let courses = components.reduce(
-                (courses,component) => {
-                    let coursesToAdd = component.requirements.reduce(
-                        (coursesToAdd,requirement) => {
-                            requirement.courses.forEach(
-                                course => {
-                                    if(course.sjc_course !== null){
-                                        coursesToAdd.push(course.sjc_course);
-                                    }
-                                }
-                            );
-                            return coursesToAdd;
-                        },[]
-                    );
-                    courses = [...courses,...coursesToAdd];
-                    return courses;
-                },[]
-            );
-            this.coursesByRubric = courses.reduce(
-                (coursesByRubric,course) => {
-                    if(coursesByRubric[course.sjc_rubric]){
-                        coursesByRubric[course.sjc_rubric] = coursesByRubric[course.sjc_rubric].filter(crs => (crs.sjc_id !== course.sjc_id));
-                        coursesByRubric[course.sjc_rubric].push(course);
-                    } else {
-                        coursesByRubric[course.sjc_rubric] = [course];
+            var coursesByCode = requirements.reduce(
+                (coursesByCode,requirement) => {
+                    let code = requirement.requirement_code;
+                    if(code.includes('09') || code===""){
+                        if(code !== '090'){
+                            code = '100';
+                        }
                     }
-                    return coursesByRubric;
-                }, {}
+                    let sjcCourses = requirement.courses.filter(course => !!course.sjc_course).map(course => course.sjc_course)
+                    if(coursesByCode[code]){
+                        coursesByCode[code] = [...coursesByCode[code],...sjcCourses]
+                    } else {
+                        coursesByCode[code] = sjcCourses;
+                    }
+                    return coursesByCode;
+                },{}
             );
-            console.log(this.coursesByRubric);
+            return coursesByCode;
+        }
+        return {};
+    }
+
+
+
+    getCoursesFromComponentArea = (coursesByCode,compArea) => {
+        let code = compArea.match(/0\d0/);
+        if(coursesByCode==={}){
+            return [];
+        } else if(code) {
+            code = code[0];
+            return coursesByCode[code] || [];
+        } else {
+            code='100';
+            console.log(coursesByCode['100']);
+            return coursesByCode[code] || [];
+        }
+        
+    }
+
+    sortByRubricThenNumber = (course1,course2) => {
+        if(course1.sjc_rubric>course2.sjc_rubric){
+            return 1;
+        } else if(course1.sjc_rubric===course2.sjc_rubric){
+            if(course1.sjc_number>course2.sjc_number){
+                return 1;
+            } else {
+                return -1;
+            }
+        } else {
+            return -1;
         }
     }
 
@@ -152,10 +123,12 @@ export default class MapForm extends React.Component{
             sessionStorage.setItem('prevMapState',JSON.stringify(this.state));
             console.log(this.state);
         }
+        let coursesByCode = this.getCoursesByCode();
+        console.log({coursesByCode})
         let {name,univ_name,prog_name,components} = this.props.savedMapToEdit;
         let courseSelectionFields = components.map(
             component => (
-                    <FormGroup>
+                    <FormGroup key={"formgroup"+component.comp_name}>
                         <Label>{component.comp_name}</Label>
                         {component.fields.map(
                             field => <Input 
@@ -164,9 +137,14 @@ export default class MapForm extends React.Component{
                                         value={this.state.componentAreas[field.name]}
                                         onChange={(ev) => {this.handleCourseSelection(field.name,ev)}}
                                     >
-                                        <option value={"-1"}> Please select a course.</option>
-                                        <option value={"1"}>ENGL 1301 Composition I</option>
-                                        <option value={"2"}>ENGL 1302 Composition I</option>
+                                    <option value={"-1"}>Please select a course.</option>
+                                        {
+                                            this.getCoursesFromComponentArea(coursesByCode,field.name)
+                                            .sort(this.sortByRubricThenNumber)
+                                            .map(
+                                                course => <option value={course.sjc_id} disabled={this.selectedIds.has(String(course.sjc_id))}>{course.sjc_rubric} {course.sjc_number} - {course.sjc_name}</option>
+                                            )
+                                        }
                                         <option value={"-2"}>Select another course</option>
                                     </Input>
                         )}

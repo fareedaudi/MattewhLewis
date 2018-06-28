@@ -23,7 +23,7 @@ class SavedMapsContextProviderComponent extends React.Component{
     deleteMap = (map_id) => {
         var token = sessionStorage.getItem('jwtToken');
         axios.post(
-            'http://localhost:5000/delete_map', {token, map_id}
+            `${ROOT_URL}/delete_map`, {token, map_id}
             ).then(
             response => response.data
             ).then(
@@ -37,8 +37,19 @@ class SavedMapsContextProviderComponent extends React.Component{
             );
     }
 
-    shareMap = () => {
-
+    shareMap = (map_id,newMapCollaborators) => {
+        var token = sessionStorage.getItem('jwtToken');
+        axios.post(
+            `${ROOT_URL}/update_collaborators`, {token,map_id,newMapCollaborators}
+        ).then(
+            response => response.data
+        ).then(
+            result => {
+                if(result.collaboratorsUpdated){
+                    this.getSavedMaps();
+                }
+            }
+        );
     }
 
     approveMap = () => {

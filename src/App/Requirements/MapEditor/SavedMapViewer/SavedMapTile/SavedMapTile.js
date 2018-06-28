@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import MapActionButton from './MapActionButton';
 import DeleteMapModal from './DeleteMapModal';
 import {WithMapActionHandlers} from '../../../../../contexts/SavedMapsContext';
+import AddColaboratorsModal from './AddCollaboratorsModal';
 
 class SavedMapTileComponent extends React.Component{
         
@@ -11,9 +12,11 @@ class SavedMapTileComponent extends React.Component{
         super(props);
         this.state = {
             deleteMapModalOpen:false,
+            addCollaboratorsModalOpen:false
         }
         this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
         this.deleteMap = this.deleteMap.bind(this);
+        this.shareMap = this.shareMap.bind(this);
     }
 
     toggleDeleteModal(){
@@ -22,10 +25,22 @@ class SavedMapTileComponent extends React.Component{
         });
     }
 
+    toggleCollaboratorsModal = () => {
+        this.setState({
+            addCollaboratorsModalOpen:!this.state.addCollaboratorsModalOpen
+        });
+    }
+
     deleteMap(map_id){
         this.props.login.actions.makeRecentlyActive();
         this.toggleDeleteModal();
         this.props.mapActionHandlers.deleteMap(map_id);
+    }
+
+    shareMap(map_id,mapCollaborators){
+        this.props.login.actions.makeRecentlyActive();
+        this.toggleCollaboratorsModal();
+        this.props.mapActionHandlers.shareMap(map_id,mapCollaborators);
     }
 
     launchMapEditor = (ev) => {
@@ -43,7 +58,7 @@ class SavedMapTileComponent extends React.Component{
                 <a id={this.props.id} href="" onClick={this.launchMapEditor} style={{maxWidth:"200px"}}>{this.props.name}</a>
                 <span className="pull-right">
                     <MapActionButton type="approve" map_id={this.props.id} handler={approveMap}/>&nbsp;&nbsp;
-                    <MapActionButton type="share" activated={true} map_id={this.props.id} handler={shareMap}/>&nbsp;&nbsp;
+                    <MapActionButton type="share" activated={this.props.map.users.length>1} map_id={this.props.id} handler={this.toggleCollaboratorsModal}/>&nbsp;&nbsp;
                     <MapActionButton type="delete" map_id={this.props.id} handler={this.toggleDeleteModal}/>
                 </span>
             </ListGroupItem>
@@ -53,6 +68,16 @@ class SavedMapTileComponent extends React.Component{
                 map_name={this.props.name}
                 handler={() => {this.deleteMap(this.props.id);}}
                 map_id={this.props.id}
+            />
+            <AddColaboratorsModal
+                isOpen={this.state.addCollaboratorsModalOpen}
+                toggle={this.toggleCollaboratorsModal}
+                map_name={this.props.name}
+                handler={this.shareMap}
+                map_id={this.props.id}
+                map={this.props.map}
+                login={this.props.login}
+                collaborators={this.props.collaborators}
             />
             </div>
         )
@@ -68,7 +93,8 @@ SavedMapTileComponent.propTypes = {
     setMapToEdit:PropTypes.func.isRequired,
     getSelectedProgramAndSetState:PropTypes.func.isRequired,
     map:PropTypes.object.isRequired,
-    mapActionHandlers:PropTypes.object.isRequired
+    mapActionHandlers:PropTypes.object.isRequired,
+    collaborators:PropTypes.array.isRequired
 }
 
 const SavedMapTile = WithMapActionHandlers(SavedMapTileComponent);
