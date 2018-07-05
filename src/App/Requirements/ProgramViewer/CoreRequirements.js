@@ -10,7 +10,6 @@ export default class CoreRequirements extends React.Component{
     render(){
         let coreRequirements = this.props.coreRequirements;
         let {university_name} = this.props.university;
-        console.log(coreRequirements);
         return (
         <Container>
             <h5>{`Core Requirements for ${university_name}`}</h5>

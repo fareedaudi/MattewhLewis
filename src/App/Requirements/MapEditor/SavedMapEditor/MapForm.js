@@ -10,17 +10,20 @@ import {
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import {Prompt} from 'react-router-dom';
+import { WithSJCCourses } from '../../../../contexts/SJCCourseContext';
 
-export default class MapForm extends React.Component{
+export class MapFormComponent extends React.Component{
     constructor(props){
         super(props);
         let {name, components} = this.props.savedMapToEdit;
-        
         let componentAreas = components.reduce(
             (componentAreas,component) => {
                 let extractedAreas = component.fields.reduce(
                     (extractedAreas,fieldObj) => {
-                        extractedAreas[fieldObj.name] = (fieldObj.course.id | "-1");
+                        let field = fieldObj.name;
+                        let course = fieldObj.course;
+                        let id = course.id;
+                        extractedAreas[field] = id || "-1";
                         return extractedAreas;
                     },
                     {}
@@ -29,19 +32,26 @@ export default class MapForm extends React.Component{
                 return componentAreas;
             },
             {});
-        console.log({componentAreas});
-        
         this.state = {
             mapName:name,
             dateCreated:'',
             componentAreas,
+            customCourseModalOpen:false,
         };
         this.selectedIds = new Set();
+        for(let field in componentAreas){
+            if(componentAreas[field] !== "-1"){
+                this.selectedIds.add(String(componentAreas[field]));
+            }
+        }
+
     }
 
     handleNameChange = ({target:{value}}) => {
         this.setState({mapName:value});
     }
+
+
 
     handleCourseSelection = (fieldName,{target:{value}}) => {
         if(value === "-2"){
@@ -58,8 +68,16 @@ export default class MapForm extends React.Component{
         this.setState({
             componentAreas:{...this.state.componentAreas,...fieldObj}
         });
-        console.log(this.selectedIds);
-        console.log(fieldObj);
+    }
+
+    getCodeFromCompArea = (compArea) => {
+        let code = compArea.match(/0\d0/);
+        if(code){
+            code = code[0];
+        } else {
+            code = '100';
+        }
+        return code;
     }
 
     getCoursesByCode = () => {
@@ -68,10 +86,11 @@ export default class MapForm extends React.Component{
             var coursesByCode = requirements.reduce(
                 (coursesByCode,requirement) => {
                     let code = requirement.requirement_code;
-                    if(code.includes('09') || code===""){
-                        if(code !== '090'){
-                            code = '100';
-                        }
+                    if(code.includes('09')){
+                        code = '090';
+                    }
+                    if(code === ""){
+                        code = '100';
                     }
                     let sjcCourses = requirement.courses.filter(course => !!course.sjc_course).map(course => course.sjc_course)
                     if(coursesByCode[code]){
@@ -82,6 +101,31 @@ export default class MapForm extends React.Component{
                     return coursesByCode;
                 },{}
             );
+            let componentAreas = this.state.componentAreas;
+            for(var field in componentAreas){
+                let courseId = componentAreas[field];
+                if((courseId !== -1) && (courseId !== "-1")){
+                    let courseIds = new Set();
+                    let programCourses = this.getCoursesFromComponentArea(coursesByCode,field);
+                    programCourses.forEach(
+                        course=>courseIds.add(String(course.sjc_id)));
+                    if(!courseIds.has(String(courseId))){
+                        let course = this.props.SJCCourses.filter(course=>course.id===courseId);
+                        if(course){
+                            course = course[0];
+                            var sjc_course = {
+                                sjc_name:course.name,
+                                sjc_id:course.id,
+                                sjc_number:course.number,
+                                sjc_rubric:course.rubric
+                            };
+                        }
+                        let code = this.getCodeFromCompArea(field);
+                        coursesByCode[code].push(sjc_course);
+                        this.selectedIds.add(String(sjc_course.sjc_id));
+                    }
+                }
+            }
             return coursesByCode;
         }
         return {};
@@ -98,7 +142,6 @@ export default class MapForm extends React.Component{
             return coursesByCode[code] || [];
         } else {
             code='100';
-            console.log(coursesByCode['100']);
             return coursesByCode[code] || [];
         }
         
@@ -121,11 +164,12 @@ export default class MapForm extends React.Component{
     render(){
         window.onbeforeunload = () => {
             sessionStorage.setItem('prevMapState',JSON.stringify(this.state));
-            console.log(this.state);
         }
         let coursesByCode = this.getCoursesByCode();
-        console.log({coursesByCode})
-        let {name,univ_name,prog_name,components} = this.props.savedMapToEdit;
+        let {id,univ_name,prog_name,components} = this.props.savedMapToEdit;
+        let {componentAreas} = this.state;
+        let name = this.state.mapName;
+        let mapData = {id,name,componentAreas};
         let courseSelectionFields = components.map(
             component => (
                     <FormGroup key={"formgroup"+component.comp_name}>
@@ -142,10 +186,15 @@ export default class MapForm extends React.Component{
                                             this.getCoursesFromComponentArea(coursesByCode,field.name)
                                             .sort(this.sortByRubricThenNumber)
                                             .map(
-                                                course => <option value={course.sjc_id} disabled={this.selectedIds.has(String(course.sjc_id))}>{course.sjc_rubric} {course.sjc_number} - {course.sjc_name}</option>
+                                                course => <option 
+                                                            value={course.sjc_id} 
+                                                            disabled={this.selectedIds.has(String(course.sjc_id))}
+                                                        > 
+                                                            {course.sjc_rubric} {course.sjc_number} - {course.sjc_name}
+                                                        </option>
                                             )
                                         }
-                                        <option value={"-2"}>Select another course</option>
+                                    <option value={"-2"}>Select another course</option>
                                     </Input>
                         )}
                     </FormGroup>
@@ -169,11 +218,17 @@ export default class MapForm extends React.Component{
                 <hr/>
                 {courseSelectionFields}
             </Form>
+            <Button className="btn-sm" color="secondary" onClick={this.props.handleClose}>Close</Button>
+            <Button className="btn-sm" color="primary" onClick={()=>this.props.handleSave(mapData)}>Save</Button>
         </div>
         )
     }
 }
 
-MapForm.propTypes = {
+MapFormComponent.propTypes = {
     savedMapToEdit:PropTypes.object.isRequired
 }
+
+const MapForm = WithSJCCourses(MapFormComponent);
+
+export default MapForm;

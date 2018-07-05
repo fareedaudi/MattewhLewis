@@ -6,7 +6,7 @@ import HomePage from './HomePage';
 import Requirements from './Requirements/Requirements';
 import LoginContextProvider from '../contexts/LoginContext';
 import SavedMapsContextProvider from '../contexts/SavedMapsContext';
-import {ROOT_URL} from '../api';
+import SJCCourseContextProvider from '../contexts/SJCCourseContext';
 import {withFetching,UNIVERSITIES_URL} from '../api';
 
 
@@ -25,8 +25,6 @@ class AppComponent extends React.Component{
       this.setState({selectedUniversityId});
     }
   }
-
-
 
   render(){
     let universities = this.props.data;
@@ -55,7 +53,9 @@ const TopContextProvider = (Component) => {
             return (
                 <LoginContextProvider>
                     <SavedMapsContextProvider>
-                        <Component {...this.props}/>
+                      <SJCCourseContextProvider>
+                          <Component {...this.props}/>
+                        </SJCCourseContextProvider>
                     </SavedMapsContextProvider>
                 </LoginContextProvider>
             );

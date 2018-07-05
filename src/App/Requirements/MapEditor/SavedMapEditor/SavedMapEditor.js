@@ -10,8 +10,9 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import {ROOT_URL} from '../../../../api';
 import MapForm from './MapForm';
+import {WithMapActionHandlers} from '../../../../contexts/SavedMapsContext';
 
-export default class SavedMapEditor extends React.Component{
+class SavedMapEditorComponent extends React.Component{
     
     constructor(props){
         super(props);
@@ -34,25 +35,34 @@ export default class SavedMapEditor extends React.Component{
         );
     }
 
+    handleSaveMap = (mapData) => {
+        this.props.mapActionHandlers.saveMap(mapData);
+    }
+
     componentWillUnmount(){
         this.props.toggleEditModeOff();
     }
 
     render(){
+        let {saveMap} = this.props.mapActionHandlers;
         let {name, components, prog_id} = this.props.savedMapToEdit;
         return (
-            <div>
                 <MapForm 
                     savedMapToEdit={this.props.savedMapToEdit} 
                     selectedProgram={this.props.selectedProgram}
-                    coreRequirements={this.props.coreRequirements}/>
-                <Button color="secondary" onClick={this.props.toggleEditMode}>Close</Button>
-            </div>
+                    coreRequirements={this.props.coreRequirements}
+                    handleClose={this.props.toggleEditMode}
+                    handleSave={this.handleSaveMap}
+                />
         )
     }
 }
 
-SavedMapEditor.propTypes = {
+SavedMapEditorComponent.propTypes = {
     toggleEditMode:PropTypes.func.isRequired,
     savedMapToEdit:PropTypes.object.isRequired
 }
+
+const SavedMapEditor = WithMapActionHandlers(SavedMapEditorComponent);
+
+export default SavedMapEditor;

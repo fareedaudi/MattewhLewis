@@ -41,7 +41,6 @@ class RequirementsComponent extends React.Component{
             response => response.json()
         ).then(
             coreRequirements => {
-                console.log(coreRequirements);
             }
         )
     }
@@ -83,7 +82,6 @@ class RequirementsComponent extends React.Component{
 
     render(){
         let selectedProgram = this.state.selectedProgram;
-        console.log({selectedProgram});
         return(
             <Container style={{paddingTop:'100px'}}>
                 <Row>
