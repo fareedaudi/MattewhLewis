@@ -172,7 +172,6 @@ class MapsByUserId(Resource):
         maps = db.session.query(Map).filter_by(user_id=user_id).all()
         return [get_dict(map_) for map_ in maps]
 
-
 @app.route('/maps',methods=['GET'])
 def maps():
     user_id = request.args.get('userId')
@@ -193,6 +192,11 @@ def maps_by_user():
         return JSON.dumps([get_dict(map_) for map_ in maps])
     else:
         return 'No params',404
+
+@app.route('/sjc_courses',methods=['GET'])
+def sjc_courses():
+    sjc_courses_objects = db.session.query(SJC).all()
+    return JSON.dumps([get_object_dict(map_) for map_ in sjc_courses_objects])
 
 @app.route('/login',methods=['POST'])
 def login():
@@ -316,7 +320,36 @@ def update_collaborators():
         })
     return '',401
             
-        
+@app.route('/save_map',methods=['POST'])
+def save_map():
+    user = None
+    form_data = json.loads(request.data)
+    token = form_data['token']
+    if(token != None):
+        user = User.verify_auth_token(token)
+    if(user):
+        map_data = form_data['mapData']
+        map_id = map_data['id']
+        map_ = db.session.query(Map).get(map_id)
+        if(map_):
+            map_name = map_data['name']
+            component_areas = map_data['componentAreas']
+            if(map_.map_name != map_name):
+                print('Renaming map!')
+                map_.map_name=map_name
+                db.session.commit()
+            for field,course_id in component_areas.items():
+                print(field,course_id)
+                if(course_id != -1):
+                    setattr(map_,field,course_id)
+                    db.session.commit()
+                else:
+                    print('No course!')
+            return json.jsonify({
+                'mapSaved':True
+            })
+    else:
+        return '',401
 
 @app.route('/user_emails',methods=['GET'])
 def user_emails():
@@ -456,3 +489,4 @@ def get_object_dict(sqlalchemy_object):
     dict_ = sqlalchemy_object.__dict__
     dict_.pop('_sa_instance_state',None)
     return dict_
+
