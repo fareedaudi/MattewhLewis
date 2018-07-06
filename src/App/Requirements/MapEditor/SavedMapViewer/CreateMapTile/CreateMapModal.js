@@ -154,7 +154,13 @@ export default class CreateMapModal extends React.Component{
                 </ModalBody>
                 <ModalFooter>
                     <Button color="secondary" onClick={this.openClose}>Close</Button>
-                    <Button color="danger" onClick={()=>this.createMapHandler(modalState)}>Submit</Button>
+                    <Button 
+                        color="primary" 
+                        onClick={()=>this.createMapHandler(modalState)} 
+                        disabled={(this.state.selectedProgramId === -1) || !this.state.newMapName}
+                    >
+                        Submit
+                    </Button>
                 </ModalFooter>
             </Modal>
             );

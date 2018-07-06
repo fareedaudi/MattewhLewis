@@ -67,7 +67,6 @@ class MapEditorComponent extends React.Component{
         let loggedIn = this.props.login.state.loggedIn;
         let savedMapToEdit = this.props.savedMaps.filter(
             savedMap=>String(savedMap.id)===this.state.mapToEdit)[0];
-        console.log('savedMap: ',savedMapToEdit);
         return (
             <Card>
                 <CardHeader>

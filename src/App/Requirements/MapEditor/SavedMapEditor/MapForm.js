@@ -11,6 +11,7 @@ import {
 import PropTypes from 'prop-types';
 import {Prompt} from 'react-router-dom';
 import { WithSJCCourses } from '../../../../contexts/SJCCourseContext';
+import AlternativeCourseModal from './AlternativeCourseModal';
 
 export class MapFormComponent extends React.Component{
     constructor(props){
@@ -25,7 +26,7 @@ export class MapFormComponent extends React.Component{
                         let id = course.id;
                         extractedAreas[field] = id || "-1";
                         return extractedAreas;
-                    },
+                    },  
                     {}
                 );
                 componentAreas = {...componentAreas,...extractedAreas}
@@ -36,7 +37,8 @@ export class MapFormComponent extends React.Component{
             mapName:name,
             dateCreated:'',
             componentAreas,
-            customCourseModalOpen:false,
+            altCourseModalOpen:false,
+            altCourseModalField:''
         };
         this.selectedIds = new Set();
         for(let field in componentAreas){
@@ -51,11 +53,37 @@ export class MapFormComponent extends React.Component{
         this.setState({mapName:value});
     }
 
+    toggleAltCourseModal = () => {
+        this.setState({
+            altCourseModalOpen:!this.state.altCourseModalOpen
+        });
+    }
 
+    createCourseModal = (fieldName) => {
+        this.setState({
+            altCourseModalField:fieldName,
+            altCourseModalOpen:true
+        });
+    }
+
+    getSelectionFromModal = (field,id) => {
+        let fieldObj = {};
+        fieldObj[field]=id;
+        if(!this.selectedIds.has(String(id))){
+            let prevId = this.state.componentAreas[field];
+            if(prevId !== -1){
+                this.selectedIds.delete(String(prevId));
+            }
+            this.setState({
+                componentAreas:{...this.state.componentAreas,...fieldObj}
+            });
+        }
+        
+    }
 
     handleCourseSelection = (fieldName,{target:{value}}) => {
         if(value === "-2"){
-            console.log(`Unconventional course selection for ${fieldName}!`);
+            this.createCourseModal(fieldName);
             return;
         }
         let fieldObj = {};
@@ -111,7 +139,7 @@ export class MapFormComponent extends React.Component{
                         course=>courseIds.add(String(course.sjc_id)));
                     if(!courseIds.has(String(courseId))){
                         let course = this.props.SJCCourses.filter(course=>course.id===courseId);
-                        if(course){
+                        if(course.length>0){
                             course = course[0];
                             var sjc_course = {
                                 sjc_name:course.name,
@@ -173,7 +201,7 @@ export class MapFormComponent extends React.Component{
         let courseSelectionFields = components.map(
             component => (
                     <FormGroup key={"formgroup"+component.comp_name}>
-                        <Label>{component.comp_name}</Label>
+                        <Label><strong>{component.comp_name}:</strong></Label>
                         {component.fields.map(
                             field => <Input 
                                         key={field.name} 
@@ -181,12 +209,13 @@ export class MapFormComponent extends React.Component{
                                         value={this.state.componentAreas[field.name]}
                                         onChange={(ev) => {this.handleCourseSelection(field.name,ev)}}
                                     >
-                                    <option value={"-1"}>Please select a course.</option>
+                                    <option value={"-1"}><strong>Please select a course.</strong></option>
                                         {
                                             this.getCoursesFromComponentArea(coursesByCode,field.name)
                                             .sort(this.sortByRubricThenNumber)
                                             .map(
-                                                course => <option 
+                                                course => <option
+                                                            key={course.sjc_id} 
                                                             value={course.sjc_id} 
                                                             disabled={this.selectedIds.has(String(course.sjc_id))}
                                                         > 
@@ -194,7 +223,7 @@ export class MapFormComponent extends React.Component{
                                                         </option>
                                             )
                                         }
-                                    <option value={"-2"}>Select another course</option>
+                                    <option value={"-2"}>Select alternative course.</option>
                                     </Input>
                         )}
                     </FormGroup>
@@ -204,22 +233,33 @@ export class MapFormComponent extends React.Component{
         <div>
             <Form>
                 <FormGroup>
-                    <label>Transfer University:</label>
+                    <label><strong>Transfer University:</strong></label>
                     <Input key={"univ_name"} type="text" value={univ_name} disabled/>
                 </FormGroup>
                 <FormGroup>
-                    <label>Transfer Program:</label>
+                    <label><strong>Transfer Program:</strong></label>
                     <Input key={"prog_name"} type="text" value={prog_name} disabled/>
                 </FormGroup>
                 <FormGroup>
-                    <label>Map Name:</label>
+                    <label><strong>Map Name:</strong></label>
                     <Input key={"map_name"} type="text" value={this.state.mapName} onChange={this.handleNameChange}/>
                 </FormGroup>
                 <hr/>
                 {courseSelectionFields}
             </Form>
-            <Button className="btn-sm" color="secondary" onClick={this.props.handleClose}>Close</Button>
-            <Button className="btn-sm" color="primary" onClick={()=>this.props.handleSave(mapData)}>Save</Button>
+            <Form>
+                <FormGroup>
+                    <Button className="btn-sm" color="secondary" onClick={this.props.handleClose}>Close</Button>
+                    <Button className="btn-sm" color="primary" onClick={()=>this.props.handleSave(mapData)}>Save</Button>
+                </FormGroup>
+            </Form>
+            <AlternativeCourseModal
+                isOpen={this.state.altCourseModalOpen}
+                toggle={this.toggleAltCourseModal}
+                SJCCourses={this.props.SJCCourses}
+                field={this.state.altCourseModalField}
+                getSelectionFromModal={this.getSelectionFromModal}
+            />
         </div>
         )
     }
