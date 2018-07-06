@@ -162,12 +162,28 @@ export class MapFormComponent extends React.Component{
 
 
     getCoursesFromComponentArea = (coursesByCode,compArea) => {
-        let code = compArea.match(/0\d0/);
         if(coursesByCode==={}){
             return [];
-        } else if(code) {
+        }
+        let code = compArea.match(/0\d0/);
+        if(code) {
             code = code[0];
             return coursesByCode[code] || [];
+        } else if(compArea.includes("inst_opt")){
+            return [
+                {
+                    sjc_id:37,
+                    sjc_rubric:'BCIS',
+                    sjc_number:'1305',
+                    sjc_name:'Business Computer Applications'
+                },
+                {
+                    sjc_id:253,
+                    sjc_rubric:'EDUC',
+                    sjc_number:'1300',
+                    sjc_name:'Learning Framework'
+                }
+            ];
         } else {
             code='100';
             return coursesByCode[code] || [];
