@@ -90,7 +90,11 @@ users_maps = db.Table(
     db.Column('user_id', db.ForeignKey('user.id'), primary_key=True),
     db.Column('map_id', db.ForeignKey('map.id'), primary_key=True)
     )
-
+program_component_requirement_courses = db.Table(
+    'program_component_requirement_courses',
+    db.Column('prog_comp_req_id', db.ForeignKey('program_component_requirement.id'),primary_key=True),
+    db.Column('course_id', db.ForeignKey('course.id'), primary_key=True)
+)
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -129,6 +133,10 @@ class Course(db.Model):
         secondary=course_program_core_requirements,
         back_populates="courses"
     )
+    program_component_requirement = db.relationship(
+        "ProgramComponentRequirement",
+        secondary=program_component_requirement_courses,
+        back_populates="courses")
 
 University.courses = db.relationship("Course", order_by=Course.id, back_populates="university")
 
@@ -162,6 +170,43 @@ class Program(db.Model):
     core_requirements = db.relationship(
         "ProgramCoreRequirement",
         back_populates="program"
+    )
+    program_components = db.relationship(
+        "ProgramComponent",
+        back_populates="program"
+    )
+
+class ProgramComponent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
+    prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
+    name = db.Column(db.String(250), nullable=False)
+    hours = db.Column(db.Integer)
+    requirements = db.relationship(
+        "ProgramComponentRequirement",
+        back_populates="program_component"
+    )
+    program = db.relationship(
+        "Program",
+        back_populates="program_components"
+    )
+
+class ProgramComponentRequirement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
+    prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
+    prog_comp_id = db.Column(db.Integer, db.ForeignKey('program_component.id'))
+    name = db.Column(db.String(250), nullable=False)
+    code = db.Column(db.String(250))
+    hours = db.Column(db.Integer)
+    courses = db.relationship(
+        "Course",
+        secondary=program_component_requirement_courses,
+        back_populates="program_component_requirement"
+    )
+    program_component = db.relationship(
+        "ProgramComponent",
+        back_populates="requirements"
     )
 
 
@@ -353,6 +398,8 @@ class Map(db.Model):
     soc_080 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
     comp_090_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
     comp_090_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
+    oral_090 = db.Column(db.Integer) # Hacky
+    phys = db.Column(db.Integer) # and temporary.
     inst_opt_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
     inst_opt_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
     trans_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
@@ -389,17 +436,18 @@ class Map(db.Model):
         'trans_6':''
     }
     component_areas = {
-        'Communication':['comm_010_1','comm_010_2'],
-        'Mathematics':['math_020'],
-        'Life and Physical Sciences':['sci_030_1','sci_030_2'],
-        'Language, Philosophy, and Culture':['phil_040'],
-        'Creative Arts':['arts_050'],
-        'American History':['hist_060_1','hist_060_2'],
-        'Government/Political Science':['gov_070_1','gov_070_2'],
-        'Social and Behavioral Sciences':['soc_080'],
-        'Component Area Option':['comp_090_1','comp_090_2'],
-        'Institutional Option':['inst_opt_1','inst_opt_2'],
-        'Transfer Path':[f'trans_{i}' for i in range(1,7)]
+        'Communication (6 hours)':['comm_010_1','comm_010_2'],
+        'Mathematics (3 hours)':['math_020'],
+        'Life and Physical Sciences (8 hours)':['sci_030_1','sci_030_2'],
+        'Language, Philosophy, and Culture (3 hours)':['phil_040'],
+        'Creative Arts (3 hours)':['arts_050'],
+        'American History (6 hours)':['hist_060_1','hist_060_2'],
+        'Government/Political Science (6 hours)':['gov_070_1','gov_070_2'],
+        'Social and Behavioral Sciences (3 hours)':['soc_080'],
+        'Oral Communication (3 hours)':['oral_090'],
+        'Physical Education Activity (1 hour)':['phys'],
+        'Institutional Option (6 hours)':['inst_opt_1','inst_opt_2'],
+        'Transfer Path (12 hours)':[f'trans_{i}' for i in range(1,5)]
     }
     
     def get_dict(self):

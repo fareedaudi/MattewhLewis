@@ -31,7 +31,7 @@ with open(CORE_CURRICULUM_CSV_FILE_LOCATION,'r') as CSV_FILE:
         if(core_req):
             core_req.courses.append(course)
         else:
-            name = component_code_map.get(comp_code) if component_code_map.get(comp_code) else ''
+            name = component_code_map.get(comp_code) if component_code_map.get(comp_code) else 'Component Area Option'
             core_req = CoreRequirement(
                 name=name,
                 code=comp_code,

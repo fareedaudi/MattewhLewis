@@ -167,6 +167,46 @@ def reqs_by_program(prog_id):
             for requirement in program.core_requirements]))
     })
 
+@app.route('/requirements_by_program/<int:prog_id>')
+def requirements_by_program(prog_id):
+    program = db.session.query(Program).get(prog_id)
+    return JSON.dumps({
+        k:v for k,v in zip(
+            ('program_link','program_id','program_name','program_components'),
+            (program.link,program.id,program.name, [
+                {
+                    k:v for k,v in zip(
+                        ('prog_comp_id','prog_comp_name','prog_comp_hours','requirements'),
+                        (prog_comp.id,prog_comp.name,prog_comp.hours,[
+                            {
+                                k:v for k,v in zip(
+                                    ('prog_comp_req_id','prog_comp_req_name','prog_comp_req_hours','prog_comp_req_code','courses'),
+                                    (prog_comp_req.id,prog_comp_req.name,prog_comp_req.hours,prog_comp_req.code,[
+                                        {
+                                            k:v for k,v in zip(
+                                                ('course_id','course_rubric','course_number','course_name','sjc_course'),
+                                                (course.id,course.rubric,course.number,course.name, {
+                                                    k:v for k,v in zip(
+                                                        ('sjc_id','sjc_rubric','sjc_number','sjc_name'),
+                                                        (db.session.query(SJC).get(course.sjc_id).id,
+                                                        db.session.query(SJC).get(course.sjc_id).rubric,
+                                                        db.session.query(SJC).get(course.sjc_id).number,
+                                                        db.session.query(SJC).get(course.sjc_id).name
+                                                        )
+                                                    )
+                                                 } if course.sjc else None )
+                                            )
+                                        } for course in prog_comp_req.courses
+                                    ])
+                                )
+                            } for prog_comp_req in prog_comp.requirements
+                        ])
+                    )
+                } for prog_comp in program.program_components
+            ])
+        )
+    })
+
 class MapsByUserId(Resource):
     def get(self,user_id):
         maps = db.session.query(Map).filter_by(user_id=user_id).all()
