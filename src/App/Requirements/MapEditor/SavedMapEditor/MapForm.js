@@ -3,13 +3,11 @@ import {
     Form,
     FormGroup,
     Input,
-    FormFeedback,
-    FormText,
     Button,
-    Label
+    Label,
+    FormFeedback
 } from 'reactstrap';
 import PropTypes from 'prop-types';
-import {Prompt} from 'react-router-dom';
 import { WithSJCCourses } from '../../../../contexts/SJCCourseContext';
 import AlternativeCourseModal from './AlternativeCourseModal';
 
@@ -46,7 +44,15 @@ export class MapFormComponent extends React.Component{
                 this.selectedIds.add(String(componentAreas[field]));
             }
         }
+        this.nonApplicableIds = new Set();
+    }
 
+    componentDidMount(){
+        this.nonApplicableIds = new Set();
+    }
+
+    componentWillUnMount(){
+        delete this.nonApplicableIds;
     }
 
     handleNameChange = ({target:{value}}) => {
@@ -73,6 +79,7 @@ export class MapFormComponent extends React.Component{
             let prevId = this.state.componentAreas[field];
             if(prevId !== -1){
                 this.selectedIds.delete(String(prevId));
+                console.log(this.selectedIds);
             }
             this.setState({
                 componentAreas:{...this.state.componentAreas,...fieldObj}
@@ -88,8 +95,10 @@ export class MapFormComponent extends React.Component{
         }
         let fieldObj = {};
         let previousSelectionId = this.state.componentAreas[fieldName];
+        console.log(`Previously selected course id: ${previousSelectionId}`)
         if(String(previousSelectionId) !== '-1'){
-            this.selectedIds.delete(previousSelectionId);
+            this.selectedIds.delete(String(previousSelectionId));
+            console.log(this.selectedIds);
         }
         this.selectedIds.add(value);
         fieldObj[fieldName] = value;
@@ -108,29 +117,51 @@ export class MapFormComponent extends React.Component{
         return code;
     }
 
+    cleanCourses = (sjcCourses) => {
+        sjcCourses.forEach(
+            course=>{
+                let number = course.sjc_number;
+                course.sjc_number = number.substring(0,1)+'4'+number.substring(2)
+                let parenStuff = course.sjc_name.match(/\(\S+\)/);
+                if(parenStuff){
+                    course.sjc_name=course.sjc_name.substring(0,parenStuff.index)
+                }
+            }
+        )
+        return sjcCourses;
+    }
+
     getCoursesByCode = () => {
-        let {program_id, requirements} = this.props.selectedProgram;
+        let {program_id, program_components} = this.props.selectedProgram;
         if(program_id !== -1){
-            var coursesByCode = requirements.reduce(
-                (coursesByCode,requirement) => {
-                    let code = requirement.requirement_code;
-                    if(code.includes('09')){
-                        code = '090';
-                    }
-                    if(code === ""){
-                        code = '100';
-                    }
-                    let sjcCourses = requirement.courses.filter(course => !!course.sjc_course).map(course => course.sjc_course)
-                    if(coursesByCode[code]){
-                        coursesByCode[code] = [...coursesByCode[code],...sjcCourses]
-                    } else {
-                        coursesByCode[code] = sjcCourses;
+            var coursesByCode = program_components.reduce(
+                (coursesByCode,component) => {
+                    let subCoursesByCode = component.requirements.reduce(
+                        (subCoursesByCode,requirement) => {
+                            let coursesToAdd = requirement.courses.filter(
+                                    course => !!course.sjc_course
+                                ).map(course => course.sjc_course);
+                            let code = requirement.prog_comp_req_code;
+                            if(subCoursesByCode[code]){
+                                subCoursesByCode[code] = subCoursesByCode[code].concat(coursesToAdd);
+                            } else {
+                                subCoursesByCode[code] = coursesToAdd;
+                            }
+                            return subCoursesByCode;
+                        },{}
+                    );
+                    for(let code in subCoursesByCode){
+                        if(coursesByCode[code]){
+                            coursesByCode[code] = coursesByCode[code].concat(subCoursesByCode[code]);
+                        } else {
+                            coursesByCode[code] = subCoursesByCode[code];
+                        }
                     }
                     return coursesByCode;
                 },{}
             );
-            let componentAreas = this.state.componentAreas;
-            for(var field in componentAreas){
+            let {componentAreas} = this.state;
+            for(let field in componentAreas){
                 let courseId = componentAreas[field];
                 if((courseId !== -1) && (courseId !== "-1")){
                     let courseIds = new Set();
@@ -141,11 +172,13 @@ export class MapFormComponent extends React.Component{
                         let course = this.props.SJCCourses.filter(course=>course.id===courseId);
                         if(course.length>0){
                             course = course[0];
+                            this.nonApplicableIds.add(course.id);
                             var sjc_course = {
                                 sjc_name:course.name,
                                 sjc_id:course.id,
                                 sjc_number:course.number,
-                                sjc_rubric:course.rubric
+                                sjc_rubric:course.rubric,
+                                not_applicable:true
                             };
                         }
                         let code = this.getCodeFromCompArea(field);
@@ -159,7 +192,10 @@ export class MapFormComponent extends React.Component{
         return {};
     }
 
-
+    saveMapLocally = (mapData) => {
+        let saveId = this.props.login.state.userEmail+this.props.savedMapToEdit.id;
+        localStorage.setItem(saveId,mapData);
+    }
 
     getCoursesFromComponentArea = (coursesByCode,compArea) => {
         if(coursesByCode==={}){
@@ -179,6 +215,12 @@ export class MapFormComponent extends React.Component{
                 },
                 {
                     sjc_id:253,
+                    sjc_rubric:'PSYC',
+                    sjc_number:'1300',
+                    sjc_name:'Learning Framework'
+                },
+                {
+                    sjc_id:132,
                     sjc_rubric:'EDUC',
                     sjc_number:'1300',
                     sjc_name:'Learning Framework'
@@ -206,6 +248,8 @@ export class MapFormComponent extends React.Component{
     }
 
     render(){
+        let saveId = this.props.login.state.userEmail+this.props.savedMapToEdit.id;
+        console.log(localStorage.getItem(saveId));
         window.onbeforeunload = () => {
             sessionStorage.setItem('prevMapState',JSON.stringify(this.state));
         }
@@ -219,15 +263,18 @@ export class MapFormComponent extends React.Component{
                     <FormGroup key={"formgroup"+component.comp_name}>
                         <Label><strong>{component.comp_name}:</strong></Label>
                         {component.fields.map(
-                            field => <Input 
+                            field => {
+                                let courses = this.getCoursesFromComponentArea(coursesByCode,field.name);
+                                return (<div key={field.name}><Input 
                                         key={field.name} 
                                         type={"select"}
                                         value={this.state.componentAreas[field.name]}
                                         onChange={(ev) => {this.handleCourseSelection(field.name,ev)}}
+                                        invalid={this.nonApplicableIds.has(this.state.componentAreas[field.name])}
                                     >
-                                    <option value={"-1"}><strong>Please select a course.</strong></option>
+                                    <option value={"-1"}>Please select a course.</option>
                                         {
-                                            this.getCoursesFromComponentArea(coursesByCode,field.name)
+                                            courses
                                             .sort(this.sortByRubricThenNumber)
                                             .map(
                                                 course => <option
@@ -241,6 +288,9 @@ export class MapFormComponent extends React.Component{
                                         }
                                     <option value={"-2"}>Select alternative course.</option>
                                     </Input>
+                                    <FormFeedback invalid={this.nonApplicableIds.has(this.state.componentAreas[field.name])}>Selected course may not apply to this degree.</FormFeedback></div>
+                                    )
+                            }
                         )}
                     </FormGroup>
                  )

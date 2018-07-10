@@ -75,7 +75,6 @@ export default class AlternativeCourseModal extends React.Component {
                 <option key={this.state.rubric+course.number} value={course.number}>{course.number} - {course.name}</option>
             ) :
             null;
-            console.log(this.props.field);
         return (
             <Modal isOpen={this.props.isOpen} toggle={this.openClose}>
                 <ModalHeader toggle={this.openClose}>

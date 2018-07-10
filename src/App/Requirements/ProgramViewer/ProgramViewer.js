@@ -51,6 +51,7 @@ class ProgramViewerComponent extends React.Component{
     }
 
     render(){
+        console.log(this.props.selectedProgram);
         return(
             <Card>
                 <CardHeader>

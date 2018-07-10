@@ -51,8 +51,8 @@ class SavedMapTileComponent extends React.Component{
     }
 
     render(){
-        var shareMap, approveMap;
-        ({shareMap, approveMap} = this.props.mapActionHandlers);
+
+        let {approveMap} = this.props.mapActionHandlers;
         return (<div className="saved-map-tile">
             <ListGroupItem className="justify-content-between d-flex">
                 <a id={this.props.id} href="" onClick={this.launchMapEditor} style={{maxWidth:"200px"}}>{this.props.name}</a>

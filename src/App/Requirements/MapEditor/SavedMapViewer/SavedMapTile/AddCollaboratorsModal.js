@@ -77,7 +77,6 @@ class AddCollaboratorsModal extends React.Component{
 
 
     render(){
-        console.log(this.state.newMapCollaborators);
         return (
         <Modal isOpen={this.props.isOpen} toggle={this.openClose} className={this.props.className}>
             <ModalHeader toggle={this.openClose}>Map Collaborators.</ModalHeader>
@@ -120,7 +119,12 @@ class AddCollaboratorsModal extends React.Component{
         </ModalBody>
         <ModalFooter>               
             <Button color="secondary" onClick={this.openClose}>Close</Button>
-            <Button color="primary" onClick={()=>{this.props.handler(this.props.map_id,this.state.newMapCollaborators)}}>Update collaborators</Button>
+            <Button 
+                color="primary" 
+                onClick={()=>{this.props.handler(this.props.map_id,this.state.newMapCollaborators)}}
+            >
+                Update collaborators
+            </Button>
         </ModalFooter>
     </Modal>    
 );

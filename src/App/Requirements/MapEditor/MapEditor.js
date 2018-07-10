@@ -80,11 +80,13 @@ class MapEditorComponent extends React.Component{
                         {
                         this.state.editMode ?
                         <SavedMapEditor
+                            key={this.state.editMode && savedMapToEdit.id}
                             toggleEditMode={this.toggleEditMode}
                             toggleEditModeOff={this.toggleEditModeOff}
                             savedMapToEdit={savedMapToEdit}
                             selectedProgram={this.props.selectedProgram}
                             coreRequirements={this.props.coreRequirements}
+                            login={this.props.login}
                         />
                         :
                         <SavedMapViewer

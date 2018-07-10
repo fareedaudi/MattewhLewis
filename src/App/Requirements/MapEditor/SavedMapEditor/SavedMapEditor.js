@@ -1,11 +1,4 @@
 import React from 'react';
-import {
-    Form,
-    FormGroup,
-    Label,
-    Input,
-    Button
-} from 'reactstrap';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import {ROOT_URL} from '../../../../api';
@@ -13,16 +6,16 @@ import MapForm from './MapForm';
 import {WithMapActionHandlers} from '../../../../contexts/SavedMapsContext';
 
 class SavedMapEditorComponent extends React.Component{
-    
+
     constructor(props){
         super(props);
+        this.state = {
+            mapId:this.props.savedMapToEdit.id
+        }
     }
 
     componentDidMount(){
         this.getComponentsFromServer();
-    }
-
-    componentWillReceiveProps(nextProps){
     }
 
     getComponentsFromServer = () => {
@@ -44,15 +37,15 @@ class SavedMapEditorComponent extends React.Component{
     }
 
     render(){
-        let {saveMap} = this.props.mapActionHandlers;
-        let {name, components, prog_id} = this.props.savedMapToEdit;
         return (
                 <MapForm 
+                    key={this.state.mapId}
                     savedMapToEdit={this.props.savedMapToEdit} 
                     selectedProgram={this.props.selectedProgram}
                     coreRequirements={this.props.coreRequirements}
                     handleClose={this.props.toggleEditMode}
                     handleSave={this.handleSaveMap}
+                    login={this.props.login}
                 />
         )
     }
