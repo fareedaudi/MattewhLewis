@@ -203,8 +203,8 @@ const StayLoggedInModal = (props) => (
             </p>
         </ModalBody>
         <ModalFooter>
-            <Button color="secondary" onClick={props.toggle}>Nah.</Button>
-            <Button color="primary" onClick={props.stayLoggedInHandler}>Yes, please.</Button>
+            <Button color="secondary" onClick={props.toggle}>No</Button>
+            <Button color="primary" onClick={props.stayLoggedInHandler}>Yes, please</Button>
         </ModalFooter>
     </Modal>
 );
