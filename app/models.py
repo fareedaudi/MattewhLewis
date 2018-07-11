@@ -381,6 +381,7 @@ class Map(db.Model):
     __tablename__ = "map"
     id = db.Column(db.Integer, primary_key=True)
     map_name = db.Column(db.String(255), nullable=True)
+    assoc_id = db.Column(db.Integer)
     prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
     univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))

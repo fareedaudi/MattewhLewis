@@ -323,7 +323,8 @@ def create_map():
             user_id=user.id,
             univ_id=map_data['selectedUniversityId'],
             map_name=map_data['newMapName'],
-            prog_id=map_data['selectedProgramId']
+            prog_id=map_data['selectedProgramId'],
+            assoc_id=map_data['selectedAssociateDegree']
             )
         new_map.users.append(user)
         for collaborator in map_data['newMapCollaborators']:
@@ -439,6 +440,7 @@ def appify_map(map_):
         'univ_name':univ_name,
         'user_id':map_.user_id,
         'prog_id':map_.prog_id,
+        'assoc_id':map_.assoc_id,
         'prog_name':prog_name,
         'users':[
             {
