@@ -55,7 +55,7 @@ class ProgramViewerComponent extends React.Component{
         return(
             <Card>
                 <CardHeader>
-                    <h4>Program Requirements: {this.props.university.university_name}</h4>
+                    <h4>Programs: {this.props.university.university_name}</h4>
                 </CardHeader>
                 <CardBody>
                     <CardText>

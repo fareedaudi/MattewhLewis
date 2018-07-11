@@ -22,6 +22,7 @@ export default class CreateMapModal extends React.Component{
     constructor(props){
         super(props);
         this.defaultState = {
+            selectedAssociateDegree:-1,
             selectedProgramId:-1,
             selectedUniversityId:this.props.university.university_id,
             newMapName:'',
@@ -29,8 +30,17 @@ export default class CreateMapModal extends React.Component{
             selected:[]
         }
         this.state = this.defaultState;
+        this.associateDegrees = [];
+        for(let id in this.props.associateDegrees){
+            let newAssociateDegree = this.props.associateDegrees[id];
+            newAssociateDegree.id = id;
+            this.associateDegrees.push(newAssociateDegree);
+        }
     }
     
+    componentDidMount(){
+    }
+
     openClose = (ev) => {
         this.setState(this.defaultState);
         this.props.toggle(ev);
@@ -77,6 +87,11 @@ export default class CreateMapModal extends React.Component{
             this.setState(this.defaultState);
         }
     }
+
+    handleAssociateDegreeSelection = ({target:{value}}) => {
+        let selectedAssociateDegree = value;
+        this.setState({selectedAssociateDegree});
+    }
     
     render(){
         let modalState = this.state;
@@ -86,9 +101,28 @@ export default class CreateMapModal extends React.Component{
                 <ModalBody>
                 <Label for="mapName">Transfer Institution</Label>
                 <h6>{this.props.university.university_name}</h6>
+                <hr/>
                 <Form>
                     <FormGroup>
-                        <Label for="program">Program</Label>
+                            <Label for="assocDegree">SJC Associate Degree</Label>
+                            <Input 
+                                type="select" 
+                                name="assocDegree" 
+                                id="assocDegree" 
+                                value={this.state.selectedAssociateDegree}
+                                onChange={this.handleAssociateDegreeSelection}
+                            >
+                                <option value="-1">Please select an Associate's Degree.</option>
+                                {this.associateDegrees.map(
+                                    associateDegree => <option key={associateDegree.id} value={associateDegree.id}>{associateDegree.name}</option>
+                                    )
+                                }
+                            </Input>
+                            <FormText>To what Associate's Degree are you aligning this map?</FormText>
+                            <FormFeedback>You did good!</FormFeedback>
+                        </FormGroup>
+                    <FormGroup>
+                        <Label for="program">Transfer Program</Label>
                         <Input 
                             type="select" 
                             name="program" 

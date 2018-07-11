@@ -14,7 +14,8 @@ import AlternativeCourseModal from './AlternativeCourseModal';
 export class MapFormComponent extends React.Component{
     constructor(props){
         super(props);
-        let {name, components} = this.props.savedMapToEdit;
+        let {name, components,assoc_id} = this.props.savedMapToEdit;
+        console.log({assoc_id});
         let componentAreas = components.reduce(
             (componentAreas,component) => {
                 let extractedAreas = component.fields.reduce(
@@ -36,7 +37,8 @@ export class MapFormComponent extends React.Component{
             dateCreated:'',
             componentAreas,
             altCourseModalOpen:false,
-            altCourseModalField:''
+            altCourseModalField:'',
+            nonApplicableIds:new Set()
         };
         this.selectedIds = new Set();
         for(let field in componentAreas){
@@ -44,15 +46,6 @@ export class MapFormComponent extends React.Component{
                 this.selectedIds.add(String(componentAreas[field]));
             }
         }
-        this.nonApplicableIds = new Set();
-    }
-
-    componentDidMount(){
-        this.nonApplicableIds = new Set();
-    }
-
-    componentWillUnMount(){
-        delete this.nonApplicableIds;
     }
 
     handleNameChange = ({target:{value}}) => {
@@ -172,13 +165,12 @@ export class MapFormComponent extends React.Component{
                         let course = this.props.SJCCourses.filter(course=>course.id===courseId);
                         if(course.length>0){
                             course = course[0];
-                            this.nonApplicableIds.add(course.id);
+                            this.state.nonApplicableIds.add(course.id);
                             var sjc_course = {
                                 sjc_name:course.name,
                                 sjc_id:course.id,
                                 sjc_number:course.number,
-                                sjc_rubric:course.rubric,
-                                not_applicable:true
+                                sjc_rubric:course.rubric
                             };
                         }
                         let code = this.getCodeFromCompArea(field);
@@ -226,6 +218,31 @@ export class MapFormComponent extends React.Component{
                     sjc_name:'Learning Framework'
                 }
             ];
+        } else if(compArea.includes("trans")){
+
+            let associateDegree = this.props.associateDegrees[this.props.savedMapToEdit.assoc_id];
+            if(!associateDegree){
+                return [];
+            }
+            let courses = associateDegree.courses;
+            courses.forEach(
+                course=>{
+                    if(course.not_applicable){
+                        this.state.nonApplicableIds.add(course.sjc_id);
+                    }
+                }
+            )
+            return courses;
+        } else if(compArea.includes("phys")) {
+            let courses = [
+                {
+                    sjc_id:230,
+                    sjc_rubric:'PHED',
+                    sjc_number:'1164',
+                    sjc_name:'Introduction to Physical Fitness & Wellness'
+                }
+            ];
+            return courses;
         } else {
             code='100';
             return coursesByCode[code] || [];
@@ -248,8 +265,9 @@ export class MapFormComponent extends React.Component{
     }
 
     render(){
+        console.log(this.state.componentAreas);
+        let associateDegree = this.props.associateDegrees[this.props.savedMapToEdit.assoc_id];
         let saveId = this.props.login.state.userEmail+this.props.savedMapToEdit.id;
-        console.log(localStorage.getItem(saveId));
         window.onbeforeunload = () => {
             sessionStorage.setItem('prevMapState',JSON.stringify(this.state));
         }
@@ -263,14 +281,15 @@ export class MapFormComponent extends React.Component{
                     <FormGroup key={"formgroup"+component.comp_name}>
                         <Label><strong>{component.comp_name}:</strong></Label>
                         {component.fields.map(
-                            field => {
+                            (field,i) => {
                                 let courses = this.getCoursesFromComponentArea(coursesByCode,field.name);
-                                return (<div key={field.name}><Input 
-                                        key={field.name} 
+                                return (<div key={field.name+i}>
+                                    <Input 
+                                        key={field.name+i} 
                                         type={"select"}
                                         value={this.state.componentAreas[field.name]}
                                         onChange={(ev) => {this.handleCourseSelection(field.name,ev)}}
-                                        invalid={this.nonApplicableIds.has(this.state.componentAreas[field.name])}
+                                        invalid={this.state.nonApplicableIds.has(Number(this.state.componentAreas[field.name]))}
                                     >
                                     <option value={"-1"}>Please select a course.</option>
                                         {
@@ -288,7 +307,8 @@ export class MapFormComponent extends React.Component{
                                         }
                                     <option value={"-2"}>Select alternative course.</option>
                                     </Input>
-                                    <FormFeedback invalid={this.nonApplicableIds.has(this.state.componentAreas[field.name])}>Selected course may not apply to this degree.</FormFeedback></div>
+                                    <FormFeedback invalid={this.state.nonApplicableIds.has(this.state.componentAreas[field.name])}>Selected course may not apply to this degree.</FormFeedback>
+                                    </div>
                                     )
                             }
                         )}
@@ -302,12 +322,17 @@ export class MapFormComponent extends React.Component{
                     <label><strong>Transfer University:</strong></label>
                     <Input key={"univ_name"} type="text" value={univ_name} disabled/>
                 </FormGroup>
+                <hr/>
+                <FormGroup>
+                    <label><strong>SJC Associate Degree:</strong></label>
+                    <Input key={"associate_degree"} type="text" value={associateDegree.name} disabled/>
+                </FormGroup>
                 <FormGroup>
                     <label><strong>Transfer Program:</strong></label>
                     <Input key={"prog_name"} type="text" value={prog_name} disabled/>
                 </FormGroup>
                 <FormGroup>
-                    <label><strong>Map Name:</strong></label>
+                    <label><strong>Pathway Map Name:</strong></label>
                     <Input key={"map_name"} type="text" value={this.state.mapName} onChange={this.handleNameChange}/>
                 </FormGroup>
                 <hr/>

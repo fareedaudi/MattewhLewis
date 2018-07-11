@@ -70,30 +70,30 @@ class HeaderComponent extends React.Component {
   }
 
   render(){
-    
+    let uhcl = this.props.universities[0];
     return (
       <Container className="fixed-top" style={{paddingTop: '10px', background: 'rgba(255, 255, 255, 9.0)'}}>
-      <h5>SJC Degree Mapping Toolkit</h5>
+      <h5>SJC Pathway Mapping Toolkit</h5>
         <Nav tabs>
-          <NavItem>
-            <NavLink 
-              className={this.state.homeActive?"active":""}
-              onClick={this.activateHome}
-              >
-              Home
-              </NavLink>
-          </NavItem>
-          
           <Dropdown nav isOpen={this.state.programDropdownOpen} toggle={this.toggleProgram}>
-            <DropdownToggle className={this.state.requirementsActive?"active":""} nav caret>
-              University Requirements
+            <DropdownToggle className={this.state.requirementsActive?"active":""} nav caret className="active">
+              Select a Transfer University
             </DropdownToggle>
             <DropdownMenu style={{maxHeight:"400px",overflowY:"scroll"}}>
-              {this.props.universities.map((obj) => (
+            {uhcl?
+              <DropdownItem 
+                  key={uhcl.university_id} 
+                  onClick={this.props.selectionHandler}
+                  value={uhcl.university_id}
+                >{uhcl.university_name}</DropdownItem>
+              : null
+            }
+              {this.props.universities.slice(1).map((obj) => (
                 <DropdownItem 
                   key={obj.university_id} 
                   onClick={this.props.selectionHandler}
                   value={obj.university_id}
+                  disabled  
                 >{obj.university_name}</DropdownItem>
                 // Refreshes entire page, because router doesn't trigger re-rendering of components (for AJAX, etc.)
               ))}

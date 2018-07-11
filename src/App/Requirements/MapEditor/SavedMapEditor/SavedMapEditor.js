@@ -7,13 +7,6 @@ import {WithMapActionHandlers} from '../../../../contexts/SavedMapsContext';
 
 class SavedMapEditorComponent extends React.Component{
 
-    constructor(props){
-        super(props);
-        this.state = {
-            mapId:this.props.savedMapToEdit.id
-        }
-    }
-
     componentDidMount(){
         this.getComponentsFromServer();
     }
@@ -39,13 +32,13 @@ class SavedMapEditorComponent extends React.Component{
     render(){
         return (
                 <MapForm 
-                    key={this.state.mapId}
                     savedMapToEdit={this.props.savedMapToEdit} 
                     selectedProgram={this.props.selectedProgram}
                     coreRequirements={this.props.coreRequirements}
                     handleClose={this.props.toggleEditMode}
                     handleSave={this.handleSaveMap}
                     login={this.props.login}
+                    associateDegrees={this.props.associateDegrees}
                 />
         )
     }

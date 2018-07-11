@@ -26,14 +26,17 @@ export default class SavedMapViewer extends React.Component{
                                     getSelectedProgramAndSetState={this.props.getSelectedProgramAndSetState}
                                     map={savedMap}
                                     collaborators={this.props.collaborators}
-                                    />
+                                />  
                             )
                         )}
                         <CreateMapTile 
                             university={this.props.university}
                             programs={this.props.programs} 
                             login={this.props.login}
-                            collaborators={this.props.collaborators}/>
+                            collaborators={this.props.collaborators}
+                            associateDegrees={this.props.associateDegrees}
+                            setAssociateDegree={this.props.setAssociateDegree}
+                            />
                     </ListGroup>
                     </div>
             )

@@ -17,6 +17,28 @@ class AppComponent extends React.Component{
       selectedUniversityId:-1,
       coreRequirements:{}
     };
+    this.universities = [
+      {
+        id:1,
+        name:'University of Houston-Clear Lake'
+      },
+      {
+        id:2,
+        name:'University of Houston'
+      },
+      {
+        id:3,
+        name:'University of Houston-Downtown'
+      },
+      {
+        id:4,
+        name:'Texas A&M University'
+      },
+      {
+        id:5,
+        name:'Sam Houston State University'
+      }
+    ];
   }
 
   onUniversitySelection = (ev) => {
@@ -27,7 +49,7 @@ class AppComponent extends React.Component{
   }
 
   render(){
-    let universities = this.props.data;
+    let universities = this.props.data.filter(univ=>univ.university_id<=5).sort((a,b)=>a.university_id-b.university_id);
     let selectedUniversityId = this.state.selectedUniversityId;
     let university = universities.filter((univ)=>(String(univ.university_id)===selectedUniversityId))[0];
     return (

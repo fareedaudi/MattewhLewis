@@ -17,6 +17,7 @@ class CreateMapTileComponent extends React.Component{
     }
 
     createMapHandler(mapState){
+        console.log({mapState});
         if(this.validMap(mapState)){
             let token = sessionStorage.getItem('jwtToken');
             this.props.login.actions.makeRecentlyActive();
@@ -61,7 +62,10 @@ class CreateMapTileComponent extends React.Component{
                     university={this.props.university}
                     programs={this.props.programs}
                     collaborators={this.props.collaborators}
-                    login={this.props.login}/>
+                    login={this.props.login}
+                    associateDegrees={this.props.associateDegrees}
+                    setAssociateDegree={this.props.setAssociateDegree}
+                    />
             </div>
             );
         }
