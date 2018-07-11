@@ -93,8 +93,45 @@ class MapEditorComponent extends React.Component{
                             sjc_id:37,
                             sjc_rubric:'BCIS',
                             sjc_number:'1305',
-                            sjc_name:'Business Computer Applications',
+                            sjc_name:'Business Computer Applications'
+                        },
+                        {
+                            sjc_id:63,
+                            sjc_rubric:'BUSI',
+                            sjc_number:'1301',
+                            sjc_name:'Business Principles'
+                        },
+                        {
+                            sjc_id:64,
+                            sjc_rubric:'BUSI',
+                            sjc_number:'2301',
+                            sjc_name:'Business Law'
+                        },
+                        {
+                            sjc_id:65,
+                            sjc_rubric:'BUSI',
+                            sjc_number:'2304',
+                            sjc_name:'Business Report Writing & Correspondence',
                             not_applicable:true
+                        },
+                        {
+                            sjc_id:129,
+                            sjc_rubric:'ECON',
+                            sjc_number:'1301',
+                            sjc_name:'Introduction to Economics',
+                            not_applicable:true
+                        },
+                        {
+                            sjc_id:130,
+                            sjc_rubric:'ECON',
+                            sjc_number:'2301',
+                            sjc_name:'Principles of Macroeconomics'
+                        },
+                        {
+                            sjc_id:131,
+                            sjc_rubric:'ECON',
+                            sjc_number:'2302',
+                            sjc_name:'Principles of Microeconomics'
                         }
                     ]
                 },
@@ -408,7 +445,6 @@ class MapEditorComponent extends React.Component{
                             sjc_rubric:'PSYC',
                             sjc_number:'2301',
                             sjc_name:'General Psychology',
-                            not_applicable:true
                         },
                         {
                             sjc_id:255,

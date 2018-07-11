@@ -242,6 +242,7 @@ export class MapFormComponent extends React.Component{
                     sjc_name:'Introduction to Physical Fitness & Wellness'
                 }
             ];
+            this.state.nonApplicableIds.add(230);
             return courses;
         } else {
             code='100';

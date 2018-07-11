@@ -75,6 +75,7 @@ export default class AlternativeCourseModal extends React.Component {
                 <option key={this.state.rubric+course.number} value={course.number}>{course.number} - {course.name}</option>
             ) :
             null;
+
         return (
             <Modal isOpen={this.props.isOpen} toggle={this.openClose}>
                 <ModalHeader toggle={this.openClose}>
@@ -94,6 +95,8 @@ export default class AlternativeCourseModal extends React.Component {
                                 <option value="">Please select a rubric.</option>
                                 {this.rubricOptions}
                             </Input>
+                        </FormGroup>
+                        <FormGroup>
                             <Label for="number">SJC Number</Label>
                             <Input 
                                 type="select"
@@ -106,6 +109,31 @@ export default class AlternativeCourseModal extends React.Component {
                                 <option value="">Please select a course number.</option>
                                 {numberOptions}
                             </Input>
+                        </FormGroup>
+                        <FormGroup check>
+                            <Label check>
+                            <Input 
+                                type="checkbox"
+                                name="apply"
+                                id="apply"
+                                value={this.state.apply}
+                                onChange={this.onSelectChange}
+                                disabled={!this.state.rubric || !this.state.number}
+                            />{' '}
+                            Check if this course is known to apply to this degree.
+                            </Label>
+                        </FormGroup>
+                        <hr/>
+                        <FormGroup>
+                            <Label for="justification">What is your rationale for selecting this course?</Label>
+                            <Input 
+                                type="textarea"
+                                name="justification"
+                                id="justication"
+                                value={this.state.justification}
+                                onChange={this.onSelectChange}
+                                disabled={!this.state.rubric || !this.state.number}
+                            />
                         </FormGroup>
                     </Form>       
                 </ModalBody>
