@@ -474,17 +474,29 @@ def get_core(univ_id):
     if(not univ):
         return 'Error!',404
     core_requirements = db.session.query(CoreRequirement).filter(CoreRequirement.univ_id==univ_id).all()
-    core = reduce(add_requirement,core_requirements,{})
-    '''
-    for req in core_requirements:
-        course = db.session.query(Course).get(req.course_id)
-        course = courseify(course)
-        if(core_dict.get(req.component_code)):
-            core_dict[req.component_code].append(course)
-        else:
-            core_dict[req.component_code] = [course]
-    '''
-    return JSON.dumps(core)
+    return JSON.dumps([
+        {
+            k:v for k,v in zip(
+                ('core_req_id','core_req_name','core_req_univ_id','core_req_code','courses'),
+                (core_req.id,core_req.name,core_req.univ_id,core_req.code,[
+                    {
+                        k:v for k,v in zip(
+                            ('course_id','course_rubric','course_number','course_name','sjc_course'),
+                            (course.id,course.rubric,course.number,course.name,{
+                                        k:v for k,v in zip(
+                                            ('sjc_id','sjc_rubric','sjc_number','sjc_name'),
+                                            (db.session.query(SJC).get(course.sjc_id).id,
+                                            db.session.query(SJC).get(course.sjc_id).rubric,
+                                            db.session.query(SJC).get(course.sjc_id).number,
+                                            db.session.query(SJC).get(course.sjc_id).name
+                                        ))
+                                    } if course.sjc else None)
+                        )
+                    } for course in core_req.courses
+                ])
+            ) for cor_req in core_requirements
+        } for core_req in core_requirements
+    ])
 
 def courseify(course):
     course_dict = {
@@ -508,9 +520,9 @@ def courseify(course):
     return course_dict
 
 
-def add_requirement(acc,nextItem):
+def add_requirement(acc,nextItem): # No longer in use.
     core_component_id = nextItem.id
-    component_details = get_component_details(nextItem.core_component_id)
+    component_details = get_component_details(core_component_id)
     code = component_details['code']
     if(code not in acc):
         acc[code] = {**component_details,'courses':[]}
@@ -519,7 +531,7 @@ def add_requirement(acc,nextItem):
     return acc
 
 
-def get_component_details(core_component_id):
+def get_component_details(core_component_id): # No longer in use
     core_component = db.session.query(CoreComponent).filter(CoreComponent.id==core_component_id).first()
     return get_object_dict(core_component)
 
