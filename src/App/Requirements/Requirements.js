@@ -21,16 +21,16 @@ class RequirementsComponent extends React.Component{
     }
 
     getSelectedProgramDataAndSetState = (programId) => {
+        this.getSelectedProgramData(programId,selectedProgram=>this.setState({selectedProgram}))
+    }
+
+    getSelectedProgramData = (programId,callback) => {
         fetch(
             `${ROOT_URL}/requirements_by_program/${programId}`
         ).then(
             response => response.json()
         ).then(
-            programData => {
-                this.setState({
-                    selectedProgram:programData
-                });
-            }
+            programData => callback(programData)
         );
     }
 

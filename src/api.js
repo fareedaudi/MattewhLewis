@@ -44,3 +44,31 @@ export const withFetching = (url,structure={}) => (Comp) =>
             return <Comp {...this.props} {...this.state}/>;
         }
     }
+
+// GET /requirements_by_program
+
+// GET /get_core
+
+// GET /programs_by_university
+
+// GET /maps
+
+// GET /maps_by_user
+
+// GET /sjc_courses
+
+// POST /logout
+
+// DELETE /delete_map
+
+// PUT /create_map
+
+// UPDATE /update_collaborats
+
+// UPDATE /save_map
+
+// GET /user_emails
+
+// GET saved_maps_by_user
+
+// GET /get_core/univ_id
