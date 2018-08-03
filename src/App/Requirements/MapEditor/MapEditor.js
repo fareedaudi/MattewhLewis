@@ -623,35 +623,15 @@ class MapEditorComponent extends React.Component{
         let associateDegreeId = value;
         this.setState({associateDegreeId});
     }
-/*
-    shouldComponentUpdate(nextProps,nextState){
-        if([
-            this.state === nextState,
-            this.props.programs === nextProps.programs,
-            this.props.login.state.loggedIn === nextProps.login.state.loggedIn,
-            this.props.university === nextProps.university,
-            this.props.savedMaps === nextProps.savedMaps,
-            this.props.selectedProgram === nextProps.selectedProgram,
-            this.props.coreRequirements === nextProps.coreRequirements
-        ].every(x=>x)) {
-            return false;}
-         else {
-        return true;
-      }
-    }
-*/
-    getSelectedProgramDataAndSetState = (programId) => {
-        fetch(
-            `${ROOT_URL}/requirements_by_program/${programId}`
-        ).then(
-            response => response.json()
-        ).then(
-            programData => {
-                this.setState({
-                    selectedProgram:programData
-                });
-            }
-        );
+
+
+    getSelectedProgramAndSetState = (programId) => {
+        this.props.getSelectedProgramData(programId,
+            (selectedProgram)=>{
+                this.setState({selectedProgram});
+                this.props.setProgramInRequirement(selectedProgram);
+            });
+
     }
 
     toggleEditMode = () => {
@@ -711,7 +691,7 @@ class MapEditorComponent extends React.Component{
                             collaborators={this.state.collaborators}
                             toggleEditMode={this.toggleEditMode}
                             setMapToEdit={this.setMapToEdit}
-                            getSelectedProgramAndSetState={this.props.getSelectedProgramAndSetState}
+                            getSelectedProgramAndSetState={this.getSelectedProgramAndSetState}
                             savedMaps={this.props.savedMaps}
                             associateDegrees={this.associateDegrees}
                             setAssociateDegree={this.setAssociateDegree}

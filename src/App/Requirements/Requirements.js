@@ -21,7 +21,7 @@ class RequirementsComponent extends React.Component{
     }
 
     getSelectedProgramDataAndSetState = (programId) => {
-        this.getSelectedProgramData(programId,selectedProgram=>this.setState({selectedProgram}))
+        this.getSelectedProgramData(programId,this.setProgram)
     }
 
     getSelectedProgramData = (programId,callback) => {
@@ -32,6 +32,10 @@ class RequirementsComponent extends React.Component{
         ).then(
             programData => callback(programData)
         );
+    }
+
+    setProgram = (selectedProgram) => {
+        this.setState({selectedProgram});
     }
 
     fetchCoreRequirements = () => {
@@ -99,6 +103,8 @@ class RequirementsComponent extends React.Component{
                             programs={this.state.programs}
                             selectedProgram={this.state.selectedProgram}
                             getSelectedProgramAndSetState={this.getSelectedProgramDataAndSetState}
+                            getSelectedProgramData={this.getSelectedProgramData}
+                            setProgramInRequirement={this.setProgram}
                             savedMaps={this.props.savedMaps}
                             coreRequirements={this.props.coreRequirements}
                         />
