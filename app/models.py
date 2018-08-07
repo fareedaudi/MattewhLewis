@@ -103,6 +103,25 @@ program_component_requirement_courses = db.Table(
     db.Column('course_id', db.ForeignKey('course.id'), primary_key=True)
 )
 
+
+selected_SJC = db.Table(
+    'selected_SJC',
+    db.Column('req_id', db.ForeignKey('map_requirement.id'),primary_key=True),
+    db.Column('SJC_id', db.ForeignKey('SJC.id'), primary_key=True)
+)
+
+choices_SJC = db.Table(
+    'choices_SJC',
+    db.Column('req_id', db.ForeignKey('map_requirement.id'),primary_key=True),
+    db.Column('SJC_id', db.ForeignKey('SJC.id'), primary_key=True)
+)
+
+applicable_SJC = db.Table(
+    'applicable_SJC',
+    db.Column('req_id', db.ForeignKey('map_requirement.id'),primary_key=True),
+    db.Column('SJC_id', db.ForeignKey('SJC.id'), primary_key=True)
+)
+
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
@@ -409,6 +428,7 @@ class NewMap(db.Model):
         )
 
 class MapRequirement(db.Model):
+    __tablename__ = "map_requirement"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=True)
     map_id = db.Column(db.Integer,db.ForeignKey('new_map.id'))
@@ -418,6 +438,18 @@ class MapRequirement(db.Model):
     map_ = db.relationship(
         "NewMap",
         back_populates="requirements"
+    )
+    selected_courses = db.relationship(
+        "SJC",
+        secondary=selected_SJC
+    )
+    default_courses = db.relationship(
+        "SJC",
+        secondary=choices_SJC
+    )
+    applicable_courses = db.relationship(
+        "SJC",
+        secondary=applicable_SJC
     )
 
 
