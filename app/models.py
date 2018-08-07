@@ -90,6 +90,13 @@ users_maps = db.Table(
     db.Column('user_id', db.ForeignKey('user.id'), primary_key=True),
     db.Column('map_id', db.ForeignKey('map.id'), primary_key=True)
     )
+
+users_new_maps = db.Table(
+    'users_new_maps', 
+    db.Column('user_id', db.ForeignKey('user.id'), primary_key=True),
+    db.Column('map_id', db.ForeignKey('new_map.id'), primary_key=True)
+    )
+
 program_component_requirement_courses = db.Table(
     'program_component_requirement_courses',
     db.Column('prog_comp_req_id', db.ForeignKey('program_component_requirement.id'),primary_key=True),
@@ -350,6 +357,11 @@ class User(UserMixin,db.Model):
         secondary=users_maps,
         back_populates="users"
         )
+    new_maps = db.relationship(
+        "NewMap",
+        secondary=users_new_maps,
+        back_populates="users"
+    )
     
     def generate_auth_token(self,expiration=10*60):
         s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
@@ -376,8 +388,40 @@ class User(UserMixin,db.Model):
     def __repr__(self):
         return '<User {}>'.format(self.email)
 
-class Map(db.Model):
 
+class NewMap(db.Model):
+    __tablename__ = "new_map"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=True)
+    assoc_id = db.Column(db.Integer)
+    prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
+    univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_at = db.Column(db.Integer)
+    requirements = db.relationship(
+        "MapRequirement",
+        back_populates="map_"
+    )
+    users = db.relationship(
+        "User", 
+        secondary=users_new_maps,
+        back_populates="new_maps"
+        )
+
+class MapRequirement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=True)
+    map_id = db.Column(db.Integer,db.ForeignKey('new_map.id'))
+    code = db.Column(db.String(255))
+    hours = db.Column(db.Integer)
+    type = db.Column(db.String(255))
+    map_ = db.relationship(
+        "NewMap",
+        back_populates="requirements"
+    )
+
+
+class Map(db.Model):
     __tablename__ = "map"
     id = db.Column(db.Integer, primary_key=True)
     map_name = db.Column(db.String(255), nullable=True)
