@@ -1,0 +1,90 @@
+assoc_id,assoc_name,course_id,course_rubric,course_number,course_name
+1,"Associate of Arts, Business",1,ACCT,2301,Principles of Financial Accounting
+1,"Associate of Arts, Business",2,ACCT,2302,Principles of Managerial Accounting
+1,"Associate of Arts, Business",3,AGRI,1131,The Agricultural Industry
+1,"Associate of Arts, Business",4,AGRI,1309,Computers in Agriculture
+1,"Associate of Arts, Business",5,AGRI,1315,Horticulture
+1,"Associate of Arts, Business",6,AGRI,1319,Introduction to Animal Science
+1,"Associate of Arts, Business",7,AGRI,1407,Agronomy
+1,"Associate of Arts, Business",8,AGRI,2317,Introduction to Agricultural Economics
+1,"Associate of Arts, Business",9,AGRI,2321,Livestock Evaluation
+1,"Associate of Arts, Business",37,BCIS,1305,Business Computer Applications
+1,"Associate of Arts, Business",63,BUSI,1301,Business Principles
+1,"Associate of Arts, Business",64,BUSI,2301,Business Law
+1,"Associate of Arts, Business",65,BUSI,2304,Business Report Writing & Correspondence
+1,"Associate of Arts, Business",129,ECON,1301,Introduction to Economics
+1,"Associate of Arts, Business",130,ECON,2301,Principles of Macroeconomics
+1,"Associate of Arts, Business",131,ECON,2302,Principles of Microeconomics
+2,"Associate of Arts, Communication",,,,
+3,"Associate of Arts, Fine Arts",,,,
+4,"Associate of Arts, General Studies",,,,
+5,"Associate of Arts, Kinesiology",,,,
+6,"Associate of Arts, Social & Behavioral Sciences",10,ANTH,2301,Physical Anthropology
+6,"Associate of Arts, Social & Behavioral Sciences",11,ANTH,2302,Introduction to Archeology
+6,"Associate of Arts, Social & Behavioral Sciences",12,ANTH,2346,General Anthropology
+6,"Associate of Arts, Social & Behavioral Sciences",13,ANTH,2351,Cultural Anthropology
+6,"Associate of Arts, Social & Behavioral Sciences",94,CRIJ,1301,Introduction to Criminal Justice
+6,"Associate of Arts, Social & Behavioral Sciences",95,CRIJ,1306,Court Systems & Practices
+6,"Associate of Arts, Social & Behavioral Sciences",96,CRIJ,1307,Crime in America
+6,"Associate of Arts, Social & Behavioral Sciences",97,CRIJ,1310,Fundamentals of Criminal Justice Law
+6,"Associate of Arts, Social & Behavioral Sciences",98,CRIJ,1313,Juvenile Justice System
+6,"Associate of Arts, Social & Behavioral Sciences",99,CRIJ,2301,Community Resources in Corrections
+6,"Associate of Arts, Social & Behavioral Sciences",100,CRIJ,2313,Correctional Systems & Practices
+6,"Associate of Arts, Social & Behavioral Sciences",101,CRIJ,2314,Criminal Investigation
+6,"Associate of Arts, Social & Behavioral Sciences",102,CRIJ,2323,Legal Aspects of Law Enforcement
+6,"Associate of Arts, Social & Behavioral Sciences",103,CRIJ,2328,Police Systems & Practices
+6,"Associate of Arts, Social & Behavioral Sciences",159,GEOG,1301,Physical Geography
+6,"Associate of Arts, Social & Behavioral Sciences",160,GEOG,1302,Human Geography
+6,"Associate of Arts, Social & Behavioral Sciences",161,GEOG,1303,World Regional Geography
+6,"Associate of Arts, Social & Behavioral Sciences",176,GOVT,2017,Federal & Texas Government
+6,"Associate of Arts, Social & Behavioral Sciences",177,GOVT,2304,Introduction to Political Science
+6,"Associate of Arts, Social & Behavioral Sciences",178,GOVT,2305,Federal Government (Federal Const & Topics)
+6,"Associate of Arts, Social & Behavioral Sciences",179,GOVT,2306,Texas Government (Texas Const & Topics)
+6,"Associate of Arts, Social & Behavioral Sciences",180,GOVT,2311,Mexican-American Politics
+6,"Associate of Arts, Social & Behavioral Sciences",181,GOVT,2389,Academic Cooperative
+6,"Associate of Arts, Social & Behavioral Sciences",183,HIST,1301,United States History I
+6,"Associate of Arts, Social & Behavioral Sciences",184,HIST,1302,United States History II
+6,"Associate of Arts, Social & Behavioral Sciences",185,HIST,2301,Texas History
+6,"Associate of Arts, Social & Behavioral Sciences",186,HIST,2311,Western Civilization I
+6,"Associate of Arts, Social & Behavioral Sciences",187,HIST,2312,Western Civilization II
+6,"Associate of Arts, Social & Behavioral Sciences",188,HIST,2321,World Civilization I
+6,"Associate of Arts, Social & Behavioral Sciences",189,HIST,2322,World Civilization II
+6,"Associate of Arts, Social & Behavioral Sciences",190,HIST,2327,Mexican-American History I
+6,"Associate of Arts, Social & Behavioral Sciences",191,HIST,2328,Mexican-American History II
+6,"Associate of Arts, Social & Behavioral Sciences",192,HIST,2381,African-American History
+6,"Associate of Arts, Social & Behavioral Sciences",193,HUMA,1301,Introduction to the Humanities I
+6,"Associate of Arts, Social & Behavioral Sciences",194,HUMA,1305,Introduction to Mexican-American Studies
+6,"Associate of Arts, Social & Behavioral Sciences",195,HUMA,1311,Mexican-American Fine Arts Appreciation
+6,"Associate of Arts, Social & Behavioral Sciences",236,PHIL,1301,Introduction to Philosophy
+6,"Associate of Arts, Social & Behavioral Sciences",237,PHIL,1304,Introduction to World Religions
+6,"Associate of Arts, Social & Behavioral Sciences",238,PHIL,2303,Introduction to Formal Logic
+6,"Associate of Arts, Social & Behavioral Sciences",239,PHIL,2306,Introduction to Ethics
+6,"Associate of Arts, Social & Behavioral Sciences",240,PHIL,2307,Introduction to Social & Political Philosophy
+6,"Associate of Arts, Social & Behavioral Sciences",253,PSYC,1300,Learning Framework
+6,"Associate of Arts, Social & Behavioral Sciences",254,PSYC,2301,General Psychology
+6,"Associate of Arts, Social & Behavioral Sciences",255,PSYC,2306,Human Sexuality
+6,"Associate of Arts, Social & Behavioral Sciences",256,PSYC,2308,Child Psychology
+6,"Associate of Arts, Social & Behavioral Sciences",257,PSYC,2314,Lifespan Growth & Development
+6,"Associate of Arts, Social & Behavioral Sciences",258,PSYC,2315,Psychology of Adjustment
+6,"Associate of Arts, Social & Behavioral Sciences",259,PSYC,2317,Statistical Methods in Psychology
+6,"Associate of Arts, Social & Behavioral Sciences",260,PSYC,2319,Social Psychology
+6,"Associate of Arts, Social & Behavioral Sciences",270,SOCI,1301,Introductory Sociology
+6,"Associate of Arts, Social & Behavioral Sciences",271,SOCI,1306,Social Problems
+6,"Associate of Arts, Social & Behavioral Sciences",272,SOCI,2301,Marriage & the Family
+6,"Associate of Arts, Social & Behavioral Sciences",273,SOCI,2306,Human Sexuality
+6,"Associate of Arts, Social & Behavioral Sciences",274,SOCI,2319,Minority Studies
+6,"Associate of Arts, Social & Behavioral Sciences",275,SOCI,2336,Criminology
+7,"Associate of Arts in Teaching, EC-6",,,,
+8,"Associate of Arts in Teaching, 4-8,EC-12",,,,
+9,"Associate of Arts in Teaching, 8-12, EC-12",,,,
+10,"Associate of Science, Computer Science",90,COSC,1336,Programming Fundamentals I
+10,"Associate of Science, Computer Science",91,COSC,1337,Programming Fundamentals II
+10,"Associate of Science, Computer Science",93,COSC,2336,Programming Fundamentals III
+10,"Associate of Science, Computer Science",92,COSC,2325,Computer Organization
+10,"Associate of Science, Computer Science",207,MATH,2413,Calculus I
+10,"Associate of Science, Computer Science",208,MATH,2414,Calculus II
+10,"Associate of Science, Computer Science",251,PHYS,2325,University Physics I (lecture)
+10,"Associate of Science, Computer Science",252,PHYS,2326,University Physics II (lecture)
+11,"Associate of Science, Life Science",,,,
+12,"Associate of Science, Mathematics",,,,
+13,"Associate of Science, Physical Sciences",,,,
