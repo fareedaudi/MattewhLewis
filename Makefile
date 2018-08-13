@@ -35,3 +35,8 @@ revise_uhd_core:
 load_uh_programs:
 	source env/bin/activate; \
 	python 
+
+load_associate_degrees:
+	source env/bin/activate; \
+	csvcut -c"assoc_id,assoc_name" data/associate_degrees.csv | uniq | python processing/load_associates_degrees.py
+

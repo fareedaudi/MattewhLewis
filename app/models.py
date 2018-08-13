@@ -452,6 +452,11 @@ class MapRequirement(db.Model):
         secondary=applicable_SJC
     )
 
+class AssociateDegree(db.Model):
+    __tablename__ = "associate_degree"
+    id = db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String(255))
+    type_ = db.Column(db.String(255))
 
 class Map(db.Model):
     __tablename__ = "map"
