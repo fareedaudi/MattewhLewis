@@ -677,7 +677,7 @@ class MapEditorComponent extends React.Component{
                             toggleEditMode={this.toggleEditMode}
                             toggleEditModeOff={this.toggleEditModeOff}
                             savedMapToEdit={savedMapToEdit}
-                            selectedProgram={this.props.selectedProgram}
+                            selectedProgram={this.state.selectedProgram}
                             coreRequirements={this.props.coreRequirements}
                             login={this.props.login}
                             associateDegrees={this.associateDegrees}
