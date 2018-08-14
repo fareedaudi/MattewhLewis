@@ -118,7 +118,7 @@ choices_SJC = db.Table(
 
 applicable_SJC = db.Table(
     'applicable_SJC',
-    db.Column('req_id', db.ForeignKey('map_requirement.id'),primary_key=True),
+    db.Column('map_id', db.ForeignKey('new_map.id'),primary_key=True),
     db.Column('SJC_id', db.ForeignKey('SJC.id'), primary_key=True)
 )
 
@@ -359,7 +359,6 @@ class SJC(db.Model):
     hours = db.Column(db.Integer, nullable=True)
     UHCL_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     ACGM_id = db.Column(db.Integer, db.ForeignKey('ACGM.id'))
-
     programs = db.relationship(
         "Program", 
         secondary=programs_sjc_courses,
@@ -426,6 +425,10 @@ class NewMap(db.Model):
         secondary=users_new_maps,
         back_populates="new_maps"
         )
+    applicable_courses = db.relationship(
+        "SJC",
+        secondary=applicable_SJC
+    )
 
 class MapRequirement(db.Model):
     __tablename__ = "map_requirement"
@@ -446,10 +449,6 @@ class MapRequirement(db.Model):
     default_courses = db.relationship(
         "SJC",
         secondary=choices_SJC
-    )
-    applicable_courses = db.relationship(
-        "SJC",
-        secondary=applicable_SJC
     )
 
 class AssociateDegree(db.Model):

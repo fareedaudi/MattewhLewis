@@ -660,7 +660,6 @@ def create_new_requirement(map_id,code,info,program_courses):
     applicable_courses = program_courses.get(code) or []
     for course_obj in applicable_courses:
         course = db.session.query(SJC).get(course_obj['sjc_id'])
-        new_req.applicable_courses.append(course)
         if(code not in ('inst','090','trans')):
             new_req.default_courses.append(course)
     db.session.commit()
@@ -670,6 +669,16 @@ def add_requirements(map_,program_courses):
     for code,info in general_associates_degree.items():
         new_req = create_new_requirement(map_.id,code,info,program_courses)
         map_.requirements.append(new_req)
+        applicable_courses = program_courses.get(code) or []
+        for course_obj in applicable_courses:
+            course = db.session.query(SJC).get(course_obj['sjc_id'])
+            map_.applicable_courses.append(course)
+    other_courses = program_courses.get('100') or []
+    for course_object in other_courses:
+        course = db.session.query(SJC).get(course_object['sjc_id'])
+        print(course)
+        map_.applicable_courses.append(course)
+    db.session.commit()
 
 # Received from AJAX: name, assoc_id, prog_id, univ_id, user_id, created_at
 def create_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at):
@@ -714,8 +723,35 @@ def get_maps_(request):
             'maps':[
                 {
                     k:v for k,v in zip(
-                        ('id','name','assoc_id','prog_id','univ_id','user_id','create_at','requirements'),
-                        (map_.id,map_.name,map_.assoc_id,map_.prog_id,map_.univ_id,map_.user_id,map_.created_at,[
+                        (
+                            'id',
+                            'name',
+                            'assoc_id',
+                            'prog_id',
+                            'univ_id',
+                            'user_id',
+                            'create_at',
+                            'applicable_courses',
+                            'requirements'
+                            ),
+                        (
+                            map_.id,
+                            map_.name,
+                            map_.assoc_id,
+                            map_.prog_id,
+                            map_.univ_id,
+                            map_.user_id,
+                            map_.created_at,
+                            [
+                                {
+                                    k:v for k,v in zip(
+                                        ('id','rubric','name','number','hours'),
+                                        (course.id,course.rubric,course.number,course.name,course.hours)
+                                    )
+                                }
+                            for course in map_.applicable_courses
+                            ],
+                            [
                             {
                                 k:v for k,v in zip(
                                     (
@@ -725,8 +761,7 @@ def get_maps_(request):
                                         'code',
                                         'hours',
                                         'selected_courses',
-                                        'default_courses',
-                                        'applicable_courses'
+                                        'default_courses'
                                     ),
                                     (
                                         req.id,
@@ -751,15 +786,6 @@ def get_maps_(request):
                                                 )
                                             }
                                         for course in req.default_courses
-                                        ],
-                                        [
-                                            {
-                                                k:v for k,v in zip(
-                                                    ('id','rubric','name','number','hours'),
-                                                    (course.id,course.rubric,course.number,course.name,course.hours)
-                                                )
-                                            }
-                                        for course in req.applicable_courses
                                         ]
                                     )
                                 )
