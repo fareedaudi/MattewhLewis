@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, json, session
 from sqlalchemy import and_
 from app import app
-from app.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent
+from app.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement
 from flask_login import current_user, login_user, logout_user
 from flask_restful import Resource,Api
 from pprint import pprint
@@ -251,11 +251,13 @@ def login():
     else:
         all_maps = db.session.query(Map).all()
         user_maps = [map_ for map_ in all_maps if user in map_.users]
+        token = user.generate_auth_token().decode('ascii')
+        print(token)
         return json.jsonify({
             'loggedIn':True,
             'userId':user.id,
             'userEmail':user.email,
-            'token':user.generate_auth_token().decode('ascii'),
+            'token':token,
     })
 
 
@@ -543,4 +545,177 @@ def get_object_dict(sqlalchemy_object):
     dict_ = sqlalchemy_object.__dict__
     dict_.pop('_sa_instance_state',None)
     return dict_
+
+
+general_associates_degree = {
+    '010':{
+        'name':'Communication',
+        'hours':'6'
+    },
+    '020':{
+        'name':'Mathematics',
+        'hours':'3'
+    },
+    '030':{
+        'name':'Life and Physical Sciences',
+        'hours':'8'
+    },
+    '040':{
+        'name':'Language, Philosophy, and Culture',
+        'hours':'3'
+    },
+    '050':{
+        'name':'Creative Arts',
+        'hours':'3'
+    },
+    '060':{
+        'name':'American History',
+        'hours':'6'
+    },
+    '070':{
+        'name':'Government/Political Science',
+        'hours':'6'
+    },
+    '080':{
+        'name':'Social and Behavioral Sciences',
+        'hours':'3'
+    },
+    'inst':{
+        'name':'Institutional Option',
+        'hours':'6'
+    },
+    '090':{
+        'name':'Component Area Option',
+        'hours':'6'
+    },
+    'trans':{
+        'name':'Transfer Path',
+        'hours':'18'
+    }
+}
+
+def get_program(prog_id):
+    program = db.session.query(Program).get(prog_id)
+    return {
+        k:v for k,v in zip(
+            ('program_link','program_id','program_name','program_components'),
+            (program.link,program.id,program.name, [
+                {
+                    k:v for k,v in zip(
+                        ('prog_comp_id','prog_comp_name','prog_comp_hours','requirements'),
+                        (prog_comp.id,prog_comp.name,prog_comp.hours,[
+                            {
+                                k:v for k,v in zip(
+                                    ('prog_comp_req_id','prog_comp_req_name','prog_comp_req_hours','prog_comp_req_code','courses'),
+                                    (prog_comp_req.id,prog_comp_req.name,prog_comp_req.hours,prog_comp_req.code,[
+                                        {
+                                            k:v for k,v in zip(
+                                                ('sjc_id','sjc_rubric','sjc_number','sjc_name'),
+                                                (
+                                                    db.session.query(SJC).get(course.sjc_id).id,
+                                                    db.session.query(SJC).get(course.sjc_id).rubric,
+                                                    db.session.query(SJC).get(course.sjc_id).number,
+                                                    db.session.query(SJC).get(course.sjc_id).name
+                                                )
+                                            )
+                                        } for course in prog_comp_req.courses if course.sjc
+                                    ])
+                                )
+                            } for prog_comp_req in prog_comp.requirements
+                        ])
+                    )
+                } for prog_comp in program.program_components
+            ])
+        )
+    }
+
+
+def get_courses_by_code(PROG_ID):
+    program = get_program(PROG_ID)
+
+    program_name = program['program_name']
+    program_link = program['program_link']
+    program_components = program['program_components']
+
+    courses_by_code = dict()
+
+    for comp in program_components:
+        reqs = comp['requirements']
+        for req in reqs:
+            code = req['prog_comp_req_code']
+            courses = req['courses']
+            courses_by_code[code] = courses_by_code[code]+courses if courses_by_code.get(code) else courses
+    return courses_by_code
+
+prog_id = 60
+courses_by_code = get_courses_by_code(prog_id)
+
+def create_new_requirement(map_id,code,info,program_courses):
+    name = info['name']
+    hours = info['hours']
+    new_req = MapRequirement(
+        name=info['name'],
+        code = code,
+        map_id = map_id,
+        hours = info['hours']
+    )
+    print(f'Attempting to add {new_req.name}')
+    try:
+        db.session.add(new_req)
+        db.session.commit()
+        print(f'\t{new_req.name} successfully added!')
+    except:
+        print(f'\t{new_req.name} could not be added.')
+    applicable_courses = program_courses.get(code) or []
+    for course_obj in applicable_courses:
+        course = db.session.query(SJC).get(course_obj['sjc_id'])
+        new_req.applicable_courses.append(course)
+        if(code not in ('inst','090','trans')):
+            new_req.default_courses.append(course)
+    db.session.commit()
+    return new_req
+
+def add_requirements(map_,program_courses):
+    for code,info in general_associates_degree.items():
+        new_req = create_new_requirement(map_.id,code,info,program_courses)
+        map_.requirements.append(new_req)
+
+# Received from AJAX: name, assoc_id, prog_id, univ_id, user_id, created_at
+def create_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at):
+    map_ = NewMap(
+        name=name,
+        assoc_id=assoc_id,
+        prog_id=prog_id,
+        univ_id=univ_id,
+        user_id=user_id,
+        created_at=created_at
+    )
+    db.session.add(map_)
+    db.session.commit()
+    program_courses = get_courses_by_code(prog_id)
+    add_requirements(map_,program_courses)
+
+
+@app.route('/maps',methods=["PUT"])
+def create_a_new_map():
+    user = None
+    form_data = request.form
+    token = form_data['token']
+    if(token != None):
+        print('token present!')
+        user = User.verify_auth_token(token)
+    print(user)
+    if(user):
+        name=form_data['name']
+        assoc_id = form_data['assoc_id']
+        prog_id = form_data['prog_id']
+        univ_id = form_data['univ_id']
+        user_id = form_data['user_id']
+        created_at = form_data['created_at']
+        create_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at)
+        return 'Success!',200
+    print('no user!')
+    return 'Error!',401
+
+
 
