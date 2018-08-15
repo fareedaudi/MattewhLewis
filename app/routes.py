@@ -718,100 +718,101 @@ def create_new_map(request):
     
 
 def get_maps_(request):
-    user_id = request.args.get('id')
-    if(user_id):
-        maps_ = db.session.query(NewMap).filter(
-            NewMap.user_id == int(user_id)
-        ).all()
-        maps_data = JSON.dumps({
-            'maps':[
-                {
-                    k:v for k,v in zip(
-                        (
-                            'id',
-                            'name',
-                            'assoc_id',
-                            'prog_id',
-                            'univ_id',
-                            'user_id',
-                            'create_at',
-                            'applicable_courses',
-                            'requirements'
-                            ),
-                        (
-                            map_.id,
-                            map_.name,
-                            map_.assoc_id,
-                            map_.prog_id,
-                            map_.univ_id,
-                            map_.user_id,
-                            map_.created_at,
-                            [
-                                {
-                                    k:v for k,v in zip(
-                                        ('id','rubric','name','number','hours'),
-                                        (course.id,course.rubric,course.number,course.name,course.hours)
-                                    )
-                                }
-                            for course in map_.applicable_courses
-                            ],
-                            [
+    user = get_user_from_token(request)
+    if(not user):
+        return 'Error',401
+    user_id = user.id
+    maps_ = db.session.query(NewMap).filter(
+        NewMap.user_id == int(user_id)
+    ).all()
+    maps_data = JSON.dumps({
+        'maps':[
+            {
+                k:v for k,v in zip(
+                    (
+                        'id',
+                        'name',
+                        'assoc_id',
+                        'prog_id',
+                        'univ_id',
+                        'user_id',
+                        'create_at',
+                        'applicable_courses',
+                        'requirements'
+                        ),
+                    (
+                        map_.id,
+                        map_.name,
+                        map_.assoc_id,
+                        map_.prog_id,
+                        map_.univ_id,
+                        map_.user_id,
+                        map_.created_at,
+                        [
                             {
                                 k:v for k,v in zip(
-                                    (
-                                        'id',
-                                        'name',
-                                        'map_id',
-                                        'code',
-                                        'hours',
-                                        'selected_courses',
-                                        'default_courses'
-                                    ),
-                                    (
-                                        req.id,
-                                        req.name,
-                                        req.map_id,
-                                        req.code,
-                                        req.hours,
-                                        [
-                                            {
-                                                k:v for k,v in zip(
-                                                    ('id','rubric','name','number','hours'),
-                                                    (course.id,course.rubric,course.number,course.name,course.hours)
-                                                )
-                                            }
-                                        for course in req.selected_courses
-                                        ],
-                                        [
-                                            {
-                                                k:v for k,v in zip(
-                                                    ('id','rubric','name','number','hours'),
-                                                    (course.id,course.rubric,course.number,course.name,course.hours)
-                                                )
-                                            }
-                                        for course in req.default_courses
-                                        ]
-                                    )
+                                    ('id','rubric','name','number','hours'),
+                                    (course.id,course.rubric,course.number,course.name,course.hours)
                                 )
                             }
-                        for req in map_.requirements])
-                    )
-                }
-            for map_ in maps_]
-        })
+                        for course in map_.applicable_courses
+                        ],
+                        [
+                        {
+                            k:v for k,v in zip(
+                                (
+                                    'id',
+                                    'name',
+                                    'map_id',
+                                    'code',
+                                    'hours',
+                                    'selected_courses',
+                                    'default_courses'
+                                ),
+                                (
+                                    req.id,
+                                    req.name,
+                                    req.map_id,
+                                    req.code,
+                                    req.hours,
+                                    [
+                                        {
+                                            k:v for k,v in zip(
+                                                ('id','rubric','name','number','hours'),
+                                                (course.id,course.rubric,course.number,course.name,course.hours)
+                                            )
+                                        }
+                                    for course in req.selected_courses
+                                    ],
+                                    [
+                                        {
+                                            k:v for k,v in zip(
+                                                ('id','rubric','name','number','hours'),
+                                                (course.id,course.rubric,course.number,course.name,course.hours)
+                                            )
+                                        }
+                                    for course in req.default_courses
+                                    ]
+                                )
+                            )
+                        }
+                    for req in map_.requirements])
+                )
+            }
+        for map_ in maps_]
+    })
     return app.response_class(
         response = maps_data,
         status=200,
         mimetype="application/json"
     )
-    return 'Error!',404
     
 
-def delete_map_(request):
+def delete_map_(id,request):
     user = get_user_from_token(request)
     if(not user):
         return 'error',401
-    map_id = request.args.get('id')
+    map_id = id
     if(not map_id):
         return 'Error',400
     map_to_delete = db.session.query(NewMap).get(map_id)
@@ -824,14 +825,46 @@ def delete_map_(request):
         return 'Error',500
     return 'Success!',200
 
+def update_map_(id,request):
+    user = get_user_from_token(request)
+    if(not user):
+        return 'error',401
+    map_to_edit = db.session.query(NewMap).get(id)
+    if(not map_to_edit):
+        return 'Error',404
+    map_data = JSON.loads(request.data)
+    new_map_name = map_data['name']
+    if(map_to_edit.name != new_map_name):
+        map_to_edit.name = new_map_name
+    requirements_objects = map_data['requirements']
+    for req_obj in requirements_objects:
+        req = db.session.query(MapRequirement).get(req_obj['id'])
+        if(not req):
+            return 'Error',500
+        selected_courses = req_obj['selected_courses']
+        for course_obj in selected_courses:
+            course = db.session.query(SJC).get(course_obj['id'])
+            if(not course):
+                return 'Error',500
+            if(course not in req.selected_courses):
+                req.selected_courses.append(course)
+    db.session.commit()
+    return '',200
+    
+
 maps_handlers = {
-    'PUT':create_new_map,
+    'POST':create_new_map,
     'GET':get_maps_,
-    'DELETE':delete_map_
+    'DELETE':delete_map_,
+    'PATCH':update_map_
 }
 
-@app.route('/maps',methods=['PUT','GET','DELETE'])
-def maps_():
+@app.route('/api/maps',methods=['POST','GET'])
+def GET_POST_maps():
     handler = maps_handlers[request.method]
     return handler(request)
 
+@app.route('/api/maps/<int:id>', methods=['DELETE','PATCH'])
+def DELETE_PATCH_maps(id):
+    handler = maps_handlers[request.method]
+    return handler(id,request)
