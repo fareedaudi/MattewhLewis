@@ -841,6 +841,7 @@ def update_map_(id,request):
         req = db.session.query(MapRequirement).get(req_obj['id'])
         if(not req):
             return 'Error',500
+        req.selected_courses = []
         selected_courses = req_obj['selected_courses']
         for course_obj in selected_courses:
             course = db.session.query(SJC).get(course_obj['id'])
