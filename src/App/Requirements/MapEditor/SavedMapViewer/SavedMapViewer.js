@@ -14,7 +14,7 @@ export default class SavedMapViewer extends React.Component{
                     <h6>Saved Maps:</h6>
                     <h6>{this.props.university.university_name}</h6>
                     <ListGroup>
-                        {this.props.newSavedMaps.filter(savedMap => savedMap.univ_id === this.props.university.university_id).map(
+                        {this.props.savedMaps.filter(savedMap => savedMap.univ_id === this.props.university.university_id).map(
                             (savedMap) => (
                                 <SavedMapTile 
                                     key={savedMap.name+savedMap.id} 

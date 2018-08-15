@@ -10,16 +10,14 @@ class SavedMapsContextProviderComponent extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            savedMaps:[],
-            newSavedMaps:[]
+            savedMaps:[]
         }
         this.mapActionHandlers = {
             deleteMap:this.deleteMap,
             shareMap:this.shareMap,
             approveMap:this.approveMap,
             getSavedMaps:this.getSavedMaps,
-            saveMap:this.saveMap,
-            getNewSavedMaps:this.getNewSavedMaps
+            saveMap:this.saveMap
         }
     }
 
@@ -78,7 +76,6 @@ class SavedMapsContextProviderComponent extends React.Component{
     componentWillReceiveProps(nextProps){
         if(!this.props.loggedIn && nextProps.loggedIn){
             this.getSavedMaps();
-            this.getNewSavedMaps();
         } else if(this.props.loggedIn && !nextProps.loggedIn){
             this.resetSavedMaps({});
         }
@@ -91,25 +88,12 @@ class SavedMapsContextProviderComponent extends React.Component{
 
     getSavedMaps = () => {
         var token = sessionStorage.getItem('jwtToken');
-        axios.post(
-            `${ROOT_URL}/saved_maps_by_user`, {token}
-        )
-        .then(response=>response.data)
-        .then(savedMaps=>{
-            this.setState({savedMaps});
-        }).catch((error)=>{
-    
-        })
-    }
-
-    getNewSavedMaps = () => {
-        var token = sessionStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
         axios.get(
             `${ROOT_URL}/api/maps`,{headers: {Authorization}}
         )
         .then(response => response.data)
-        .then(({maps}) => this.setState({newSavedMaps:maps}));
+        .then(({maps}) => this.setState({savedMaps:maps}));
     }
 
     render(){
