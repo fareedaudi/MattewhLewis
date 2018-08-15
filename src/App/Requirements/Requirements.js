@@ -106,6 +106,7 @@ class RequirementsComponent extends React.Component{
                             getSelectedProgramData={this.getSelectedProgramData}
                             setProgramInRequirement={this.setProgram}
                             savedMaps={this.props.savedMaps}
+                            newSavedMaps={this.props.newSavedMaps}
                             coreRequirements={this.props.coreRequirements}
                         />
                     </Col>

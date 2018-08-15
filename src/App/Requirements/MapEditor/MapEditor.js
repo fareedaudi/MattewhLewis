@@ -693,6 +693,7 @@ class MapEditorComponent extends React.Component{
                             setMapToEdit={this.setMapToEdit}
                             getSelectedProgramAndSetState={this.getSelectedProgramAndSetState}
                             savedMaps={this.props.savedMaps}
+                            newSavedMaps={this.props.newSavedMaps}
                             associateDegrees={this.associateDegrees}
                             setAssociateDegree={this.setAssociateDegree}
                             />
