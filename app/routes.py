@@ -680,8 +680,7 @@ def add_requirements(map_,program_courses):
         map_.applicable_courses.append(course)
     db.session.commit()
 
-# Received from AJAX: name, assoc_id, prog_id, univ_id, user_id, created_at
-def create_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at):
+def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at):
     map_ = NewMap(
         name=name,
         assoc_id=assoc_id,
@@ -695,23 +694,28 @@ def create_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at):
     program_courses = get_courses_by_code(prog_id)
     add_requirements(map_,program_courses)
 
-def create_a_new_map(request):
+
+def get_user_from_token(request):
     user = None
-    form_data = request.form
-    token = form_data['token']
-    if(token != None):
-        print('token present!')
+    label,token = request.headers['Authorization'].split(' ')
+    if(label=="Bearer" and token):
         user = User.verify_auth_token(token)
-    if(user):
-        name=form_data['name']
-        assoc_id = form_data['assoc_id']
-        prog_id = form_data['prog_id']
-        univ_id = form_data['univ_id']
-        user_id = user.id
-        created_at = form_data['created_at']
-        create_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at)
-        return 'Success!',200
-    return 'Error!',401
+    return user
+
+def create_new_map(request):
+    user = get_user_from_token(request)
+    if(not user):
+        return 'Error!',401
+    form_data = request.form
+    name=form_data['name']
+    assoc_id = form_data['assoc_id']
+    prog_id = form_data['prog_id']
+    univ_id = form_data['univ_id']
+    user_id = user.id
+    created_at = form_data['created_at']
+    initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at)
+    return 'Success!',200
+    
 
 def get_maps_(request):
     user_id = request.args.get('id')
@@ -803,12 +807,30 @@ def get_maps_(request):
     return 'Error!',404
     
 
+def delete_map_(request):
+    user = get_user_from_token(request)
+    if(not user):
+        return 'error',401
+    map_id = request.args.get('id')
+    if(not map_id):
+        return 'Error',400
+    map_to_delete = db.session.query(NewMap).get(map_id)
+    if(not map_to_delete):
+        return 'Error',404
+    try:
+        db.session.delete(map_to_delete)
+        db.session.commit()
+    except:
+        return 'Error',500
+    return 'Success!',200
+
 maps_handlers = {
-    'PUT':create_a_new_map,
-    'GET':get_maps_
+    'PUT':create_new_map,
+    'GET':get_maps_,
+    'DELETE':delete_map_
 }
 
-@app.route('/maps',methods=["PUT","GET"])
+@app.route('/maps',methods=['PUT','GET','DELETE'])
 def maps_():
     handler = maps_handlers[request.method]
     return handler(request)

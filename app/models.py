@@ -382,7 +382,7 @@ class User(UserMixin,db.Model):
     )
     
     def generate_auth_token(self,expiration=10*60):
-        s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
+        s = Serializer(app.config['SECRET_KEY'])
         return s.dumps({ 'id': self.id })
         
     @staticmethod
