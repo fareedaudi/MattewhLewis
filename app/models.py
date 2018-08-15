@@ -450,6 +450,20 @@ class MapRequirement(db.Model):
         "SJC",
         secondary=choices_SJC
     )
+    course_slots = db.relationship(
+        "CourseSlot"
+    )
+
+class CourseSlot(db.Model):
+    __tablename__ = "course_slot"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('SJC.id'), nullable=True)
+    req_id = db.Column(db.Integer, db.ForeignKey('map_requirement.id'), nullable=False)
+    requirement = db.relationship(
+        "MapRequirement",
+        back_populates="course_slots"
+    )
 
 class AssociateDegree(db.Model):
     __tablename__ = "associate_degree"

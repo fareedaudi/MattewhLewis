@@ -1,9 +1,10 @@
 from flask import render_template, redirect, url_for, request, json, session
 from sqlalchemy import and_
 from app import app
-from app.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement
+from app.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement,AssociateDegree,CourseSlot
 from flask_login import current_user, login_user, logout_user
 from flask_restful import Resource,Api
+from slugify import slugify
 from pprint import pprint
 import json as JSON
 from functools import reduce
@@ -662,6 +663,11 @@ def create_new_requirement(map_id,code,info,program_courses):
         course = db.session.query(SJC).get(course_obj['sjc_id'])
         if(code not in ('inst','090','trans')):
             new_req.default_courses.append(course)
+    no_slots = int(hours)//3
+    for i in range(no_slots):
+        slot_name = slugify(new_req.name)+"-"+str(i)
+        slot = CourseSlot(name=slot_name,req_id=new_req.id)
+        db.session.add(slot)
     db.session.commit()
     return new_req
 
@@ -698,6 +704,7 @@ def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at):
 def get_user_from_token(request):
     user = None
     label,token = request.headers['Authorization'].split(' ')
+    print(label,token)
     if(label=="Bearer" and token):
         user = User.verify_auth_token(token)
     return user
@@ -718,6 +725,7 @@ def create_new_map(request):
     
 
 def get_maps_(request):
+    print(request.headers)
     user = get_user_from_token(request)
     if(not user):
         return 'Error',401
@@ -733,10 +741,14 @@ def get_maps_(request):
                         'id',
                         'name',
                         'assoc_id',
+                        'assoc_name',
                         'prog_id',
+                        'prog_name',
                         'univ_id',
+                        'univ_name',
                         'user_id',
                         'create_at',
+                        'users',
                         'applicable_courses',
                         'requirements'
                         ),
@@ -744,10 +756,21 @@ def get_maps_(request):
                         map_.id,
                         map_.name,
                         map_.assoc_id,
+                        db.session.query(AssociateDegree).get(map_.assoc_id).name,
                         map_.prog_id,
+                        db.session.query(Program).get(map_.prog_id).name,
                         map_.univ_id,
+                        db.session.query(University).get(map_.univ_id).name,
                         map_.user_id,
                         map_.created_at,
+                        [
+                            {
+                                k:v for k,v in zip(
+                                    ('id','email'),
+                                    (user.id,user.email)
+                                )
+                            }
+                        for user in map_.users],
                         [
                             {
                                 k:v for k,v in zip(
@@ -766,8 +789,8 @@ def get_maps_(request):
                                     'map_id',
                                     'code',
                                     'hours',
-                                    'selected_courses',
-                                    'default_courses'
+                                    'default_courses',
+                                    'course_slots'
                                 ),
                                 (
                                     req.id,
@@ -779,20 +802,24 @@ def get_maps_(request):
                                         {
                                             k:v for k,v in zip(
                                                 ('id','rubric','name','number','hours'),
-                                                (course.id,course.rubric,course.number,course.name,course.hours)
+                                                (course.id,course.rubric,course.name,course.number,course.hours)
                                             )
                                         }
-                                    for course in req.selected_courses
+                                    for course in req.default_courses
                                     ],
                                     [
                                         {
                                             k:v for k,v in zip(
-                                                ('id','rubric','name','number','hours'),
-                                                (course.id,course.rubric,course.number,course.name,course.hours)
+                                                ('id','name','req_id','course'),
+                                                (slot.id,slot.name,slot.req_id,{
+                                                    'id':db.session.query(SJC).get(slot.course_id).id,
+                                                    'name':db.session.query(SJC).get(slot.course_id).name,
+                                                    'rubric':db.session.query(SJC).get(slot.course_id).rubric,
+                                                    'number':db.session.query(SJC).get(slot.course_id).rubric
+                                                } if slot.course_id else {})
                                             )
                                         }
-                                    for course in req.default_courses
-                                    ]
+                                    for slot in req.course_slots]
                                 )
                             )
                         }
