@@ -23,18 +23,15 @@ class SavedMapsContextProviderComponent extends React.Component{
 
     deleteMap = (map_id) => {
         var token = sessionStorage.getItem('jwtToken');
-        axios.post(
-            `${ROOT_URL}/delete_map`, {token, map_id}
+        const Authorization = `Bearer ${token}`;
+        axios.delete(
+            `${ROOT_URL}/api/maps/${map_id}`, {headers: {Authorization}}
             ).then(
-            response => response.data
+                response => {console.log(response.status);return response.data;}
             ).then(
-                (result) => {
-                    if(result.mapDeleted){
-                        this.setState({
+                (result) => {this.setState({
                             savedMaps:this.state.savedMaps.filter((savedMap)=>(savedMap.id!==Number(map_id)))
-                        });
-                    }
-                }
+                    })}
             );
     }
 
@@ -98,7 +95,7 @@ class SavedMapsContextProviderComponent extends React.Component{
 
     render(){
         return (
-        <SavedMapsContext.Provider value={{savedMaps:this.state.savedMaps,mapActionHandlers:this.mapActionHandlers,newSavedMaps:this.state.newSavedMaps}}>
+        <SavedMapsContext.Provider value={{savedMaps:this.state.savedMaps,mapActionHandlers:this.mapActionHandlers}}>
             {this.props.children}
         </SavedMapsContext.Provider>
         )
@@ -129,7 +126,7 @@ export function WithSavedMaps(SavedMapsConsumer){
                 <SavedMapsContext.Consumer>
                     {
                         (savedMapsContext) => (
-                            <SavedMapsConsumer savedMaps={savedMapsContext.savedMaps} newSavedMaps={savedMapsContext.newSavedMaps} {...this.props}/>
+                            <SavedMapsConsumer savedMaps={savedMapsContext.savedMaps} {...this.props}/>
                         )
                     }
                 </SavedMapsContext.Consumer>

@@ -30,6 +30,7 @@ class SavedMapEditorComponent extends React.Component{
     }
 
     render(){
+        console.log(this.props.savedMapToEdit);
         return (
                 <MapForm 
                     savedMapToEdit={this.props.savedMapToEdit} 

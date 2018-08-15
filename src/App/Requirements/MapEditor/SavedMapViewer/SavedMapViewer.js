@@ -6,7 +6,6 @@ import CreateMapTile from './CreateMapTile/CreateMapTile';
 
 export default class SavedMapViewer extends React.Component{
         render(){
-            console.log(this.props.newSavedMaps);
             return (
                 <div>
                 <CardText id="map-editor">
