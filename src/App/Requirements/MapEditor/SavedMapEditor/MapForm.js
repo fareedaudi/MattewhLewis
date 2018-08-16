@@ -21,20 +21,20 @@ export class MapFormComponent extends React.Component{
                 optionsByReqId[req.id] = [];
                 let idsOfCoursesAddedToOptions = new Set();
             
-                // Create selectionFields for default_courses
+                // Create selectionFields for default_courses.
                 req.default_courses.forEach(
                     course => {
-                        optionsByReqId[req.id].push((<option value={course.id}>{course.rubric} {course.number} - {course.name}</option>))
+                        optionsByReqId[req.id].push(course)
                         idsOfCoursesAddedToOptions.add(course.id);
                     }
                 )
                 
-                // Create course_slots for state; add additional courses to selectionFields
+                // Create courseSlots for state; add additional courses to selectionFields, if not already present.
                 req.course_slots.forEach(
                     course_slot => {
                         courseSlots[course_slot.name] = course_slot.course
                         if(Object.keys(course_slot.course).length && (!idsOfCoursesAddedToOptions.has(course_slot.course.id))){
-                            optionsByReqId[req.id].push(<option value={course_slot.course.id}>{course_slot.course.rubric} {course_slot.course.number} - {course_slot.course.name}</option>)
+                            optionsByReqId[req.id].push(course_slot.course);
                             idsOfCoursesAddedToOptions.add(course_slot.course.id);
                         }
                     }
@@ -46,11 +46,11 @@ export class MapFormComponent extends React.Component{
         this.optionsByReqId = optionsByReqId;
         this.state = {
             name,
-            savedMapToEdit,
             courseSlots,
             altCourseModalOpen:false,
             altCourseModalField:''
         };
+        console.log(this.state);
     }
 
 
@@ -86,10 +86,6 @@ export class MapFormComponent extends React.Component{
         }
     }
 
-    handleCourseSelection = (fieldName,{target:{value}}) => {
-
-    }
-
     cleanCourses = (sjcCourses) => {
         sjcCourses.forEach(
             course=>{
@@ -123,6 +119,17 @@ export class MapFormComponent extends React.Component{
         }
     }
 
+    handleCourseSelection = (slotName,course) => {
+        this.setState(
+            prevState => ({
+                ...prevState,
+                courseSlots: {
+                    ...prevState.courseSlots,
+                    [slotName]:course
+                }
+            })
+        );
+    }
 
     render(){
         /*
@@ -130,8 +137,8 @@ export class MapFormComponent extends React.Component{
             sessionStorage.setItem('prevMapState',JSON.stringify(this.state));
         }
         */
-        let {id,univ_name,prog_name,assoc_name,requirements} = this.state.savedMapToEdit;
-        let name = this.state.savedMapToEdit.name;
+        let {id,univ_name,name,prog_name,assoc_name,requirements} = this.props.savedMapToEdit;
+        console.log(this.state);
         let courseSelectionFields = requirements.map(
             requirement => (
                     <FormGroup key={"formgroup"+requirement.name}>
@@ -142,13 +149,21 @@ export class MapFormComponent extends React.Component{
                                     <Input 
                                         key={slot.name} 
                                         type={"select"}
-                                        value={slot.course?slot.course.id:"-1"}
+                                        value={Object.keys(slot.course).length?this.state.courseSlots[slot.name].id:"-1"}
                                         invalid={true}
-                                        onChange={()=>(1)}
+                                        onChange={
+                                            ({target:{value}})=>{
+                                                let name = slot.name;
+                                                let course = this.optionsByReqId[requirement.id].filter(def_course=>String(def_course.id)===value)[0];
+                                                this.handleCourseSelection(name,course);
+                                                }
+                                            }
                                     >
                                     <option value={"-1"}>Please select a course.</option>
                                     {
-                                        this.optionsByReqId[requirement.id]
+                                        this.optionsByReqId[requirement.id].map(
+                                            course=><option value={course.id}>{course.rubric} {course.number} - {course.name}</option>
+                                        )
                                     }
                                     <option value={"-2"}>Select alternative course.</option>
                                     </Input>
