@@ -15,17 +15,44 @@ export class MapFormComponent extends React.Component{
     constructor(props){
         super(props);
         let savedMapToEdit = this.props.savedMapToEdit;
+        let {name,requirements} = savedMapToEdit;
+        let {courseSlots,optionsByReqId} = requirements.reduce(
+            ({courseSlots,optionsByReqId},req)=> {
+                optionsByReqId[req.id] = [];
+                let idsOfCoursesAddedToOptions = new Set();
+            
+                // Create selectionFields for default_courses
+                req.default_courses.forEach(
+                    course => {
+                        optionsByReqId[req.id].push((<option value={course.id}>{course.rubric} {course.number} - {course.name}</option>))
+                        idsOfCoursesAddedToOptions.add(course.id);
+                    }
+                )
+                
+                // Create course_slots for state; add additional courses to selectionFields
+                req.course_slots.forEach(
+                    course_slot => {
+                        courseSlots[course_slot.name] = course_slot.course
+                        if(Object.keys(course_slot.course).length && (!idsOfCoursesAddedToOptions.has(course_slot.course.id))){
+                            optionsByReqId[req.id].push(<option value={course_slot.course.id}>{course_slot.course.rubric} {course_slot.course.number} - {course_slot.course.name}</option>)
+                            idsOfCoursesAddedToOptions.add(course_slot.course.id);
+                        }
+                    }
+                )
+                return {courseSlots,optionsByReqId};
+            },{courseSlots:{},optionsByReqId:{}}
+        );
+        console.log({courseSlots,optionsByReqId});
+        this.optionsByReqId = optionsByReqId;
         this.state = {
+            name,
             savedMapToEdit,
+            courseSlots,
             altCourseModalOpen:false,
             altCourseModalField:''
         };
     }
 
-    componentDidMount(){
-        let savedMapToEdit = this.props.savedMapToEdit;
-        this.setState({savedMapToEdit});
-    }
 
     handleNameChange = ({target:{value}}) => {
         this.setState({savedMapToEdit:{ ...this.state.savedMapToEdit, name:value }});
@@ -96,6 +123,7 @@ export class MapFormComponent extends React.Component{
         }
     }
 
+
     render(){
         /*
         window.onbeforeunload = () => {
@@ -120,11 +148,7 @@ export class MapFormComponent extends React.Component{
                                     >
                                     <option value={"-1"}>Please select a course.</option>
                                     {
-                                        requirement.default_courses.map(
-                                            course => {
-                                                return(<option value={course.id}>{course.rubric} {course.number} - {course.name}</option>)
-                                            }
-                                        )
+                                        this.optionsByReqId[requirement.id]
                                     }
                                     <option value={"-2"}>Select alternative course.</option>
                                     </Input>
