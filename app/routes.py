@@ -815,7 +815,7 @@ def get_maps_(request):
                                                     'id':db.session.query(SJC).get(slot.course_id).id,
                                                     'name':db.session.query(SJC).get(slot.course_id).name,
                                                     'rubric':db.session.query(SJC).get(slot.course_id).rubric,
-                                                    'number':db.session.query(SJC).get(slot.course_id).rubric
+                                                    'number':db.session.query(SJC).get(slot.course_id).number
                                                 } if slot.course_id else {})
                                             )
                                         }
