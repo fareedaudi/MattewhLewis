@@ -11,6 +11,8 @@ import PropTypes from 'prop-types';
 import { WithSJCCourses } from '../../../../contexts/SJCCourseContext';
 import AlternativeCourseModal from './AlternativeCourseModal';
 
+const isObjEmpty = (obj) => !!Object.keys(obj).length;
+
 export class MapFormComponent extends React.Component{
     constructor(props){
         super(props);
@@ -119,13 +121,31 @@ export class MapFormComponent extends React.Component{
         }
     }
 
-    handleCourseSelection = (slotName,course) => {
+    handleCourseSelection = (reqId,slotName,selectedCourse) => {
+        let formerSelection = this.state.courseSlots[slotName];
+        let {default_courses} = this.props.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
+        
+        let formerSelectionNotInDefault = !default_courses.filter(def_course=>def_course.id === formerSelection.id).length;
+        let newSelectionNotInDefault = !default_courses.filter(def_course=>String(def_course.id) === String(selectedCourse.id)).length;
+        console.log({formerSelection,default_courses});
+        console.log({formerSelectionNotInDefault});
+        if(formerSelectionNotInDefault){
+            // Remove former selection from optionsByReqId
+            this.optionsByReqId[reqId] = this.optionsByReqId[reqId].filter(course=>course.id !== formerSelection.id);
+            if(newSelectionNotInDefault){
+                // Add new selection to optionsByReqId
+                this.optionsByReqId[reqId].push(selectedCourse);
+            }
+        }
+
+        // Insert new selection into optionsByReq[reqId]
+
         this.setState(
             prevState => ({
                 ...prevState,
                 courseSlots: {
                     ...prevState.courseSlots,
-                    [slotName]:course
+                    [slotName]:selectedCourse
                 }
             })
         );
@@ -149,13 +169,13 @@ export class MapFormComponent extends React.Component{
                                     <Input 
                                         key={slot.name} 
                                         type={"select"}
-                                        value={Object.keys(slot.course).length?this.state.courseSlots[slot.name].id:"-1"}
+                                        value={Object.keys(this.state.courseSlots[slot.name]).length?this.state.courseSlots[slot.name].id:"-1"}
                                         invalid={true}
                                         onChange={
                                             ({target:{value}})=>{
                                                 let name = slot.name;
-                                                let course = this.optionsByReqId[requirement.id].filter(def_course=>String(def_course.id)===value)[0];
-                                                this.handleCourseSelection(name,course);
+                                                let course = this.optionsByReqId[requirement.id].filter(def_course=>String(def_course.id)===value)[0] || {};
+                                                this.handleCourseSelection(requirement.id,name,course);
                                                 }
                                             }
                                     >
