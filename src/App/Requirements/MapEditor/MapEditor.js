@@ -710,10 +710,12 @@ class MapEditorComponent extends React.Component{
     }
 
     getCollaborators = () => {
+        let token = sessionStorage.getItem('jwtToken');
+        const Authorization = `Bearer ${token}`
         axios.get(
-            `${ROOT_URL}/user_emails`
+            `${ROOT_URL}/api/users`, {headers:{Authorization}}
         ).then(
-            response => response.data
+            response => response.data.users.map(user=>user.email)
         ).then(
             collaborators => {
                 this.setState({collaborators},

@@ -17,7 +17,8 @@ class SavedMapsContextProviderComponent extends React.Component{
             shareMap:this.shareMap,
             approveMap:this.approveMap,
             getSavedMaps:this.getSavedMaps,
-            saveMap:this.saveMap
+            saveMap:this.saveMap,
+            createMap:this.createMap
         }
     }
 
@@ -64,6 +65,25 @@ class SavedMapsContextProviderComponent extends React.Component{
                 }
             }
         );
+    }
+
+    createMap = (mapState) => {
+        var token = sessionStorage.getItem('jwtToken');
+        const Authorization = `Bearer ${token}`;
+        if(String(mapState.selectedProgramId) === "-1"){
+            return;
+        }
+        return axios.post(
+            `${ROOT_URL}/api/maps`,mapState,{headers:{Authorization}}
+        ).then(
+            response=>{
+                if(response.status===200){
+                    this.getSavedMaps();
+                } else {
+                    throw new Error('Error!');
+                }
+            }
+        )
     }
 
     approveMap = () => {
