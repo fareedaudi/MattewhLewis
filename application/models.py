@@ -11,7 +11,7 @@ This file contains the object models to allow the application to communicate
 with the database.
 
 """
-from app import app, db, login
+from application import application, db, login
 from flask_login import UserMixin
 from flask import json
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -90,10 +90,36 @@ users_maps = db.Table(
     db.Column('user_id', db.ForeignKey('user.id'), primary_key=True),
     db.Column('map_id', db.ForeignKey('map.id'), primary_key=True)
     )
+
+users_new_maps = db.Table(
+    'users_new_maps', 
+    db.Column('user_id', db.ForeignKey('user.id'), primary_key=True),
+    db.Column('map_id', db.ForeignKey('new_map.id'), primary_key=True)
+    )
+
 program_component_requirement_courses = db.Table(
     'program_component_requirement_courses',
     db.Column('prog_comp_req_id', db.ForeignKey('program_component_requirement.id'),primary_key=True),
     db.Column('course_id', db.ForeignKey('course.id'), primary_key=True)
+)
+
+
+selected_SJC = db.Table(
+    'selected_SJC',
+    db.Column('req_id', db.ForeignKey('map_requirement.id'),primary_key=True),
+    db.Column('SJC_id', db.ForeignKey('SJC.id'), primary_key=True)
+)
+
+choices_SJC = db.Table(
+    'choices_SJC',
+    db.Column('req_id', db.ForeignKey('map_requirement.id'),primary_key=True),
+    db.Column('SJC_id', db.ForeignKey('SJC.id'), primary_key=True)
+)
+
+applicable_SJC = db.Table(
+    'applicable_SJC',
+    db.Column('map_id', db.ForeignKey('new_map.id'),primary_key=True),
+    db.Column('SJC_id', db.ForeignKey('SJC.id'), primary_key=True)
 )
 
 class Course(db.Model):
@@ -333,12 +359,14 @@ class SJC(db.Model):
     hours = db.Column(db.Integer, nullable=True)
     UHCL_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     ACGM_id = db.Column(db.Integer, db.ForeignKey('ACGM.id'))
-
     programs = db.relationship(
         "Program", 
         secondary=programs_sjc_courses,
         back_populates="sjc_courses"
         )
+    notes = db.relationship(
+        'CourseNote'
+    )
 
 class User(UserMixin,db.Model):
     __tablename__ = "user"
@@ -350,14 +378,19 @@ class User(UserMixin,db.Model):
         secondary=users_maps,
         back_populates="users"
         )
+    new_maps = db.relationship(
+        "NewMap",
+        secondary=users_new_maps,
+        back_populates="users"
+    )
     
     def generate_auth_token(self,expiration=10*60):
-        s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
+        s = Serializer(application.config['SECRET_KEY'])
         return s.dumps({ 'id': self.id })
         
     @staticmethod
     def verify_auth_token(token):
-        s = Serializer(app.config['SECRET_KEY'])
+        s = Serializer(application.config['SECRET_KEY'])
         try:
             data = s.loads(token)
         except SignatureExpired:
@@ -376,8 +409,85 @@ class User(UserMixin,db.Model):
     def __repr__(self):
         return '<User {}>'.format(self.email)
 
-class Map(db.Model):
 
+class NewMap(db.Model):
+    __tablename__ = "new_map"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=True)
+    assoc_id = db.Column(db.Integer)
+    prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
+    univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_at = db.Column(db.Integer)
+    requirements = db.relationship(
+        "MapRequirement",
+        back_populates="map_"
+    )
+    users = db.relationship(
+        "User", 
+        secondary=users_new_maps,
+        back_populates="new_maps"
+        )
+    applicable_courses = db.relationship(
+        "SJC",
+        secondary=applicable_SJC
+    )
+
+class MapRequirement(db.Model):
+    __tablename__ = "map_requirement"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=True)
+    map_id = db.Column(db.Integer,db.ForeignKey('new_map.id'))
+    code = db.Column(db.String(255))
+    hours = db.Column(db.Integer)
+    type = db.Column(db.String(255))
+    map_ = db.relationship(
+        "NewMap",
+        back_populates="requirements"
+    )
+    selected_courses = db.relationship(
+        "SJC",
+        secondary=selected_SJC
+    )
+    default_courses = db.relationship(
+        "SJC",
+        secondary=choices_SJC
+    )
+    course_slots = db.relationship(
+        "CourseSlot"
+    )
+
+class CourseSlot(db.Model):
+    __tablename__ = "course_slot"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('SJC.id'), nullable=True)
+    req_id = db.Column(db.Integer, db.ForeignKey('map_requirement.id'), nullable=False)
+    requirement = db.relationship(
+        "MapRequirement",
+        back_populates="course_slots"
+    )
+    note = db.relationship(
+        "CourseNote"
+    )
+
+class CourseNote(db.Model):
+    __tablename__ = "course_note"
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(400))
+    applicable = db.Column(db.Integer)
+    slot_id = db.Column(db.Integer, db.ForeignKey('course_slot.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('SJC.id'),nullable=False)
+    prog_id = db.Column(db.Integer, db.ForeignKey('program.id'),nullable=False)
+
+
+class AssociateDegree(db.Model):
+    __tablename__ = "associate_degree"
+    id = db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String(255))
+    type_ = db.Column(db.String(255))
+
+class Map(db.Model):
     __tablename__ = "map"
     id = db.Column(db.Integer, primary_key=True)
     map_name = db.Column(db.String(255), nullable=True)
