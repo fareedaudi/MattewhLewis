@@ -671,6 +671,14 @@ def create_new_requirement(map_id,code,info,program_courses):
     db.session.commit()
     return new_req
 
+def add_users(map_,user_emails):
+    for email in user_emails:
+        user = db.session.query(User).filter(User.email==email).first()
+        if(not user):
+            return
+        map_.users.append(user)
+        db.session.commit()
+
 def add_requirements(map_,program_courses):
     for code,info in general_associates_degree.items():
         new_req = create_new_requirement(map_.id,code,info,program_courses)
@@ -686,7 +694,7 @@ def add_requirements(map_,program_courses):
         map_.applicable_courses.append(course)
     db.session.commit()
 
-def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at):
+def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collaborators):
     map_ = NewMap(
         name=name,
         assoc_id=assoc_id,
@@ -699,7 +707,7 @@ def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at):
     db.session.commit()
     program_courses = get_courses_by_code(prog_id)
     add_requirements(map_,program_courses)
-
+    add_users(map_,collaborators)
 
 def get_user_from_token(request):
     user = None
@@ -713,14 +721,16 @@ def create_new_map(request):
     user = get_user_from_token(request)
     if(not user):
         return 'Error!',401
-    form_data = request.form
-    name=form_data['name']
-    assoc_id = form_data['assoc_id']
-    prog_id = form_data['prog_id']
-    univ_id = form_data['univ_id']
+    form_data = JSON.loads(request.data)
+    name=form_data['newMapName']
+    assoc_id = form_data['selectedAssociateDegree']
+    prog_id = form_data['selectedProgramId']
+    univ_id = form_data['selectedUniversityId']
     user_id = user.id
-    created_at = form_data['created_at']
-    initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at)
+    created_at = ''
+    collaborators = form_data['newMapCollaborators']
+    print(collaborators)
+    initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collaborators)
     return 'Success!',200
     
 
@@ -750,7 +760,8 @@ def get_maps_(request):
                         'create_at',
                         'users',
                         'applicable_courses',
-                        'requirements'
+                        'requirements',
+                        'users'
                         ),
                     (
                         map_.id,
@@ -819,11 +830,17 @@ def get_maps_(request):
                                                 } if slot.course_id else {})
                                             )
                                         }
-                                    for slot in req.course_slots]
+                                    for slot in req.course_slots],
                                 )
                             )
                         }
-                    for req in map_.requirements])
+                    for req in map_.requirements],
+                    [
+                        {   
+                            'id':user.id,
+                            'email':user.email
+                        } for user in map_.users
+                    ]+[{'id':user.id,'email':user.email}])
                 )
             }
         for map_ in maps_]
@@ -887,8 +904,32 @@ maps_handlers = {
     'PATCH':update_map_
 }
 
+def get_users(request):
+    user = get_user_from_token(request)
+    if(not user):
+        return 'Error',401
+    user_data = JSON.dumps({
+        'users':[
+            {
+                'id':user.id,
+                'email':user.email
+            } for user in db.session.query(User).all()
+        ]
+    })
+    return app.response_class(
+        response=user_data,
+        status=200,
+        mimetype="application/json"
+    )
+
+users_handlers = {
+    'GET':get_users
+}
+
+
 @app.route('/api/maps',methods=['POST','GET'])
 def GET_POST_maps():
+    print(request)
     handler = maps_handlers[request.method]
     return handler(request)
 
@@ -896,3 +937,8 @@ def GET_POST_maps():
 def DELETE_PATCH_maps(id):
     handler = maps_handlers[request.method]
     return handler(id,request)
+
+@app.route('/api/users', methods=['GET'])
+def GET_users():
+    handler = users_handlers[request.method]
+    return handler(request)
