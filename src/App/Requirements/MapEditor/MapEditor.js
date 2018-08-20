@@ -11,6 +11,7 @@ import {ROOT_URL} from '../../../api';
 import SavedMapViewer from './SavedMapViewer/SavedMapViewer';
 import SavedMapEditor from './SavedMapEditor/SavedMapEditor';
 import {WithLogin} from '../../../contexts/LoginContext';
+import {getUsers} from '../../../api';
 
 class MapEditorComponent extends React.Component{
     constructor(props){
@@ -710,12 +711,8 @@ class MapEditorComponent extends React.Component{
     }
 
     getCollaborators = () => {
-        let token = sessionStorage.getItem('jwtToken');
-        const Authorization = `Bearer ${token}`
-        axios.get(
-            `${ROOT_URL}/api/users`, {headers:{Authorization}}
-        ).then(
-            response => response.data.users.map(user=>user.email)
+        getUsers().then(
+            data => data.users.map(user=>user.email)
         ).then(
             collaborators => {
                 this.setState({collaborators},

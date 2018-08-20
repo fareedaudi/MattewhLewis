@@ -1,7 +1,9 @@
 import React from 'react';
+import axios from 'axios';
 export const ROOT_URL = 'http://localhost:5000';
 export const UNIVERSITIES_URL = ROOT_URL + '/universities';
 export const SAVED_MAPS_URL = ROOT_URL + '/saved_maps_by_user';
+
 
 export const withFetching = (url,structure={}) => (Comp) => 
     class WithFetching extends React.Component{
@@ -44,6 +46,19 @@ export const withFetching = (url,structure={}) => (Comp) =>
             return <Comp {...this.props} {...this.state}/>;
         }
     }
+
+export const getUsers = () => {
+    let token = sessionStorage.getItem('jwtToken');
+    const Authorization = `Bearer ${token}`
+    return axios.get(
+        `${ROOT_URL}/api/users`, {headers:{Authorization}}
+    ).then( response => {
+        if(response.status!==200){
+            throw new Error('Error!');
+        }
+        return response.data
+    });
+}
 
 // GET /requirements_by_program
 
