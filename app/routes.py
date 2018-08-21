@@ -711,6 +711,7 @@ def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collabor
 
 def get_user_from_token(request):
     user = None
+    pprint(request.headers)
     label,token = request.headers['Authorization'].split(' ')
     print(label,token)
     if(label=="Bearer" and token):
@@ -735,7 +736,6 @@ def create_new_map(request):
     
 
 def get_maps_(request):
-    print(request.headers)
     user = get_user_from_token(request)
     if(not user):
         return 'Error',401
@@ -870,29 +870,48 @@ def delete_map_(id,request):
     return 'Success!',200
 
 def update_map_(id,request):
+    # Authenticate
     user = get_user_from_token(request)
     if(not user):
         return 'error',401
+    
+    #Fetch map to update
     map_to_edit = db.session.query(NewMap).get(id)
     if(not map_to_edit):
         return 'Error',404
+
     map_data = JSON.loads(request.data)
+
+    # Update name
     new_map_name = map_data['name']
     if(map_to_edit.name != new_map_name):
         map_to_edit.name = new_map_name
+
+    #Update requirements
     requirements_objects = map_data['requirements']
     for req_obj in requirements_objects:
         req = db.session.query(MapRequirement).get(req_obj['id'])
         if(not req):
             return 'Error',500
-        req.selected_courses = []
-        selected_courses = req_obj['selected_courses']
-        for course_obj in selected_courses:
-            course = db.session.query(SJC).get(course_obj['id'])
-            if(not course):
-                return 'Error',500
-            if(course not in req.selected_courses):
-                req.selected_courses.append(course)
+        
+        #Update course_slots
+        course_slot_objects = req_obj['course_slots']
+        for course_slot_obj in course_slot_objects:
+            if(course_slot_obj['course']):
+                course_slot = db.session.query(CourseSlot).get(course_slot_obj['id'])
+                if(not course_slot):
+                    return 'Error',500
+                course_id = course_slot_obj['course']['id']
+                if(course_slot.course_id != course_id):
+                    course_slot.course_id = course_id
+
+        #Update users
+    map_to_edit.users = []
+    for new_user_obj in map_data['users']:
+        if(new_user_obj['id'] != user.id):
+            new_user = db.session.query(User).get(new_user_obj['id'])
+            map_to_edit.users.append(new_user)
+        
     db.session.commit()
     return '',200
     
@@ -935,6 +954,7 @@ def GET_POST_maps():
 
 @app.route('/api/maps/<int:id>', methods=['DELETE','PATCH'])
 def DELETE_PATCH_maps(id):
+    print(request)
     handler = maps_handlers[request.method]
     return handler(id,request)
 

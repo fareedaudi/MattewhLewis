@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 login = LoginManager(app)
 app.debug = True
-CORS(app)
+CORS(app,expose_headers='Authorization')
 db = SQLAlchemy(app)
 migrate = Migrate(app,db)
 
