@@ -36,19 +36,24 @@ class SavedMapsContextProviderComponent extends React.Component{
             );
     }
 
-    saveMap = (mapData) => {
+    saveMap = (map) => {
+        console.log({map});
         var token = sessionStorage.getItem('jwtToken');
-        axios.post(
-            `${ROOT_URL}/save_map`, {token,mapData}
-        ).then(
+        const Authorization = `Bearer ${token}`;
+        return axios({
+            method:'PATCH',
+            url:`${ROOT_URL}/api/maps/${map.id}`,
+            headers: {Authorization},
+            data:map
+        }).then(
             response => response.data
         ).then(
             result => {
-                if(result.mapSaved){
+                if(result.collaboratorsUpdated){
                     this.getSavedMaps();
                 }
             }
-        )
+        );
     }
 
     shareMap = (map) => {
@@ -78,8 +83,7 @@ class SavedMapsContextProviderComponent extends React.Component{
             return;
         }
         return axios({
-            method:'PATCH',
-            mode:'CORS',
+            method:'POST',
             url:`${ROOT_URL}/api/maps`,
             headers:{Authorization},
             data:mapState

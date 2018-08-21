@@ -51,6 +51,7 @@ export class MapFormComponent extends React.Component{
             altCourseModalOpen:false,
             altCourseModalField:''
         };
+
     }
 
 
@@ -118,7 +119,7 @@ export class MapFormComponent extends React.Component{
         }
     }
 
-    handleCourseSelection = (reqId,slotName,selectedCourse) => {
+    handleCourseSelection = (reqId,slotId,slotName,selectedCourse) => {
         let formerSelection = this.state.courseSlots[slotName];
         let {default_courses} = this.props.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
         
@@ -142,7 +143,12 @@ export class MapFormComponent extends React.Component{
                     ...prevState.courseSlots,
                     [slotName]:selectedCourse
                 }
-            })
+            }),
+            () => {
+                let req = this.props.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
+                let slot = req.course_slots.filter(slot=>slot.id===slotId)[0];
+                slot.course = selectedCourse;
+            }
         );
     }
 
@@ -169,7 +175,7 @@ export class MapFormComponent extends React.Component{
                                             ({target:{value}})=>{
                                                 let name = slot.name;
                                                 let course = this.optionsByReqId[requirement.id].filter(def_course=>String(def_course.id)===value)[0] || {};
-                                                this.handleCourseSelection(requirement.id,name,course);
+                                                this.handleCourseSelection(requirement.id,slot.id,name,course);
                                                 }
                                             }
                                     >
@@ -215,7 +221,7 @@ export class MapFormComponent extends React.Component{
             <Form>
                 <FormGroup>
                     <Button className="btn-sm" color="secondary" onClick={this.props.handleClose}>Close</Button>
-                    <Button className="btn-sm" color="primary" onClick={()=>this.props.handleSave()}>Save</Button>
+                    <Button className="btn-sm" color="primary" onClick={()=>this.props.handleSave(this.props.savedMapToEdit)}>Save</Button>
                 </FormGroup>
             </Form>
             <AlternativeCourseModal
