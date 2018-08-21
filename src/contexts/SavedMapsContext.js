@@ -55,7 +55,7 @@ class SavedMapsContextProviderComponent extends React.Component{
     shareMap = (map_id,newMapCollaborators) => {
         var token = sessionStorage.getItem('jwtToken');
         axios.post(
-            `${ROOT_URL}/update_collaborators`, {token,map_id,newMapCollaborators}
+            `${ROOT_URL}/update_collaborators`, {map_id,newMapCollaborators}
         ).then(
             response => response.data
         ).then(
