@@ -70,9 +70,10 @@ class AddCollaboratorsModal extends React.Component{
     handleNewCollaboratorsSubmission = (newCollaboratorEmails) => {
         let map = this.props.map;
         let newUsers = this.props.collaborators.filter(
-            collaborator => (collaborator.email in newCollaboratorEmails) || (collaborator.id ===map.user_id)
+            collaborator => (newCollaboratorEmails.includes(collaborator.email)) || (collaborator.id ===map.user_id)
         );
         map.users = newUsers;
+        console.log(newUsers);
         this.props.handler(map);
     }
 
@@ -122,13 +123,13 @@ class AddCollaboratorsModal extends React.Component{
             <Button color="secondary" onClick={this.openClose}>Close</Button>
             <Button 
                 color="primary" 
-                onClick={this.handleNewCollaboratorsSubmission}
+                onClick={()=>{this.handleNewCollaboratorsSubmission(this.state.newMapCollaborators)}}
             >
                 Update collaborators
             </Button>
         </ModalFooter>
     </Modal>    
-);
+);  
     }
 }
     

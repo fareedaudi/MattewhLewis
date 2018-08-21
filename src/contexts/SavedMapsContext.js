@@ -52,11 +52,15 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     shareMap = (map) => {
+        console.log({map});
         var token = sessionStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
-        axios.post(
-            `${ROOT_URL}/api/maps/${map.id}`, map, {headers: Authorization}
-        ).then(
+        return axios({
+            method:'PATCH',
+            url:`${ROOT_URL}/api/maps/${map.id}`,
+            headers: {Authorization},
+            data:map
+        }).then(
             response => response.data
         ).then(
             result => {
@@ -73,9 +77,13 @@ class SavedMapsContextProviderComponent extends React.Component{
         if(String(mapState.selectedProgramId) === "-1"){
             return;
         }
-        return axios.post(
-            `${ROOT_URL}/api/maps`,mapState,{headers:{Authorization}}
-        ).then(
+        return axios({
+            method:'PATCH',
+            mode:'CORS',
+            url:`${ROOT_URL}/api/maps`,
+            headers:{Authorization},
+            data:mapState
+        }).then(
             response=>{
                 if(response.status===200){
                     this.getSavedMaps();
