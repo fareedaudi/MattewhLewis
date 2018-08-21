@@ -3,8 +3,36 @@ import { CardText, ListGroup } from 'reactstrap';
 import PropTypes from 'prop-types';
 import SavedMapTile from './SavedMapTile/SavedMapTile';
 import CreateMapTile from './CreateMapTile/CreateMapTile';
+import {getUsers} from '../../../../api';
 
 export default class SavedMapViewer extends React.Component{
+
+    constructor(props){
+        super(props);
+        this.state = {
+            collaborators:[]
+        }
+    }
+
+
+    componentDidMount(){
+        console.log('SavedMapViewer mounted!');
+        this.getCollaborators();
+    }
+
+    getCollaborators = () => {
+        getUsers().then(
+            data => data.users.map(user=>user.email)
+        ).then(
+            collaborators => {
+                this.setState({collaborators},
+                ()=> {
+                });
+            }
+        );
+    }
+
+
         render(){
             return (
                 <div>
@@ -25,7 +53,7 @@ export default class SavedMapViewer extends React.Component{
                                     setMapToEdit={this.props.setMapToEdit}
                                     getSelectedProgramAndSetState={this.props.getSelectedProgramAndSetState}
                                     map={savedMap}
-                                    collaborators={this.props.collaborators}
+                                    collaborators={this.state.collaborators}
                                 />  
                             )
                         )}
@@ -33,7 +61,7 @@ export default class SavedMapViewer extends React.Component{
                             university={this.props.university}
                             programs={this.props.programs} 
                             login={this.props.login}
-                            collaborators={this.props.collaborators}
+                            collaborators={this.state.collaborators}
                             associateDegrees={this.props.associateDegrees}
                             setAssociateDegree={this.props.setAssociateDegree}
                             />
@@ -47,7 +75,6 @@ export default class SavedMapViewer extends React.Component{
         login:PropTypes.object.isRequired,
         university:PropTypes.object.isRequired,
         programs:PropTypes.array.isRequired,
-        collaborators:PropTypes.array.isRequired,
         toggleEditMode:PropTypes.func.isRequired,
         setMapToEdit:PropTypes.func.isRequired,
         getSelectedProgramAndSetState:PropTypes.func.isRequired,

@@ -11,14 +11,12 @@ import {ROOT_URL} from '../../../api';
 import SavedMapViewer from './SavedMapViewer/SavedMapViewer';
 import SavedMapEditor from './SavedMapEditor/SavedMapEditor';
 import {WithLogin} from '../../../contexts/LoginContext';
-import {getUsers} from '../../../api';
 
 class MapEditorComponent extends React.Component{
     constructor(props){
         super(props);
         this.state = {
             editMode:false,
-            collaborators:[],
             mapToEdit:'-1',
             selectedProgram:{
                 program_id:-1
@@ -616,10 +614,6 @@ class MapEditorComponent extends React.Component{
         }
     }
 
-    componentDidMount(){
-        this.getCollaborators();
-    }
-
     setAssociateDegree = ({target:{value}}) => {
         let associateDegreeId = value;
         this.setState({associateDegreeId});
@@ -689,7 +683,6 @@ class MapEditorComponent extends React.Component{
                             login={this.props.login} 
                             university={this.props.university}
                             programs={this.props.programs}
-                            collaborators={this.state.collaborators}
                             toggleEditMode={this.toggleEditMode}
                             setMapToEdit={this.setMapToEdit}
                             getSelectedProgramAndSetState={this.getSelectedProgramAndSetState}
@@ -710,17 +703,6 @@ class MapEditorComponent extends React.Component{
         )
     }
 
-    getCollaborators = () => {
-        getUsers().then(
-            data => data.users.map(user=>user.email)
-        ).then(
-            collaborators => {
-                this.setState({collaborators},
-                ()=> {
-                });
-            }
-        );
-    }
 }
 
 

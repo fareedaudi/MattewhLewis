@@ -169,7 +169,7 @@ export class MapFormComponent extends React.Component{
                                     <Input 
                                         key={slot.name} 
                                         type={"select"}
-                                        value={Object.keys(this.state.courseSlots[slot.name]).length?this.state.courseSlots[slot.name].id:"-1"}
+                                        value={isObjEmpty(this.state.courseSlots[slot.name])?this.state.courseSlots[slot.name].id:"-1"}
                                         invalid={true}
                                         onChange={
                                             ({target:{value}})=>{
