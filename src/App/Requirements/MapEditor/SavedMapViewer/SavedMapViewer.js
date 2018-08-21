@@ -22,7 +22,7 @@ export default class SavedMapViewer extends React.Component{
 
     getCollaborators = () => {
         getUsers().then(
-            data => data.users.map(user=>user.email)
+            data => data.users
         ).then(
             collaborators => {
                 this.setState({collaborators},

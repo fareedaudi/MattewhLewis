@@ -78,8 +78,7 @@ class AddCollaboratorsModal extends React.Component{
 
     render(){
         let map = this.props.map;
-        let collaborators = this.props.collaborators;
-        console.log('AddCollaboratorsModal: ',{map,collaborators})
+        let collaboratorEmails = this.props.collaborators.map(collaborator=>collaborator.email);
         return (
         <Modal isOpen={this.props.isOpen} toggle={this.openClose} className={this.props.className}>
             <ModalHeader toggle={this.openClose}>Map Collaborators.</ModalHeader>
@@ -94,7 +93,7 @@ class AddCollaboratorsModal extends React.Component{
                             name="collaboratorsModal"
                             id="collaboratorsModal"
                             placeholder="E.g., matthew.lewis@sjcd.edu"
-                            options={this.props.collaborators.filter(
+                            options={collaboratorEmails.filter(
                                 collaborator => collaborator !== this.props.login.state.userEmail
                                 )}
                             onChange={this.handleCollaboratorAdd}
