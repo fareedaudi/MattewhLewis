@@ -104,7 +104,6 @@ export default class LoginContextProvider extends React.Component{
     }
 
     makeRecentlyActive(){
-        console.log('Activity!');
         if(!this.state.recentlyActive){
             this.setState({
                 recentlyActive:true

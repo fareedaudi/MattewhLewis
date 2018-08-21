@@ -44,7 +44,6 @@ export class MapFormComponent extends React.Component{
                 return {courseSlots,optionsByReqId};
             },{courseSlots:{},optionsByReqId:{}}
         );
-        console.log({courseSlots,optionsByReqId});
         this.optionsByReqId = optionsByReqId;
         this.state = {
             name,
@@ -52,7 +51,6 @@ export class MapFormComponent extends React.Component{
             altCourseModalOpen:false,
             altCourseModalField:''
         };
-        console.log(this.state);
     }
 
 
@@ -80,7 +78,6 @@ export class MapFormComponent extends React.Component{
             let prevId = this.state.componentAreas[field];
             if(prevId !== -1){
                 this.selectedIds.delete(String(prevId));
-                console.log(this.selectedIds);
             }
             this.setState({
                 componentAreas:{...this.state.componentAreas,...fieldObj}
@@ -127,8 +124,6 @@ export class MapFormComponent extends React.Component{
         
         let formerSelectionNotInDefault = !default_courses.filter(def_course=>def_course.id === formerSelection.id).length;
         let newSelectionNotInDefault = !default_courses.filter(def_course=>String(def_course.id) === String(selectedCourse.id)).length;
-        console.log({formerSelection,default_courses});
-        console.log({formerSelectionNotInDefault});
         if(formerSelectionNotInDefault){
             // Remove former selection from optionsByReqId
             this.optionsByReqId[reqId] = this.optionsByReqId[reqId].filter(course=>course.id !== formerSelection.id);
@@ -157,8 +152,7 @@ export class MapFormComponent extends React.Component{
             sessionStorage.setItem('prevMapState',JSON.stringify(this.state));
         }
         */
-        let {id,univ_name,name,prog_name,assoc_name,requirements} = this.props.savedMapToEdit;
-        console.log(this.state);
+        let {univ_name,name,prog_name,assoc_name,requirements} = this.props.savedMapToEdit;
         let courseSelectionFields = requirements.map(
             requirement => (
                     <FormGroup key={"formgroup"+requirement.name}>

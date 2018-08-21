@@ -1,5 +1,5 @@
 import React from 'react';
-import {Container,Nav,NavItem,NavLink,Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from 'reactstrap';
+import {Container,Nav,NavItem,Dropdown,DropdownToggle,DropdownItem,DropdownMenu} from 'reactstrap';
 import PropTypes from 'prop-types';
 import LoginButton from './LoginButton/LoginButton';
 import {WithLogin} from '../../contexts/LoginContext';
@@ -76,7 +76,7 @@ class HeaderComponent extends React.Component {
       <h5>SJC Pathway Mapping Toolkit</h5>
         <Nav tabs>
           <Dropdown nav isOpen={this.state.programDropdownOpen} toggle={this.toggleProgram}>
-            <DropdownToggle className={this.state.requirementsActive?"active":""} nav caret className="active">
+            <DropdownToggle nav caret className="active">
               Select a Transfer University
             </DropdownToggle>
             <DropdownMenu style={{maxHeight:"400px",overflowY:"scroll"}}>

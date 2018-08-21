@@ -24,6 +24,10 @@ class AddCollaboratorsModal extends React.Component{
         }
     }
 
+    componentDidMount(){
+        this.initializeCollaborators();
+    }
+
     openClose = () => {
         this.initializeCollaborators();
         this.props.toggle();
@@ -41,17 +45,6 @@ class AddCollaboratorsModal extends React.Component{
         this.setState({newMapCollaborators:prevCollaborators});
     }
 
-    componentDidMount(){
-        let prevCollaborators = this.props.map.users.reduce(
-            (collaborators,collaboratorData) => {
-                let newEmail = collaboratorData.email;
-                if(newEmail !== this.props.login.state.userEmail){
-                    collaborators.push(collaboratorData.email);
-                }
-                return collaborators;
-            },[]);
-        this.setState({newMapCollaborators:prevCollaborators});
-    }
 
     handleCollaboratorAdd = ([selectedCollaborator]) => {
         let currentCollaborators = this.state.newMapCollaborators;
@@ -74,10 +67,16 @@ class AddCollaboratorsModal extends React.Component{
         this.setState({newMapCollaborators});
     }
 
-
+    handleNewCollaboratorsSubmission = (newCollaboratorEmails) => {
+        let map = this.props.map;
+        let newUsers = this.props.collaborators.filter(
+            collaborator => (collaborator.email in newCollaboratorEmails) || (collaborator.id ===map.user_id)
+        );
+        map.users = newUsers;
+        this.props.handler(map);
+    }
 
     render(){
-        let map = this.props.map;
         let collaboratorEmails = this.props.collaborators.map(collaborator=>collaborator.email);
         return (
         <Modal isOpen={this.props.isOpen} toggle={this.openClose} className={this.props.className}>
@@ -123,7 +122,7 @@ class AddCollaboratorsModal extends React.Component{
             <Button color="secondary" onClick={this.openClose}>Close</Button>
             <Button 
                 color="primary" 
-                onClick={()=>{this.props.handler(this.props.map_id,this.state.newMapCollaborators)}}
+                onClick={this.handleNewCollaboratorsSubmission}
             >
                 Update collaborators
             </Button>

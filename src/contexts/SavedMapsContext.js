@@ -28,7 +28,7 @@ class SavedMapsContextProviderComponent extends React.Component{
         axios.delete(
             `${ROOT_URL}/api/maps/${map_id}`, {headers: {Authorization}}
             ).then(
-                response => {console.log(response.status);return response.data;}
+                response => response.data
             ).then(
                 (result) => {this.setState({
                             savedMaps:this.state.savedMaps.filter((savedMap)=>(savedMap.id!==Number(map_id)))
@@ -38,7 +38,6 @@ class SavedMapsContextProviderComponent extends React.Component{
 
     saveMap = (mapData) => {
         var token = sessionStorage.getItem('jwtToken');
-        console.log('Map Saved!');
         axios.post(
             `${ROOT_URL}/save_map`, {token,mapData}
         ).then(
@@ -52,10 +51,11 @@ class SavedMapsContextProviderComponent extends React.Component{
         )
     }
 
-    shareMap = (map_id,newMapCollaborators) => {
+    shareMap = (map) => {
         var token = sessionStorage.getItem('jwtToken');
+        const Authorization = `Bearer ${token}`;
         axios.post(
-            `${ROOT_URL}/update_collaborators`, {map_id,newMapCollaborators}
+            `${ROOT_URL}/api/maps/${map.id}`, map, {headers: Authorization}
         ).then(
             response => response.data
         ).then(

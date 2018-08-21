@@ -6,8 +6,6 @@ import {
     CardText
 } from 'reactstrap';
 import PropTypes from 'prop-types';
-import axios from 'axios';
-import {ROOT_URL} from '../../../api';
 import SavedMapViewer from './SavedMapViewer/SavedMapViewer';
 import SavedMapEditor from './SavedMapEditor/SavedMapEditor';
 import {WithLogin} from '../../../contexts/LoginContext';

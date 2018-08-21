@@ -16,7 +16,6 @@ export default class SavedMapViewer extends React.Component{
 
 
     componentDidMount(){
-        console.log('SavedMapViewer mounted!');
         this.getCollaborators();
     }
 
