@@ -37,7 +37,6 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     saveMap = (map) => {
-        console.log({map});
         var token = sessionStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
         return axios({
@@ -57,7 +56,6 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     shareMap = (map) => {
-        console.log({map});
         var token = sessionStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
         return axios({

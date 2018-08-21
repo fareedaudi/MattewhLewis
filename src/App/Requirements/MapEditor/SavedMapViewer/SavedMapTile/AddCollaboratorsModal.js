@@ -73,7 +73,6 @@ class AddCollaboratorsModal extends React.Component{
             collaborator => (newCollaboratorEmails.includes(collaborator.email)) || (collaborator.id ===map.user_id)
         );
         map.users = newUsers;
-        console.log(newUsers);
         this.props.handler(map);
     }
 
