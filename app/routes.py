@@ -5,7 +5,6 @@ from app.models import db,University,Program,Component,Course,SJC,User,Map,Core,
 from flask_login import current_user, login_user, logout_user
 from flask_restful import Resource,Api
 from slugify import slugify
-from pprint import pprint
 import json as JSON
 from functools import reduce
 
@@ -59,7 +58,6 @@ class Universities(Resource):
                 (university.id,university.name)
             )} for university in universities
         ]
-        pprint(universities_list)
         return universities_list
 
 class ProgramsByUniv(Resource):
@@ -244,7 +242,6 @@ def login():
         all_maps = db.session.query(Map).all()
         user_maps = [map_ for map_ in all_maps if user in map_.users]
         token = user.generate_auth_token().decode('ascii')
-        print(token)
         return json.jsonify({
             'loggedIn':True,
             'userId':user.id,
@@ -311,7 +308,6 @@ def create_map():
     if(token != None):
         user = User.verify_auth_token(token)
     if(user):
-        print('Map workin!')
         map_data = form_data['mapState']
         new_map = Map(
             user_id=user.id,
@@ -370,16 +366,14 @@ def save_map():
             map_name = map_data['name']
             component_areas = map_data['componentAreas']
             if(map_.map_name != map_name):
-                print('Renaming map!')
                 map_.map_name=map_name
                 db.session.commit()
             for field,course_id in component_areas.items():
-                print(field,course_id)
                 if(course_id != -1):
                     setattr(map_,field,course_id)
                     db.session.commit()
                 else:
-                    print('No course!')
+                    pass
             return json.jsonify({
                 'mapSaved':True
             })
@@ -414,13 +408,11 @@ def saved_maps_by_user():
     form_data = json.loads(request.data)
     token = form_data['token']
     if(token != None):
-        print('token present!')
         user = User.verify_auth_token(token)
     if(user):
         all_maps = db.session.query(Map).all()
         user_saved_maps = [appify_map(map_) for map_ in all_maps if user in map_.users]
         return JSON.dumps(user_saved_maps)
-    print('no user!')
     return 'Error!',401
 
 def appify_map(map_):
@@ -651,13 +643,11 @@ def create_new_requirement(map_id,code,info,program_courses):
         map_id = map_id,
         hours = info['hours']
     )
-    print(f'Attempting to add {new_req.name}')
     try:
         db.session.add(new_req)
         db.session.commit()
-        print(f'\t{new_req.name} successfully added!')
     except:
-        print(f'\t{new_req.name} could not be added.')
+        pass
     applicable_courses = program_courses.get(code) or []
     for course_obj in applicable_courses:
         course = db.session.query(SJC).get(course_obj['sjc_id'])
@@ -690,7 +680,6 @@ def add_requirements(map_,program_courses):
     other_courses = program_courses.get('100') or []
     for course_object in other_courses:
         course = db.session.query(SJC).get(course_object['sjc_id'])
-        print(course)
         map_.applicable_courses.append(course)
     db.session.commit()
 
@@ -711,9 +700,7 @@ def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collabor
 
 def get_user_from_token(request):
     user = None
-    pprint(request.headers)
     label,token = request.headers['Authorization'].split(' ')
-    print(label,token)
     if(label=="Bearer" and token):
         user = User.verify_auth_token(token)
     return user
@@ -730,7 +717,6 @@ def create_new_map(request):
     user_id = user.id
     created_at = ''
     collaborators = form_data['newMapCollaborators']
-    print(collaborators)
     initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collaborators)
     return 'Success!',200
     
@@ -948,13 +934,11 @@ users_handlers = {
 
 @app.route('/api/maps',methods=['POST','GET'])
 def GET_POST_maps():
-    print(request)
     handler = maps_handlers[request.method]
     return handler(request)
 
 @app.route('/api/maps/<int:id>', methods=['DELETE','PATCH'])
 def DELETE_PATCH_maps(id):
-    print(request)
     handler = maps_handlers[request.method]
     return handler(id,request)
 
