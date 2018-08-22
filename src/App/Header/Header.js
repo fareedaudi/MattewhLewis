@@ -94,7 +94,6 @@ class HeaderComponent extends React.Component {
                   onClick={this.props.selectionHandler}
                   value={obj.university_id}  
                 >{obj.university_name}</DropdownItem>
-                // Refreshes entire page, because router doesn't trigger re-rendering of components (for AJAX, etc.)
               ))}
             </DropdownMenu>
           </Dropdown>

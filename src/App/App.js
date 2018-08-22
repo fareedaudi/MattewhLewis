@@ -41,8 +41,8 @@ class AppComponent extends React.Component{
     ];
   }
 
-  onUniversitySelection = (ev) => {
-    let selectedUniversityId = ev.target.value;
+  onUniversitySelection = ({target:{value}}) => {
+    let selectedUniversityId = value;
     if(selectedUniversityId !== this.state.selectedUniversityId){
       this.setState({selectedUniversityId});
     }

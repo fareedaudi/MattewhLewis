@@ -41,6 +41,12 @@ export default class CreateMapModal extends React.Component{
     componentDidMount(){
     }
 
+    componentWillReceiveProps(nextProps){
+        if(this.props.university.university_id !== nextProps.university.university_id){
+            this.setState({selectedUniversityId:nextProps.university.university_id});
+        }
+    }
+
     openClose = (ev) => {
         this.setState(this.defaultState);
         this.props.toggle(ev);

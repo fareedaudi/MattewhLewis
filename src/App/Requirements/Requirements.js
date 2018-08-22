@@ -64,18 +64,7 @@ class RequirementsComponent extends React.Component{
         });
     }
 
-    static getDerivedStateFromProps(nextProps,prevState){
-        if(prevState.university !== nextProps.university){
-            return {
-                programs:[],
-                selectedProgram:{
-                    program_id:-1.
-                }
-            }
-        } else{
-            return null;
-        }
-    }
+
 
     componentDidUpdate(prevProps,prevState){
         if(this.props.university !== prevProps.university){
