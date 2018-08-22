@@ -676,11 +676,13 @@ def add_requirements(map_,program_courses):
         applicable_courses = program_courses.get(code) or []
         for course_obj in applicable_courses:
             course = db.session.query(SJC).get(course_obj['sjc_id'])
-            map_.applicable_courses.append(course)
+            if(course not in map_.applicable_courses):
+                map_.applicable_courses.append(course)
     other_courses = program_courses.get('100') or []
     for course_object in other_courses:
         course = db.session.query(SJC).get(course_object['sjc_id'])
-        map_.applicable_courses.append(course)
+        if(course not in map_.applicable_courses):
+            map_.applicable_courses.append(course)
     db.session.commit()
 
 def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collaborators):
