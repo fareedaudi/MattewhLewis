@@ -6,8 +6,6 @@ import {
     CardText
 } from 'reactstrap';
 import PropTypes from 'prop-types';
-import axios from 'axios';
-import {ROOT_URL} from '../../../api';
 import SavedMapViewer from './SavedMapViewer/SavedMapViewer';
 import SavedMapEditor from './SavedMapEditor/SavedMapEditor';
 import {WithLogin} from '../../../contexts/LoginContext';
@@ -17,7 +15,6 @@ class MapEditorComponent extends React.Component{
         super(props);
         this.state = {
             editMode:false,
-            collaborators:[],
             mapToEdit:'-1',
             selectedProgram:{
                 program_id:-1
@@ -615,10 +612,6 @@ class MapEditorComponent extends React.Component{
         }
     }
 
-    componentDidMount(){
-        this.getCollaborators();
-    }
-
     setAssociateDegree = ({target:{value}}) => {
         let associateDegreeId = value;
         this.setState({associateDegreeId});
@@ -688,12 +681,10 @@ class MapEditorComponent extends React.Component{
                             login={this.props.login} 
                             university={this.props.university}
                             programs={this.props.programs}
-                            collaborators={this.state.collaborators}
                             toggleEditMode={this.toggleEditMode}
                             setMapToEdit={this.setMapToEdit}
                             getSelectedProgramAndSetState={this.getSelectedProgramAndSetState}
                             savedMaps={this.props.savedMaps}
-                            newSavedMaps={this.props.newSavedMaps}
                             associateDegrees={this.associateDegrees}
                             setAssociateDegree={this.setAssociateDegree}
                             />
@@ -710,19 +701,6 @@ class MapEditorComponent extends React.Component{
         )
     }
 
-    getCollaborators = () => {
-        axios.get(
-            `${ROOT_URL}/user_emails`
-        ).then(
-            response => response.data
-        ).then(
-            collaborators => {
-                this.setState({collaborators},
-                ()=> {
-                });
-            }
-        );
-    }
 }
 
 

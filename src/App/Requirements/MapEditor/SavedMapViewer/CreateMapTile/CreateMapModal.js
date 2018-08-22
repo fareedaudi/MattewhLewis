@@ -159,7 +159,7 @@ export default class CreateMapModal extends React.Component{
                             name="collaborators"
                             id="collaborators"
                             placeholder="E.g., matthew.lewis@sjcd.edu"
-                            options={this.props.collaborators.filter(
+                            options={this.props.collaborators.map(collaborator=>collaborator.email).filter(
                                 collaborator => collaborator !== this.props.login.state.userEmail
                                 )}
                             onChange={this.handleCollaboratorAdd}

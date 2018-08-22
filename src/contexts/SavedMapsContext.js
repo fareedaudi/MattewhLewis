@@ -10,8 +10,7 @@ class SavedMapsContextProviderComponent extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            savedMaps:[],
-            newSavedMaps:[]
+            savedMaps:[]
         }
         this.mapActionHandlers = {
             deleteMap:this.deleteMap,
@@ -19,48 +18,33 @@ class SavedMapsContextProviderComponent extends React.Component{
             approveMap:this.approveMap,
             getSavedMaps:this.getSavedMaps,
             saveMap:this.saveMap,
-            getNewSavedMaps:this.getNewSavedMaps
+            createMap:this.createMap
         }
     }
 
     deleteMap = (map_id) => {
         var token = sessionStorage.getItem('jwtToken');
-        axios.post(
-            `${ROOT_URL}/delete_map`, {token, map_id}
+        const Authorization = `Bearer ${token}`;
+        axios.delete(
+            `${ROOT_URL}/api/maps/${map_id}`, {headers: {Authorization}}
             ).then(
-            response => response.data
+                response => response.data
             ).then(
-                (result) => {
-                    if(result.mapDeleted){
-                        this.setState({
+                (result) => {this.setState({
                             savedMaps:this.state.savedMaps.filter((savedMap)=>(savedMap.id!==Number(map_id)))
-                        });
-                    }
-                }
+                    })}
             );
     }
 
-    saveMap = (mapData) => {
+    saveMap = (map) => {
         var token = sessionStorage.getItem('jwtToken');
-        console.log('Map Saved!');
-        axios.post(
-            `${ROOT_URL}/save_map`, {token,mapData}
-        ).then(
-            response => response.data
-        ).then(
-            result => {
-                if(result.mapSaved){
-                    this.getSavedMaps();
-                }
-            }
-        )
-    }
-
-    shareMap = (map_id,newMapCollaborators) => {
-        var token = sessionStorage.getItem('jwtToken');
-        axios.post(
-            `${ROOT_URL}/update_collaborators`, {token,map_id,newMapCollaborators}
-        ).then(
+        const Authorization = `Bearer ${token}`;
+        return axios({
+            method:'PATCH',
+            url:`${ROOT_URL}/api/maps/${map.id}`,
+            headers: {Authorization},
+            data:map
+        }).then(
             response => response.data
         ).then(
             result => {
@@ -71,6 +55,47 @@ class SavedMapsContextProviderComponent extends React.Component{
         );
     }
 
+    shareMap = (map) => {
+        var token = sessionStorage.getItem('jwtToken');
+        const Authorization = `Bearer ${token}`;
+        return axios({
+            method:'PATCH',
+            url:`${ROOT_URL}/api/maps/${map.id}`,
+            headers: {Authorization},
+            data:map
+        }).then(
+            response => response.data
+        ).then(
+            result => {
+                if(result.collaboratorsUpdated){
+                    this.getSavedMaps();
+                }
+            }
+        );
+    }
+
+    createMap = (mapState) => {
+        var token = sessionStorage.getItem('jwtToken');
+        const Authorization = `Bearer ${token}`;
+        if(String(mapState.selectedProgramId) === "-1"){
+            return;
+        }
+        return axios({
+            method:'POST',
+            url:`${ROOT_URL}/api/maps`,
+            headers:{Authorization},
+            data:mapState
+        }).then(
+            response=>{
+                if(response.status===200){
+                    this.getSavedMaps();
+                } else {
+                    throw new Error('Error!');
+                }
+            }
+        )
+    }
+
     approveMap = () => {
 
     }
@@ -78,7 +103,6 @@ class SavedMapsContextProviderComponent extends React.Component{
     componentWillReceiveProps(nextProps){
         if(!this.props.loggedIn && nextProps.loggedIn){
             this.getSavedMaps();
-            this.getNewSavedMaps();
         } else if(this.props.loggedIn && !nextProps.loggedIn){
             this.resetSavedMaps({});
         }
@@ -91,30 +115,17 @@ class SavedMapsContextProviderComponent extends React.Component{
 
     getSavedMaps = () => {
         var token = sessionStorage.getItem('jwtToken');
-        axios.post(
-            `${ROOT_URL}/saved_maps_by_user`, {token}
-        )
-        .then(response=>response.data)
-        .then(savedMaps=>{
-            this.setState({savedMaps});
-        }).catch((error)=>{
-    
-        })
-    }
-
-    getNewSavedMaps = () => {
-        var token = sessionStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
         axios.get(
             `${ROOT_URL}/api/maps`,{headers: {Authorization}}
         )
         .then(response => response.data)
-        .then(({maps}) => this.setState({newSavedMaps:maps}));
+        .then(({maps}) => this.setState({savedMaps:maps}));
     }
 
     render(){
         return (
-        <SavedMapsContext.Provider value={{savedMaps:this.state.savedMaps,mapActionHandlers:this.mapActionHandlers,newSavedMaps:this.state.newSavedMaps}}>
+        <SavedMapsContext.Provider value={{savedMaps:this.state.savedMaps,mapActionHandlers:this.mapActionHandlers}}>
             {this.props.children}
         </SavedMapsContext.Provider>
         )
@@ -145,7 +156,7 @@ export function WithSavedMaps(SavedMapsConsumer){
                 <SavedMapsContext.Consumer>
                     {
                         (savedMapsContext) => (
-                            <SavedMapsConsumer savedMaps={savedMapsContext.savedMaps} newSavedMaps={savedMapsContext.newSavedMaps} {...this.props}/>
+                            <SavedMapsConsumer savedMaps={savedMapsContext.savedMaps} {...this.props}/>
                         )
                     }
                 </SavedMapsContext.Consumer>

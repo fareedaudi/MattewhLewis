@@ -37,10 +37,10 @@ class SavedMapTileComponent extends React.Component{
         this.props.mapActionHandlers.deleteMap(map_id);
     }
 
-    shareMap(map_id,mapCollaborators){
+    shareMap(map){
         this.props.login.actions.makeRecentlyActive();
         this.toggleCollaboratorsModal();
-        this.props.mapActionHandlers.shareMap(map_id,mapCollaborators);
+        this.props.mapActionHandlers.shareMap(map);
     }
 
     launchMapEditor = (ev) => {
@@ -51,7 +51,6 @@ class SavedMapTileComponent extends React.Component{
     }
 
     render(){
-
         let {approveMap} = this.props.mapActionHandlers;
         return (<div className="saved-map-tile">
             <ListGroupItem className="justify-content-between d-flex">
