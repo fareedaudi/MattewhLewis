@@ -56,8 +56,8 @@ export class MapFormComponent extends React.Component{
         this.applicableCourseIds.add("-1"); // Unspecified courses are "applicable."
     }
 
-    isCourseApplicable = ({id}) => {
-        return this.applicableCourseIds.has(String(id||"-1"));
+    isCourseNotApplicable = ({id}) => {
+        return !this.applicableCourseIds.has(String(id||"-1"));
     }
 
     handleNameChange = ({target:{value}}) => {
@@ -185,7 +185,7 @@ export class MapFormComponent extends React.Component{
                                         key={slot.name} 
                                         type={"select"}
                                         value={isObjEmpty(course)?course.id:"-1"}
-                                        invalid={!this.isCourseApplicable(course)}
+                                        invalid={this.isCourseNotApplicable(course)}
                                         onChange={
                                             ({target:{value}})=>{
                                                 if(value === "-2"){
@@ -200,7 +200,7 @@ export class MapFormComponent extends React.Component{
                                     <option value={"-1"}>Please select a course.</option>
                                     {
                                         this.optionsByReqId[requirement.id].map(
-                                            course=><option value={course.id}>{course.rubric} {course.number} - {course.name}</option>
+                                            (course,i)=><option key={i} value={course.id}>{course.rubric} {course.number} - {course.name}</option>
                                         )
                                     }
                                     <option value={"-2"}>Select alternative course.</option>
