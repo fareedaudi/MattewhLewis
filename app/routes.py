@@ -7,6 +7,7 @@ from flask_restful import Resource,Api
 from slugify import slugify
 import json as JSON
 from functools import reduce
+from pprint import pprint
 
 api = Api(app)
 
@@ -570,11 +571,11 @@ general_associates_degree = {
     },
     '090':{
         'name':'Component Area Option',
-        'hours':'6'
+        'hours':'4'
     },
     'trans':{
         'name':'Transfer Path',
-        'hours':'18'
+        'hours':'12'
     }
 }
 
@@ -662,12 +663,15 @@ def create_new_requirement(map_id,code,info,program_courses):
     return new_req
 
 def add_users(map_,user_emails):
+    user = User.query.get(map_.user_id)
     for email in user_emails:
+        if(email == user.email):
+            continue
         user = db.session.query(User).filter(User.email==email).first()
         if(not user):
             return
         map_.users.append(user)
-        db.session.commit()
+    db.session.commit()
 
 def add_requirements(map_,program_courses):
     for code,info in general_associates_degree.items():
@@ -694,6 +698,8 @@ def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collabor
         user_id=user_id,
         created_at=created_at
     )
+    user = User.query.get(user_id)
+    map_.users.append(user)
     db.session.add(map_)
     db.session.commit()
     program_courses = get_courses_by_code(prog_id)
@@ -728,9 +734,9 @@ def get_maps_(request):
     if(not user):
         return 'Error',401
     user_id = user.id
-    maps_ = db.session.query(NewMap).filter(
-        NewMap.user_id == int(user_id)
-    ).all()
+    user_created_maps = NewMap.query.filter(NewMap.user_id == user.id).all()
+    all_maps = NewMap.query.all()
+    maps = [map_ for map_ in all_maps if user in map_.users]
     maps_data = JSON.dumps({
         'maps':[
             {
@@ -814,7 +820,8 @@ def get_maps_(request):
                                                     'id':db.session.query(SJC).get(slot.course_id).id,
                                                     'name':db.session.query(SJC).get(slot.course_id).name,
                                                     'rubric':db.session.query(SJC).get(slot.course_id).rubric,
-                                                    'number':db.session.query(SJC).get(slot.course_id).number
+                                                    'number':db.session.query(SJC).get(slot.course_id).number,
+                                                    'hours':db.session.query(SJC).get(slot.course_id).hours
                                                 } if slot.course_id else {})
                                             )
                                         }
@@ -831,7 +838,7 @@ def get_maps_(request):
                     ]+[{'id':user.id,'email':user.email}])
                 )
             }
-        for map_ in maps_]
+        for map_ in maps]
     })
     return app.response_class(
         response = maps_data,
@@ -896,9 +903,9 @@ def update_map_(id,request):
         #Update users
     map_to_edit.users = []
     for new_user_obj in map_data['users']:
-        if(new_user_obj['id'] != user.id):
-            new_user = db.session.query(User).get(new_user_obj['id'])
-            map_to_edit.users.append(new_user)
+        pprint(map_data)
+        new_user = db.session.query(User).get(new_user_obj['id'])
+        map_to_edit.users.append(new_user)
         
     db.session.commit()
     return '',200
