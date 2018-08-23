@@ -124,6 +124,7 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     render(){
+        console.log(this.state.savedMaps);
         return (
         <SavedMapsContext.Provider value={{savedMaps:this.state.savedMaps,mapActionHandlers:this.mapActionHandlers}}>
             {this.props.children}

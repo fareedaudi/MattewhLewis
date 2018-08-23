@@ -11,13 +11,14 @@ import PropTypes from 'prop-types';
 import { WithSJCCourses } from '../../../../contexts/SJCCourseContext';
 import AlternativeCourseModal from './AlternativeCourseModal';
 
-const isObjEmpty = (obj) => !!Object.keys(obj).length;
+const isObjNotEmpty = (obj) => !!Object.keys(obj).length;
 
 export class MapFormComponent extends React.Component{
     constructor(props){
         super(props);
         let savedMapToEdit = this.props.savedMapToEdit;
         let {name,requirements} = savedMapToEdit;
+        this.alreadySelected = new Set();
         let {courseSlots,optionsByReqId} = requirements.reduce(
             ({courseSlots,optionsByReqId},req)=> {
                 optionsByReqId[req.id] = [];
@@ -35,6 +36,9 @@ export class MapFormComponent extends React.Component{
                 req.course_slots.forEach(
                     course_slot => {
                         courseSlots[course_slot.name] = course_slot.course
+                        if(course_slot.course.id){
+                            this.alreadySelected.add(String(course_slot.course.id))
+                        }
                         if(Object.keys(course_slot.course).length && (!idsOfCoursesAddedToOptions.has(course_slot.course.id))){
                             optionsByReqId[req.id].push(course_slot.course);
                             idsOfCoursesAddedToOptions.add(course_slot.course.id);
@@ -50,18 +54,39 @@ export class MapFormComponent extends React.Component{
             courseSlots,
             altCourseModalOpen:false,
             altCourseModalReqId:'',
-            altCourseModalSlotId:''
+            altCourseModalSlotId:'',
+            savedMapToEdit
         };
-        this.applicableCourseIds = new Set(this.props.savedMapToEdit.applicable_courses.map(course=>String(course.id)));
+        this.applicableCourseIds = new Set(this.state.savedMapToEdit.applicable_courses.map(course=>String(course.id)));
         this.applicableCourseIds.add("-1"); // Unspecified courses are "applicable."
     }
 
+    isCourseNotSelectable = ({id}) => {
+        return this.alreadySelected.has(String(id));
+    }
+
     isCourseNotApplicable = ({id}) => {
-        return !this.applicableCourseIds.has(String(id||"-1"));
+        if(!id){
+            return null;
+        }
+        return !this.applicableCourseIds.has(String(id));
+    }
+
+    isCourseApplicable = ({id}) => {
+        if(!id) {
+            return null;
+        }
+        return this.applicableCourseIds.has(String(id));
     }
 
     handleNameChange = ({target:{value}}) => {
-        this.setState({name:value},()=>{this.props.savedMapToEdit.name=value});
+        this.setState({
+            name:value,
+            savedMapToEdit:{
+                ...this.state.savedMapToEdit,
+                name:value
+            }
+        });
     }
 
     toggleAltCourseModal = () => {
@@ -78,7 +103,7 @@ export class MapFormComponent extends React.Component{
     }
 
     getSelectionFromModal = (reqId,slotId,course) => {
-        let requirement = this.props.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
+        let requirement = this.state.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
         let slot = requirement.course_slots.filter(slot=>slot.id===slotId)[0];
         let slotName = slot.name;
         console.log(slotName);
@@ -127,7 +152,7 @@ export class MapFormComponent extends React.Component{
 
     handleCourseSelection = (reqId,slotId,slotName,selectedCourse) => {
         let formerSelection = this.state.courseSlots[slotName];
-        let {default_courses} = this.props.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
+        let {default_courses} = this.state.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
         
         let formerSelectionNotInDefault = !default_courses.filter(def_course=>def_course.id === formerSelection.id).length;
         let newSelectionNotInDefault = !default_courses.filter(def_course=>String(def_course.id) === String(selectedCourse.id)).length;
@@ -140,8 +165,15 @@ export class MapFormComponent extends React.Component{
             }
         }
 
+
         // Insert new selection into optionsByReq[reqId]
 
+        if(selectedCourse.id){
+            this.alreadySelected.add(String(selectedCourse.id));
+        }
+        if(formerSelection.id){
+            this.alreadySelected.delete(String(formerSelection.id));
+        }
         this.setState(
             prevState => ({
                 ...prevState,
@@ -151,9 +183,11 @@ export class MapFormComponent extends React.Component{
                 }
             }),
             () => {
-                let req = this.props.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
+                // Hacky way to deal with the fact that I am using a poorly nested data structure in state.
+                let req = this.state.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
                 let slot = req.course_slots.filter(slot=>slot.id===slotId)[0];
                 slot.course = selectedCourse;
+                this.forceUpdate();
             }
         );
     }
@@ -172,25 +206,37 @@ export class MapFormComponent extends React.Component{
             sessionStorage.setItem('prevMapState',JSON.stringify(this.state));
         }
         */
-        let {univ_name,name,prog_name,assoc_name,requirements} = this.props.savedMapToEdit;
+        console.log(this.alreadySelected);
+        let {univ_name,prog_name,assoc_name,requirements} = this.state.savedMapToEdit;
+        let totalHours = 0;
         let courseSelectionFields = requirements.map(
-            requirement => (
+            requirement => {
+                let reqId = requirement.id;
+                let requirementFromSavedMap = this.state.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
+                let reqHours = requirementFromSavedMap.course_slots.reduce(
+                    (reqHours,course_slot)=>{
+                        return reqHours + (course_slot.course.hours || 0);
+                    },0);
+                totalHours += reqHours;
+                return (
                     <FormGroup key={"formgroup"+requirement.name}>
-                        <Label><strong>{`${requirement.name} (${requirement.hours} hours)`}</strong></Label>
+                        <Label><strong>{`${requirement.name} (${reqHours} out of ${requirement.hours} hours)`}</strong></Label>
                         {requirement.course_slots.map(
                             slot => {
                                 let course = this.state.courseSlots[slot.name] || {};
                                 return (<div key={slot.name}>
-                                    <Input 
+                                    <Input
                                         key={slot.name} 
                                         type={"select"}
-                                        value={isObjEmpty(course)?course.id:"-1"}
+                                        value={isObjNotEmpty(course)?course.id:"-1"}
+                                        valid={this.isCourseApplicable(course)}
                                         invalid={this.isCourseNotApplicable(course)}
                                         onChange={
                                             ({target:{value}})=>{
                                                 if(value === "-2"){
                                                     this.initializeAltCourseModal(requirement.id,slot.id);
-                                                }
+                                                    return;
+                                                } 
                                                 let name = slot.name;
                                                 let course = this.optionsByReqId[requirement.id].filter(def_course=>String(def_course.id)===value)[0] || {};
                                                 this.handleCourseSelection(requirement.id,slot.id,name,course);
@@ -199,8 +245,8 @@ export class MapFormComponent extends React.Component{
                                     >
                                     <option value={"-1"}>Please select a course.</option>
                                     {
-                                        this.optionsByReqId[requirement.id].map(
-                                            (course,i)=><option key={i} value={course.id}>{course.rubric} {course.number} - {course.name}</option>
+                                        this.optionsByReqId[requirement.id].filter(course=>isObjNotEmpty(course)).map(
+                                            (course,i)=><option key={course.id} value={course.id} disabled={this.isCourseNotSelectable(course)}>{course.rubric} {course.number} - {course.name}</option>
                                         )
                                     }
                                     <option value={"-2"}>Select alternative course.</option>
@@ -211,7 +257,7 @@ export class MapFormComponent extends React.Component{
                             }
                         )}
                     </FormGroup>
-                 )
+                );}
         );
         return (
         <div>
@@ -235,11 +281,12 @@ export class MapFormComponent extends React.Component{
                 </FormGroup>
                 <hr/>
                 {courseSelectionFields}
+                <h6>Total hours selected: {totalHours}</h6>
             </Form>
             <Form>
                 <FormGroup>
                     <Button className="btn-sm" color="secondary" onClick={this.props.handleClose}>Close</Button>
-                    <Button className="btn-sm" color="primary" onClick={()=>this.props.handleSave(this.props.savedMapToEdit)}>Save</Button>
+                    <Button className="btn-sm" color="primary" onClick={()=>this.props.handleSave(this.state.savedMapToEdit)}>Save</Button>
                 </FormGroup>
             </Form>
             <AlternativeCourseModal

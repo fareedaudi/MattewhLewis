@@ -100,6 +100,7 @@ export default class CreateMapModal extends React.Component{
     }
     
     render(){
+        console.log(this.state);
         let modalState = this.state;
         return (
             <Modal isOpen={this.props.isOpen} toggle={this.openClose} className={this.props.className}>

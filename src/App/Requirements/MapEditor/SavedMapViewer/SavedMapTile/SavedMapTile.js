@@ -51,6 +51,7 @@ class SavedMapTileComponent extends React.Component{
     }
 
     render(){
+        console.log(this.props.map);
         let {approveMap} = this.props.mapActionHandlers;
         return (<div className="saved-map-tile">
             <ListGroupItem className="justify-content-between d-flex">

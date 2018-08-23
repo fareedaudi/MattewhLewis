@@ -51,8 +51,7 @@ class ProgramViewerComponent extends React.Component{
     }
 
     render(){
-        console.log(this.props);
-        return(
+            return(
             <Card>
                 <CardHeader>
                     <h4>Programs: {this.props.university.university_name}</h4>
