@@ -107,6 +107,13 @@ export class MapFormComponent extends React.Component{
         let slot = requirement.course_slots.filter(slot=>slot.id===slotId)[0];
         let slotName = slot.name;
         console.log(slotName);
+        if(course.id){
+            this.alreadySelected.add(String(course.id));
+        }
+        let prevSelection = this.state.courseSlots[slotName];
+        if(prevSelection.id){
+            this.alreadySelected.delete(String(prevSelection.id));
+        }
         this.setState(prevState => ({
             ...prevState,
             courseSlots:{
