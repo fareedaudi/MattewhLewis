@@ -22,13 +22,14 @@ export default class NoteModal extends React.Component {
 
     componentWillReceiveProps(nextProps){
         this.setState({
-            applicable:nextProps.noteModalNote.applicable,
-            text:nextProps.noteModalNote.text
+            applicable:(nextProps.noteModalNote.applicable),
+            text:(nextProps.noteModalNote.text || '')
         });
     }
 
     openClose = () => {
         this.props.toggle();
+        this.resetModalState();
     }
 
     onSelectChange = ({target:{name,value}}) => {
@@ -45,8 +46,6 @@ export default class NoteModal extends React.Component {
             [name]:checked
         });
     }
-
-
 
 
     resetModalState = () => {
