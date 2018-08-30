@@ -3,6 +3,8 @@ import {
     Form,
     FormGroup,
     Input,
+    InputGroup,
+    InputGroupAddon,
     Button,
     Label,
     FormFeedback
@@ -10,6 +12,7 @@ import {
 import PropTypes from 'prop-types';
 import { WithSJCCourses } from '../../../../contexts/SJCCourseContext';
 import AlternativeCourseModal from './AlternativeCourseModal';
+import NoteModal from './NoteModal';
 
 const isObjNotEmpty = (obj) => !!Object.keys(obj).length;
 
@@ -55,10 +58,33 @@ export class MapFormComponent extends React.Component{
             altCourseModalOpen:false,
             altCourseModalReqId:'',
             altCourseModalSlotId:'',
-            savedMapToEdit
+            savedMapToEdit,
+            noteModalOpen:false,
+            noteModalNote:{},
+            noteModalCourse:{},
+            noteModalSlot:{}
+
         };
         this.applicableCourseIds = new Set(this.state.savedMapToEdit.applicable_courses.map(course=>String(course.id)));
         this.applicableCourseIds.add("-1"); // Unspecified courses are "applicable."
+    }
+
+    launchNoteModal = (slot) => {
+        let {note,course} = slot;
+        this.setState({
+            noteModalNote:note,
+            noteModalCourse:course,
+            noteModalOpen:true,
+            noteModalSlot:slot
+        });
+    }
+
+    editNote = ({id,req_id,note}) => {
+        let requirement = this.state.savedMapToEdit.requirements.filter(req=>req.id===req_id)[0];
+        let slot = requirement.course_slots.filter(slot=>slot.id===id)[0];
+        slot.note=note;
+        console.log('Edited map!',this.state.savedMapToEdit);
+        this.forceUpdate();
     }
 
     isCourseNotSelectable = ({id}) => {
@@ -95,6 +121,12 @@ export class MapFormComponent extends React.Component{
         });
     }
 
+    toggleNoteModal = () => {
+        this.setState({
+            noteModalOpen:!this.state.noteModalOpen
+        });
+    }
+
     createCourseModal = (fieldName) => {
         this.setState({
             altCourseModalField:fieldName,
@@ -102,11 +134,11 @@ export class MapFormComponent extends React.Component{
         });
     }
 
-    getSelectionFromModal = (reqId,slotId,course) => {
+    getSelectionFromModal = (reqId,slotId,course,note) => {
+
         let requirement = this.state.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
         let slot = requirement.course_slots.filter(slot=>slot.id===slotId)[0];
         let slotName = slot.name;
-        console.log(slotName);
         if(course.id){
             this.alreadySelected.add(String(course.id));
         }
@@ -120,7 +152,13 @@ export class MapFormComponent extends React.Component{
                 ...this.state.courseSlots,
                 [slotName]:course
             }
-        }),()=>{slot.course = course});
+        }),()=>{
+            slot.course = course
+            if(isObjNotEmpty(note)){
+                slot.note = note;
+            }
+            this.forceUpdate();
+        });
         this.optionsByReqId[reqId].push(course);
     }
 
@@ -213,7 +251,7 @@ export class MapFormComponent extends React.Component{
             sessionStorage.setItem('prevMapState',JSON.stringify(this.state));
         }
         */
-        console.log(this.alreadySelected);
+       console.log('Saved Map',this.state.savedMapToEdit);
         let {univ_name,prog_name,assoc_name,requirements} = this.state.savedMapToEdit;
         let totalHours = 0;
         let courseSelectionFields = requirements.map(
@@ -231,9 +269,15 @@ export class MapFormComponent extends React.Component{
                         {requirement.course_slots.map(
                             slot => {
                                 let course = this.state.courseSlots[slot.name] || {};
+                                let notePresent = isObjNotEmpty(slot.note);
+                                let noteColor = notePresent?'black':'gray';
                                 return (<div key={slot.name}>
+                                    
+                                    <InputGroup>
+        
                                     <Input
-                                        key={slot.name} 
+                                        key={slot.name}
+                                        //style={{width:'90%'}}
                                         type={"select"}
                                         value={isObjNotEmpty(course)?course.id:"-1"}
                                         valid={this.isCourseApplicable(course)}
@@ -258,6 +302,16 @@ export class MapFormComponent extends React.Component{
                                     }
                                     <option value={"-2"}>Select alternative course.</option>
                                     </Input>
+                                     {
+                                         isObjNotEmpty(slot.course)?
+                                         <InputGroupAddon addonType="append">
+                                            <span className="fa fa-sticky-note" style={{color:noteColor,cursor:'pointer',opacity:.5}} onClick={()=>{this.launchNoteModal(slot)}}></span>
+                                        </InputGroupAddon>:
+                                        null
+                                     }
+                                    
+                                    </InputGroup>
+                                    
                                     <FormFeedback invalid={true}>Selected course may not apply to this degree.</FormFeedback>
                                     </div>
                                     )
@@ -303,6 +357,16 @@ export class MapFormComponent extends React.Component{
                 reqId={this.state.altCourseModalReqId}
                 slotId={this.state.altCourseModalSlotId}
                 getSelectionFromModal={this.getSelectionFromModal}
+                progId={this.state.savedMapToEdit.prog_id}
+            />
+            <NoteModal
+                isOpen={this.state.noteModalOpen}
+                toggle={this.toggleNoteModal}
+                noteModalNote={this.state.noteModalNote}
+                noteModalCourse={this.state.noteModalCourse}
+                editNote={this.editNote}
+                slot = {this.state.noteModalSlot}
+
             />
         </div>
         )

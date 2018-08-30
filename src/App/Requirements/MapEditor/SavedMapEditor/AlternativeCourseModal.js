@@ -32,6 +32,7 @@ export default class AlternativeCourseModal extends React.Component {
         this.rubricOptions = [...rubricSet].map(
             rubric=><option key={rubric} value={rubric}>{rubric}</option>
         );
+
     }
 
     openClose = () => {
@@ -43,14 +44,21 @@ export default class AlternativeCourseModal extends React.Component {
         if(name==="rubric"){
             this.setState({number:''});
         }
-        this.setState({[name]:value});
+        if(name !== "apply"){
+            this.setState({[name]:value});
+        } else {
+            this.setState({[name]:Boolean(value)})
+        }
+        
     }
 
 
     resetModalState = () => {
         this.setState({
             rubric:'',
-            number:''
+            number:'',
+            apply:false,
+            justification:''
         })
     }
 
@@ -62,7 +70,15 @@ export default class AlternativeCourseModal extends React.Component {
         );
         if(course.length>0){
             let {id,name,number,rubric,hours} = course[0];
-            this.props.getSelectionFromModal(reqId,slotId,{id,name,number,rubric,hours});
+            let note = {};
+            if(this.state.apply || this.state.justification){    
+                note = {
+                    applicable:this.state.apply,
+                    text:this.state.justification
+                }
+            }
+
+            this.props.getSelectionFromModal(reqId,slotId,{id,name,number,rubric,hours},note);
             this.resetModalState();
             this.props.toggle();
         }

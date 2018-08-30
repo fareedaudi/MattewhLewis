@@ -23,6 +23,7 @@ class SavedMapEditorComponent extends React.Component{
 
     handleSaveMap = (mapData) => {
         this.props.mapActionHandlers.saveMap(mapData);
+        this.props.mapActionHandlers.getSavedMaps();
     }
 
     componentWillUnmount(){
@@ -30,6 +31,7 @@ class SavedMapEditorComponent extends React.Component{
     }
 
     render(){
+        console.log(this.props.savedMapToEdit);
         return (
                 <MapForm 
                     savedMapToEdit={this.props.savedMapToEdit} 
