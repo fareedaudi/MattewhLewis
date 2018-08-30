@@ -11,7 +11,7 @@ This file contains the object models to allow the application to communicate
 with the database.
 
 """
-from app import app, db, login
+from application import application, db, login
 from flask_login import UserMixin
 from flask import json
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -385,12 +385,12 @@ class User(UserMixin,db.Model):
     )
     
     def generate_auth_token(self,expiration=10*60):
-        s = Serializer(app.config['SECRET_KEY'])
+        s = Serializer(application.config['SECRET_KEY'])
         return s.dumps({ 'id': self.id })
         
     @staticmethod
     def verify_auth_token(token):
-        s = Serializer(app.config['SECRET_KEY'])
+        s = Serializer(application.config['SECRET_KEY'])
         try:
             data = s.loads(token)
         except SignatureExpired:

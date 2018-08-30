@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, json, session
 from sqlalchemy import and_
-from app import app
-from app.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement,AssociateDegree,CourseSlot,CourseNote
+from application import application
+from application.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement,AssociateDegree,CourseSlot,CourseNote
 from flask_login import current_user, login_user, logout_user
 from flask_restful import Resource,Api
 from slugify import slugify
@@ -9,7 +9,7 @@ import json as JSON
 from functools import reduce
 from pprint import pprint
 
-api = Api(app)
+api = Api(application)
 
 def get_dict(map_):
     empty_dict = {
@@ -136,7 +136,7 @@ class RequirementsByProgram(Resource):
                     ]))
           }
 
-@app.route('/reqs_by_program/<int:prog_id>')
+@application.route('/reqs_by_program/<int:prog_id>')
 def reqs_by_program(prog_id):
     program = db.session.query(Program).get(prog_id)
     return JSON.dumps({
@@ -167,7 +167,7 @@ def reqs_by_program(prog_id):
             for requirement in program.core_requirements]))
     })
 
-@app.route('/requirements_by_program/<int:prog_id>')
+@application.route('/requirements_by_program/<int:prog_id>')
 def requirements_by_program(prog_id):
     program = db.session.query(Program).get(prog_id)
     return JSON.dumps({
@@ -214,7 +214,7 @@ class MapsByUserId(Resource):
 
 
 
-@app.route('/maps_by_user',methods=['GET'])
+@application.route('/maps_by_user',methods=['GET'])
 def maps_by_user():
     user_id = request.args.get('userId')
     if(user_id):
@@ -224,12 +224,12 @@ def maps_by_user():
     else:
         return 'No params',404
 
-@app.route('/sjc_courses',methods=['GET'])
+@application.route('/sjc_courses',methods=['GET'])
 def sjc_courses():
     sjc_courses_objects = db.session.query(SJC).all()
     return JSON.dumps([get_object_dict(map_) for map_ in sjc_courses_objects])
 
-@app.route('/login',methods=['POST'])
+@application.route('/login',methods=['POST'])
 def login():
     form_data = json.loads(request.data)
     email = form_data['loginEmail']
@@ -252,7 +252,7 @@ def login():
 
 
 
-@app.route('/load_login_data',methods=['POST'])
+@application.route('/load_login_data',methods=['POST'])
 def load_login_data():
     user = None
     form_data = json.loads(request.data)
@@ -275,12 +275,12 @@ def load_login_data():
         })
 
 
-@app.route('/logout',methods=['GET'])   
+@application.route('/logout',methods=['GET'])   
 def logout():
     return 'check console'
 
 
-@app.route('/delete_map',methods=['POST'])
+@application.route('/delete_map',methods=['POST'])
 def delete_map():
     user = None
     form_data = json.loads(request.data)
@@ -301,7 +301,7 @@ def delete_map():
         })
 
 
-@app.route('/create_map',methods=['POST'])
+@application.route('/create_map',methods=['POST'])
 def create_map():
     user = None
     form_data = json.loads(request.data)
@@ -328,7 +328,7 @@ def create_map():
         })
     return '',401
 
-@app.route('/update_collaborators',methods=['POST'])
+@application.route('/update_collaborators',methods=['POST'])
 def update_collaborators():
     user = None
     form_data = json.loads(request.data)
@@ -352,7 +352,7 @@ def update_collaborators():
         })
     return '',401
             
-@app.route('/save_map',methods=['POST'])
+@application.route('/save_map',methods=['POST'])
 def save_map():
     user = None
     form_data = json.loads(request.data)
@@ -381,13 +381,13 @@ def save_map():
     else:
         return '',401
 
-@app.route('/user_emails',methods=['GET'])
+@application.route('/user_emails',methods=['GET'])
 def user_emails():
     users = db.session.query(User).all()
     user_emails = [user.email for user in users]
     return JSON.dumps(user_emails)
 
-@app.route('/degree_components',methods=['GET'])
+@application.route('/degree_components',methods=['GET'])
 def degree_components():
     components = Map.component_areas
     return JSON.dumps(
@@ -403,7 +403,7 @@ api.add_resource(Universities,'/universities')
 api.add_resource(ProgramsByUniv,'/programs_by_university/<int:univ_id>')
 api.add_resource(RequirementsByProgram,'/requirements_by_program/<int:prog_id>')
 
-@app.route('/saved_maps_by_user',methods=['POST'])
+@application.route('/saved_maps_by_user',methods=['POST'])
 def saved_maps_by_user():
     user = None
     form_data = json.loads(request.data)
@@ -454,7 +454,7 @@ def appify_map(map_):
         ] 
     }
 
-@app.route('/get_core/<int:univ_id>')
+@application.route('/get_core/<int:univ_id>')
 def get_core(univ_id):
     core = {}
     univ = db.session.query(University).get(univ_id)
@@ -850,7 +850,7 @@ def get_maps_(request):
             }
         for map_ in maps]
     })
-    return app.response_class(
+    return application.response_class(
         response = maps_data,
         status=200,
         mimetype="application/json"
@@ -957,7 +957,7 @@ def get_users(request):
             } for user in db.session.query(User).all()
         ]
     })
-    return app.response_class(
+    return application.response_class(
         response=user_data,
         status=200,
         mimetype="application/json"
@@ -968,17 +968,17 @@ users_handlers = {
 }
 
 
-@app.route('/api/maps',methods=['POST','GET'])
+@application.route('/api/maps',methods=['POST','GET'])
 def GET_POST_maps():
     handler = maps_handlers[request.method]
     return handler(request)
 
-@app.route('/api/maps/<int:id>', methods=['DELETE','PATCH'])
+@application.route('/api/maps/<int:id>', methods=['DELETE','PATCH'])
 def DELETE_PATCH_maps(id):
     handler = maps_handlers[request.method]
     return handler(id,request)
 
-@app.route('/api/users', methods=['GET'])
+@application.route('/api/users', methods=['GET'])
 def GET_users():
     handler = users_handlers[request.method]
     return handler(request)
