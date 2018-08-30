@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, json, session
 from sqlalchemy import and_
 from app import app
-from app.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement,AssociateDegree,CourseSlot
+from app.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement,AssociateDegree,CourseSlot,CourseNote
 from flask_login import current_user, login_user, logout_user
 from flask_restful import Resource,Api
 from slugify import slugify
@@ -815,14 +815,24 @@ def get_maps_(request):
                                     [
                                         {
                                             k:v for k,v in zip(
-                                                ('id','name','req_id','course'),
-                                                (slot.id,slot.name,slot.req_id,{
+                                                ('id','name','req_id','course','note'),
+                                                (slot.id,slot.name,slot.req_id,
+                                                {
                                                     'id':db.session.query(SJC).get(slot.course_id).id,
                                                     'name':db.session.query(SJC).get(slot.course_id).name,
                                                     'rubric':db.session.query(SJC).get(slot.course_id).rubric,
                                                     'number':db.session.query(SJC).get(slot.course_id).number,
                                                     'hours':db.session.query(SJC).get(slot.course_id).hours
-                                                } if slot.course_id else {})
+                                                } if slot.course_id else {},
+                                                {
+                                                    'id':slot.note[0].id,
+                                                    'text':slot.note[0].text,
+                                                    'applicable':slot.note[0].applicable,
+                                                    'slot_id':slot.note[0].slot_id,
+                                                    'course_id':slot.note[0].course_id,
+                                                    'prog_id':slot.note[0].prog_id
+                                                } if slot.note else {}
+                                                )
                                             )
                                         }
                                     for slot in req.course_slots],
@@ -899,11 +909,28 @@ def update_map_(id,request):
                 course_id = course_slot_obj['course']['id']
                 if(course_slot.course_id != course_id):
                     course_slot.course_id = course_id
+                if(course_slot_obj['note']):
+                    note_obj = course_slot_obj['note']
+                    if(course_slot.note): # Note existed previously; just needs an update.
+                        note = course_slot.note[0]
+                        note.text = note_obj['text']
+                        note.applicable = note_obj['applicable']
+                        note.course_id = course_id
+                        print('Note updated!')
+                    else: # Note did not previously exist; create new note.
+                        note = CourseNote(
+                            text = note_obj['text'],
+                            applicable = note_obj['applicable'],
+                            course_id = course_id,
+                            prog_id = map_to_edit.prog_id,
+                            slot_id = course_slot.id
+                        )
+                        db.session.add(note)
+                        print('Note created!')
 
         #Update users
     map_to_edit.users = []
     for new_user_obj in map_data['users']:
-        pprint(map_data)
         new_user = db.session.query(User).get(new_user_obj['id'])
         map_to_edit.users.append(new_user)
         

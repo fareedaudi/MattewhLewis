@@ -364,6 +364,9 @@ class SJC(db.Model):
         secondary=programs_sjc_courses,
         back_populates="sjc_courses"
         )
+    notes = db.relationship(
+        'CourseNote'
+    )
 
 class User(UserMixin,db.Model):
     __tablename__ = "user"
@@ -464,6 +467,19 @@ class CourseSlot(db.Model):
         "MapRequirement",
         back_populates="course_slots"
     )
+    note = db.relationship(
+        "CourseNote"
+    )
+
+class CourseNote(db.Model):
+    __tablename__ = "course_note"
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(400))
+    applicable = db.Column(db.Integer)
+    slot_id = db.Column(db.Integer, db.ForeignKey('course_slot.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('SJC.id'),nullable=False)
+    prog_id = db.Column(db.Integer, db.ForeignKey('program.id'),nullable=False)
+
 
 class AssociateDegree(db.Model):
     __tablename__ = "associate_degree"
