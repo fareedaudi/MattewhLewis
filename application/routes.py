@@ -913,14 +913,14 @@ def update_map_(id,request):
                     note_obj = course_slot_obj['note']
                     if(course_slot.note): # Note existed previously; just needs an update.
                         note = course_slot.note[0]
-                        note.text = note_obj['text']
-                        note.applicable = note_obj['applicable']
+                        note.text = note_obj.get('text') or ''
+                        note.applicable = note_obj.get('applicable') or False
                         note.course_id = course_id
                         print('Note updated!')
                     else: # Note did not previously exist; create new note.
                         note = CourseNote(
-                            text = note_obj['text'],
-                            applicable = note_obj['applicable'],
+                            text = note_obj.get('text') or '',
+                            applicable = note_obj.get('applicable') or False,
                             course_id = course_id,
                             prog_id = map_to_edit.prog_id,
                             slot_id = course_slot.id
