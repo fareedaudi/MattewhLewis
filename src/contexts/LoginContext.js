@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import {Modal,ModalHeader,ModalBody,ModalFooter,Button} from 'reactstrap';
+import {ROOT_URL} from '../api';
 
 var LoginContext = React.createContext();
 
@@ -46,7 +47,7 @@ export default class LoginContextProvider extends React.Component{
 
     loadLoginData(token){
         axios.post(
-            'http://localhost:5000/load_login_data', {token}
+            `${ROOT_URL}/load_login_data`, {token}
             ).then(
                response => response.data
             ).then( 
@@ -75,7 +76,7 @@ export default class LoginContextProvider extends React.Component{
 
     loginFromCredentials({loginEmail,loginPassword}){
         axios.post(
-            'http://localhost:5000/login', {loginEmail,loginPassword}
+            `${ROOT_URL}/login`, {loginEmail,loginPassword}
             ).then(
                response => {
                    this.setTime();
