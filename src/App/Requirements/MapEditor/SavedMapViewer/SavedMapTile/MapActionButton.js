@@ -29,9 +29,17 @@ export default class MapActionButton extends React.Component{
 
     render(){
         let buttonId = this.props.type + this.props.map_id;
+        let color;
+        if(this.props.disabled){
+            color = "gray";
+        } else if (this.props.activated){
+            color = "green";
+        } else {
+            color = "black";
+        }
         var style = {
             cursor:"pointer",
-            color:(this.props.activated)?"green":"black"
+            color:color
         }
         return (
             <span>
@@ -39,7 +47,9 @@ export default class MapActionButton extends React.Component{
                     className={this.FAClassMap[this.props.type].faClass} 
                     style={style}
                     id={buttonId}
-                    onClick={this.props.handler}
+                    onClick={() => {if(this.props.disabled){
+                        return;
+                    }this.props.handler();}}
                 />
                 <Tooltip 
                     placement="top" 

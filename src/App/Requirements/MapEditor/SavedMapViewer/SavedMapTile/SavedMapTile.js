@@ -57,8 +57,8 @@ class SavedMapTileComponent extends React.Component{
             <ListGroupItem className="justify-content-between d-flex">
                 <a id={this.props.id} href="" onClick={this.launchMapEditor} style={{maxWidth:"200px"}}>{this.props.name}</a>
                 <span className="pull-right">
-                    <MapActionButton type="approve" map_id={this.props.id} handler={approveMap}/>&nbsp;&nbsp;
-                    <MapActionButton type="share" activated={this.props.map.users.length>1} map_id={this.props.id} handler={this.toggleCollaboratorsModal}/>&nbsp;&nbsp;
+                    <MapActionButton type="approve" map_id={this.props.id} handler={approveMap} disabled={true}/>&nbsp;&nbsp;
+                    <MapActionButton type="share" activated={this.props.map.users.length>1} disabled={true} map_id={this.props.id} handler={this.toggleCollaboratorsModal}/>&nbsp;&nbsp;
                     <MapActionButton type="delete" map_id={this.props.id} handler={this.toggleDeleteModal}/>
                 </span>
             </ListGroupItem>
