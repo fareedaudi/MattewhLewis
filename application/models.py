@@ -202,7 +202,7 @@ class Program(db.Model):
         back_populates="program"
     )
 
-class ProgramComponent(db.Model):
+class ProgramComponent(db.Model):   
     id = db.Column(db.Integer, primary_key=True)
     univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
     prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
