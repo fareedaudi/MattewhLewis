@@ -5,10 +5,11 @@ import PropTypes from 'prop-types';
 const SelectedRequirements = (props) => {
     let {program_name,program_link,program_components} = props.program;
     let showSJCCourses = props.showSJCCourses;
+    var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 375;
     return (
         <div id="selected-requirements">
             <hr/>
-            <Container className="selected-requirements">
+            <Container className="selected-requirements" style={{maxHeight:h,overflowY:'scroll'}}>
                 <h5><a href={program_link} style={{float:"left"}} target="_blank">{program_name}</a></h5>
                 <br/>
                 {program_components.map((component,i) => (

@@ -84,6 +84,7 @@ class RequirementsComponent extends React.Component{
                             selectedProgram={this.state.selectedProgram}
                             getSelectedProgramDataAndSetState={this.getSelectedProgramDataAndSetState}
                             resetSelectedProgram={this.resetSelectedProgram}
+                            className="requirements"
                         />
                     </Col>
                     <Col xs="5">
@@ -96,6 +97,7 @@ class RequirementsComponent extends React.Component{
                             setProgramInRequirement={this.setProgram}
                             savedMaps={this.props.savedMaps}
                             coreRequirements={this.props.coreRequirements}
+                            className="requirements"
                         />
                     </Col>
                 </Row>

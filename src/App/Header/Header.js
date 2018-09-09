@@ -71,6 +71,10 @@ class HeaderComponent extends React.Component {
 
   render(){
     let uhcl = this.props.universities[0];
+    let uh = this.props.universities[1];
+    let uhd = this.props.universities[2];
+    let tamu = this.props.universities[3];
+    let shsu = this.props.universities[4];
     return (
       <Container className="fixed-top" style={{paddingTop: '10px', background: 'rgba(255, 255, 255, 9.0)'}}>
       <h5>SJC Pathway Mapping Toolkit</h5>
@@ -88,13 +92,32 @@ class HeaderComponent extends React.Component {
                 >{uhcl.university_name}</DropdownItem>
               : null
             }
-              {this.props.universities.slice(1).map((obj) => (
+            {uh?
+              <DropdownItem 
+                  key={uh.university_id} 
+                  onClick={this.props.selectionHandler}
+                  value={uh.university_id}
+                >{uh.university_name}</DropdownItem>
+              : null
+            }
+            {uhd?
+              <DropdownItem 
+                  key={uhd.university_id} 
+                  onClick={this.props.selectionHandler}
+                  value={uhd.university_id}
+                >{uhd.university_name}</DropdownItem>
+              : null
+            }
+              {tamu||shsu?[tamu,shsu].map((obj) => (
                 <DropdownItem 
                   key={obj.university_id} 
                   onClick={this.props.selectionHandler}
-                  value={obj.university_id}  
+                  value={obj.university_id}
+                  disabled  
                 >{obj.university_name}</DropdownItem>
-              ))}
+              ))
+              :null
+              }
             </DropdownMenu>
           </Dropdown>
 

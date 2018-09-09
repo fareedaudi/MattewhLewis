@@ -653,13 +653,14 @@ class MapEditorComponent extends React.Component{
         let loggedIn = this.props.login.state.loggedIn;
         let savedMapToEdit = this.props.savedMaps.filter(
             savedMap=>String(savedMap.id)===this.state.mapToEdit)[0];
+        var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 200;
         return (
             <Card>
                 <CardHeader>
                     <h4>Pathway Map Editor</h4>
                 </CardHeader>
                 {loggedIn?
-                    <CardBody>
+                    <CardBody style={{maxHeight:h,overflowY:'scroll'}}>
                         <CardText>
                             {instructions}
                         </CardText>
