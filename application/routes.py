@@ -630,6 +630,7 @@ def get_courses_by_code(PROG_ID):
             code = req['prog_comp_req_code']
             courses = req['courses']
             courses_by_code[code] = courses_by_code[code]+courses if courses_by_code.get(code) else courses
+    print(courses_by_code)
     return courses_by_code
 
 prog_id = 60
