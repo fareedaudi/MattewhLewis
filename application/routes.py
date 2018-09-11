@@ -739,6 +739,7 @@ def get_user_from_token(request):
     label,token = request.headers['Authorization'].split(' ')
     if(label=="Bearer" and token):
         user = User.verify_auth_token(token)
+        print(user)
     return user
 
 def create_new_map(request):

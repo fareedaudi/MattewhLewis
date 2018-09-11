@@ -394,10 +394,14 @@ class User(UserMixin,db.Model):
         try:
             data = s.loads(token)
         except SignatureExpired:
+            print('Signature expired!')
             return None # valid token, but expired
         except BadSignature:
+            print('Bad signature!')
+            print(token)
             return None # invalid token
         user = User.query.get(data['id'])
+        print(token)
         return user
 
     def set_password(self,password):
