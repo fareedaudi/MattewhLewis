@@ -239,16 +239,15 @@ def login():
         return json.jsonify({
             "logged_in":False,
             "email":None}),401
-    else:
-        all_maps = db.session.query(Map).all()
-        user_maps = [map_ for map_ in all_maps if user in map_.users]
-        token = user.generate_auth_token().decode('ascii')
-        return json.jsonify({
-            'loggedIn':True,
-            'userId':user.id,
-            'userEmail':user.email,
-            'token':token,
-    })
+    all_maps = db.session.query(Map).all()
+    user_maps = [map_ for map_ in all_maps if user in map_.users]
+    token = user.generate_auth_token().decode('ascii')
+    return json.jsonify({
+        'loggedIn':True,
+        'userId':user.id,
+        'userEmail':user.email,
+        'token':token,
+})
 
 
 
@@ -628,8 +627,11 @@ def get_courses_by_code(PROG_ID):
         reqs = comp['requirements']
         for req in reqs:
             code = req['prog_comp_req_code']
+            if(not code):
+                code = '100'
             courses = req['courses']
             courses_by_code[code] = courses_by_code[code]+courses if courses_by_code.get(code) else courses
+    pprint(courses_by_code)
     return courses_by_code
 
 
@@ -647,11 +649,15 @@ def create_new_requirement(map_id,code,info,program_courses):
         db.session.commit()
     except:
         pass
-    applicable_courses = program_courses.get(code) or []
-    for course_obj in applicable_courses:
-        course = db.session.query(SJC).get(course_obj['sjc_id'])
-        if(code not in ('inst','090','trans')):
+    if(code not in ('inst','090','trans')):
+        applicable_courses = program_courses.get(code) or []
+        for course_obj in applicable_courses:
+            course = db.session.query(SJC).get(course_obj['sjc_id'])
             new_req.default_courses.append(course)
+    if(code == 'inst'):
+        for id in SJC_ids_for_comp_area:
+            sjc_course = SJC.query.get(id)
+            new_req.default_courses.append(sjc_course)
     no_slots = int(hours)//3
     for i in range(no_slots):
         slot_name = slugify(new_req.name)+"-"+str(i)
@@ -671,6 +677,8 @@ def add_users(map_,user_emails):
         map_.users.append(user)
     db.session.commit()
 
+SJC_ids_for_comp_area = [132,37,253]
+
 def add_requirements(map_,program_courses):
     for code,info in general_associates_degree.items():
         new_req = create_new_requirement(map_.id,code,info,program_courses)
@@ -685,6 +693,25 @@ def add_requirements(map_,program_courses):
         course = db.session.query(SJC).get(course_object['sjc_id'])
         if(course not in map_.applicable_courses):
             map_.applicable_courses.append(course)
+    trans_req = MapRequirement.query.filter_by(map_id=map_.id,code='trans').first()
+    if(not trans_req):
+        raise ValueError('Something went wrong finding the trans requiremnet!')
+    trans_req.default_courses = map_.applicable_courses.copy()
+    comp_req = MapRequirement.query.filter_by(map_id=map_.id,code='090').first()
+    if(not comp_req):
+        raise ValueError('Something went wrong finding the comp requiremnet!')
+    for code in program_courses:
+        for course_obj in program_courses.get(code):
+            if code in ['trans','inst','100']:
+                continue
+            sjc_id = course_obj.get('sjc_id')
+            if(not sjc_id):
+                continue
+            sjc_course = SJC.query.get(sjc_id)
+            if(not sjc_course):
+                raise ValueError('Something went wrong finding SJC course!')
+            if(sjc_course not in comp_req.default_courses):
+                comp_req.default_courses.append(sjc_course)
     db.session.commit()
 
 def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collaborators):

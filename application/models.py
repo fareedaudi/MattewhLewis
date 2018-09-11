@@ -15,7 +15,7 @@ from application import application, db, login
 from flask_login import UserMixin
 from flask import json
 from werkzeug.security import generate_password_hash, check_password_hash
-from itsdangerous import (TimedJSONWebSignatureSerializer
+from itsdangerous import (JSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
 
@@ -384,7 +384,7 @@ class User(UserMixin,db.Model):
         back_populates="users"
     )
     
-    def generate_auth_token(self,expiration=10*60):
+    def generate_auth_token(self):
         s = Serializer(application.config['SECRET_KEY'])
         return s.dumps({ 'id': self.id })
         
