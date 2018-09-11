@@ -48,7 +48,8 @@ export const withFetching = (url,structure={}) => (Comp) =>
     }
 
 export const getUsers = () => {
-    let token = sessionStorage.getItem('jwtToken');
+    let token = localStorage.getItem('jwtToken');
+    console.log({token});
     const Authorization = `Bearer ${token}`;
     return axios.get(
         `${ROOT_URL}/api/users`, {headers:{Authorization}}

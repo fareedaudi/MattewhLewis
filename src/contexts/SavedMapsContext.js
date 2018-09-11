@@ -23,7 +23,7 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     deleteMap = (map_id) => {
-        var token = sessionStorage.getItem('jwtToken');
+        var token = localStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
         axios.delete(
             `${ROOT_URL}/api/maps/${map_id}`, {headers: {Authorization}}
@@ -37,7 +37,7 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     saveMap = (map) => {
-        var token = sessionStorage.getItem('jwtToken');
+        var token = localStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
         return axios({
             method:'PATCH',
@@ -56,7 +56,7 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     shareMap = (map) => {
-        var token = sessionStorage.getItem('jwtToken');
+        var token = localStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
         return axios({
             method:'PATCH',
@@ -75,7 +75,7 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     createMap = (mapState) => {
-        var token = sessionStorage.getItem('jwtToken');
+        var token = localStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
         if(String(mapState.selectedProgramId) === "-1"){
             return;
@@ -114,7 +114,7 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     getSavedMaps = () => {
-        var token = sessionStorage.getItem('jwtToken');
+        var token = localStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
         axios.get(
             `${ROOT_URL}/api/maps`,{headers: {Authorization}}

@@ -32,7 +32,7 @@ export default class LoginContextProvider extends React.Component{
     }
     
     componentDidMount(){
-        var token = sessionStorage.getItem('jwtToken');
+        var token = localStorage.getItem('jwtToken');
         if(token !== null){
             this.loadLoginData(token);
         }
@@ -65,7 +65,7 @@ export default class LoginContextProvider extends React.Component{
     
 
     updateLoginData(loginDetails){
-        sessionStorage.setItem('jwtToken',loginDetails.token);
+        localStorage.setItem('jwtToken',loginDetails.token);
         this.setState({
             loggedIn:loginDetails.loggedIn,
             userId:loginDetails.userId,
@@ -116,16 +116,20 @@ export default class LoginContextProvider extends React.Component{
         let timeElapsed = Math.floor((Date.now() - this.state.loggedInAt)/1000);
         let timeRemaining = loginDuration - timeElapsed;
         if(timeRemaining < 0){
-            this.logout();
+            //this.logout();
+            this.externalLoadLoginData();
         } else if(timeRemaining === 30 && !this.state.stayLoggedInModalOpen){
             if(this.state.recentlyActive){
                 this.externalLoadLoginData();
             } else{
+                /*
                 this.setState({
                     countDown:30
                 },
-                this.toggleStayLoggedInModal
+                 this.toggleStayLoggedInModal
             );
+            */
+                this.externalLoadLoginData();
             } 
         } else if(timeRemaining < 30){
             this.setState({

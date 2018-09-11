@@ -172,6 +172,7 @@ export default class CreateMapModal extends React.Component{
                             onChange={this.handleCollaboratorAdd}
                             selectHintOnEnter={true}
                             selected={this.state.selected}
+                            disabled
                         />
                         <FormText>Add some co-conspirators!</FormText>
                         <ListGroup>

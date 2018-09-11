@@ -646,6 +646,7 @@ class MapEditorComponent extends React.Component{
     }
 
     render(){
+        console.log(this.props.savedMapToEdit);
         let associateDegree = this.associateDegrees[this.state.associateDegreeId];
         var instructions = (this.state.editMode)?
             'Edit courses for degree components, below.':
