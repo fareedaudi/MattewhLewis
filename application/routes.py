@@ -649,7 +649,7 @@ def create_new_requirement(map_id,code,info,program_courses):
         db.session.commit()
     except:
         pass
-    if(code not in ('inst','090','trans')):
+    if(code not in ('inst','trans')):
         applicable_courses = program_courses.get(code) or []
         for course_obj in applicable_courses:
             course = db.session.query(SJC).get(course_obj['sjc_id'])
@@ -680,15 +680,18 @@ def add_users(map_,user_emails):
 SJC_ids_for_comp_area = [132,37,253]
 
 def add_requirements(map_,program_courses):
+    consummable_program_courses = program_courses.copy()
     for code,info in general_associates_degree.items():
         new_req = create_new_requirement(map_.id,code,info,program_courses)
         map_.requirements.append(new_req)
-        applicable_courses = program_courses.get(code) or []
+        applicable_courses = consummable_program_courses.pop(code,None) or []
         for course_obj in applicable_courses:
             course = db.session.query(SJC).get(course_obj['sjc_id'])
             if(course not in map_.applicable_courses):
                 map_.applicable_courses.append(course)
-    other_courses = program_courses.get('100') or []
+    other_courses = []
+    for code in consummable_program_courses:
+        other_courses += consummable_program_courses[code]
     for course_object in other_courses:
         course = db.session.query(SJC).get(course_object['sjc_id'])
         if(course not in map_.applicable_courses):
