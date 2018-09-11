@@ -17,7 +17,7 @@ export default class SJCCourseContextProvider extends React.Component{
 
     loadSJCCourses = () => {
         fetch(
-            `${ROOT_URL}/sjc_courses`,
+            `${ROOT_URL}/api/sjc_courses`,
         ).then(
             response => response.json()
         ).then(

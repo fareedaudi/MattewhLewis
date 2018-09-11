@@ -19,7 +19,7 @@ export class UniversityContextProvider extends React.Component{
 
     loadUniversities(){
         fetch(
-            'http://localhost:8000/universities',
+            `${ROOT_URL}/api/universities`,
         ).then(
             response = response.json()
         ).then(

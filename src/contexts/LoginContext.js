@@ -47,7 +47,7 @@ export default class LoginContextProvider extends React.Component{
 
     loadLoginData(token){
         axios.post(
-            `${ROOT_URL}/load_login_data`, {token}
+            `${ROOT_URL}/api/load_login_data`, {token}
             ).then(
                response => response.data
             ).then( 
@@ -76,7 +76,7 @@ export default class LoginContextProvider extends React.Component{
 
     loginFromCredentials({loginEmail,loginPassword}){
         axios.post(
-            `${ROOT_URL}/login`, {loginEmail,loginPassword}
+            `${ROOT_URL}/api/login`, {loginEmail,loginPassword}
             ).then(
                response => {
                    this.setTime();

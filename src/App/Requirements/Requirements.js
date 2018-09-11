@@ -26,7 +26,7 @@ class RequirementsComponent extends React.Component{
 
     getSelectedProgramData = (programId,callback) => {
         fetch(
-            `${ROOT_URL}/requirements_by_program/${programId}`
+            `${ROOT_URL}/api/requirements_by_program/${programId}`
         ).then(
             response => response.json()
         ).then(
@@ -40,7 +40,7 @@ class RequirementsComponent extends React.Component{
 
     fetchCoreRequirements = () => {
         fetch(
-            `${ROOT_URL}/get_core/${this.props.university.university_id}`
+            `${ROOT_URL}/api/get_core/${this.props.university.university_id}`
         ).then(
             response => response.json()
         ).then(
@@ -107,7 +107,7 @@ class RequirementsComponent extends React.Component{
 
     fetchUniversityProgramsAndUpdateState(universityId){
         fetch(
-            `${ROOT_URL}/programs_by_university/${universityId}`,
+            `${ROOT_URL}/api/programs_by_university/${universityId}`,
         ).then(
             response => response.json()
         ).then(

@@ -13,7 +13,7 @@ class SavedMapEditorComponent extends React.Component{
 
     getComponentsFromServer = () => {
         axios.get(
-            `${ROOT_URL}/degree_components`
+            `${ROOT_URL}/api/degree_components`
         ).then(
             response => response.data
         ).then(
