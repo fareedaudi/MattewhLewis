@@ -570,7 +570,7 @@ general_associates_degree = {
     },
     '090':{
         'name':'Component Area Option',
-        'hours':'4'
+        'hours':'6'
     },
     'trans':{
         'name':'Transfer Path',
