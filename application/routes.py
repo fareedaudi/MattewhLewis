@@ -136,7 +136,7 @@ class RequirementsByProgram(Resource):
                     ]))
           }
 
-@application.route('/reqs_by_program/<int:prog_id>')
+@application.route('/api/reqs_by_program/<int:prog_id>')
 def reqs_by_program(prog_id):
     program = db.session.query(Program).get(prog_id)
     return JSON.dumps({
@@ -167,7 +167,7 @@ def reqs_by_program(prog_id):
             for requirement in program.core_requirements]))
     })
 
-@application.route('/requirements_by_program/<int:prog_id>')
+@application.route('/api/requirements_by_program/<int:prog_id>')
 def requirements_by_program(prog_id):
     program = db.session.query(Program).get(prog_id)
     return JSON.dumps({
@@ -214,7 +214,7 @@ class MapsByUserId(Resource):
 
 
 
-@application.route('/maps_by_user',methods=['GET'])
+@application.route('/api/maps_by_user',methods=['GET'])
 def maps_by_user():
     user_id = request.args.get('userId')
     if(user_id):
@@ -224,12 +224,12 @@ def maps_by_user():
     else:
         return 'No params',404
 
-@application.route('/sjc_courses',methods=['GET'])
+@application.route('/api/sjc_courses',methods=['GET'])
 def sjc_courses():
     sjc_courses_objects = db.session.query(SJC).all()
     return JSON.dumps([get_object_dict(map_) for map_ in sjc_courses_objects])
 
-@application.route('/login',methods=['POST'])
+@application.route('/api/login',methods=['POST'])
 def login():
     form_data = json.loads(request.data)
     email = form_data['loginEmail']
@@ -251,7 +251,7 @@ def login():
 
 
 
-@application.route('/load_login_data',methods=['POST'])
+@application.route('/api/load_login_data',methods=['POST'])
 def load_login_data():
     user = None
     form_data = json.loads(request.data)
@@ -274,12 +274,12 @@ def load_login_data():
         })
 
 
-@application.route('/logout',methods=['GET'])   
+@application.route('/api/logout',methods=['GET'])   
 def logout():
     return 'check console'
 
 
-@application.route('/delete_map',methods=['POST'])
+@application.route('/api/delete_map',methods=['POST'])
 def delete_map():
     user = None
     form_data = json.loads(request.data)
@@ -300,7 +300,7 @@ def delete_map():
         })
 
 
-@application.route('/create_map',methods=['POST'])
+@application.route('/api/create_map',methods=['POST'])
 def create_map():
     user = None
     form_data = json.loads(request.data)
@@ -327,7 +327,7 @@ def create_map():
         })
     return '',401
 
-@application.route('/update_collaborators',methods=['POST'])
+@application.route('/api/update_collaborators',methods=['POST'])
 def update_collaborators():
     user = None
     form_data = json.loads(request.data)
@@ -351,7 +351,7 @@ def update_collaborators():
         })
     return '',401
             
-@application.route('/save_map',methods=['POST'])
+@application.route('/api/save_map',methods=['POST'])
 def save_map():
     user = None
     form_data = json.loads(request.data)
@@ -380,13 +380,13 @@ def save_map():
     else:
         return '',401
 
-@application.route('/user_emails',methods=['GET'])
+@application.route('/api/user_emails',methods=['GET'])
 def user_emails():
     users = db.session.query(User).all()
     user_emails = [user.email for user in users]
     return JSON.dumps(user_emails)
 
-@application.route('/degree_components',methods=['GET'])
+@application.route('/api/degree_components',methods=['GET'])
 def degree_components():
     components = Map.component_areas
     return JSON.dumps(
@@ -398,11 +398,11 @@ def degree_components():
         ]
     )
 
-api.add_resource(Universities,'/universities')
-api.add_resource(ProgramsByUniv,'/programs_by_university/<int:univ_id>')
-api.add_resource(RequirementsByProgram,'/requirements_by_program/<int:prog_id>')
+api.add_resource(Universities,'/api/universities')
+api.add_resource(ProgramsByUniv,'/api/programs_by_university/<int:univ_id>')
+api.add_resource(RequirementsByProgram,'/api/requirements_by_program/<int:prog_id>')
 
-@application.route('/saved_maps_by_user',methods=['POST'])
+@application.route('/api/saved_maps_by_user',methods=['POST'])
 def saved_maps_by_user():
     user = None
     form_data = json.loads(request.data)
@@ -453,7 +453,7 @@ def appify_map(map_):
         ] 
     }
 
-@application.route('/get_core/<int:univ_id>')
+@application.route('/api/get_core/<int:univ_id>')
 def get_core(univ_id):
     core = {}
     univ = db.session.query(University).get(univ_id)
