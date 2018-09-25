@@ -27,7 +27,10 @@ export default class CreateMapModal extends React.Component{
             selectedUniversityId:this.props.university.university_id,
             newMapName:'',
             newMapCollaborators:[],
-            selected:[]
+            selected:[],
+            creating:false,
+            createError:false,
+            created:false
         }
         this.state = this.defaultState;
         this.associateDegrees = [];
@@ -65,10 +68,6 @@ export default class CreateMapModal extends React.Component{
             newMapName
         });
     }
-    
-    testMethod = () => {
-        console.log('Test method run!');
-    }
 
     handleCollaboratorAdd = ([selectedCollaborator]) => {
         let currentCollaborators = this.state.newMapCollaborators;
@@ -93,8 +92,37 @@ export default class CreateMapModal extends React.Component{
     
     createMapHandler = (mapState) => {
         if(mapState.selectedProgramId!==-1){
-            this.props.handler(mapState);
-            this.setState(this.defaultState);
+            this.setState({
+                creating:true,
+                createError:false,
+                created:false
+            });
+            this.props.handler(mapState).then(
+                ()=>{
+                    this.timer = setTimeout(
+                        _ => {
+                            this.setState({
+                                creating:false,
+                                created:true
+                            },
+                            () => {
+                                this.timer = setTimeout(
+                                    () => {
+                                        this.setState({created:false});
+                                        this.setState({...this.defaultState});
+                                        this.props.toggle();
+                                    },1500);
+                            });
+                        },500);
+                }).catch(
+                    err => {
+                        this.setState({
+                            creating:false,
+                            createError:true
+                        });
+                    }
+                )
+            
         }
     }
 
@@ -199,6 +227,15 @@ export default class CreateMapModal extends React.Component{
     
                 </ModalBody>
                 <ModalFooter>
+                {
+                        this.state.creating?<span style={{color:"green"}}>&nbsp;&nbsp;&nbsp;Creating map...</span>:null
+                    }
+                    {
+                        this.state.createError?<span style={{color:"red"}}>&nbsp;&nbsp;&nbsp;Something went wrong. Try again!</span>:null
+                    }
+                    {
+                        this.state.created?<span style={{color:"green"}}>&nbsp;&nbsp;&nbsp;Map created!</span>:null
+                    }
                     <Button color="secondary" onClick={this.openClose}>Close</Button>
                     <Button 
                         color="primary" 

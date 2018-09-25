@@ -14,12 +14,11 @@ class CreateMapTileComponent extends React.Component{
     }
 
     createMapHandler = (mapState) => {
-        this.props.mapActionHandlers.createMap(
+        return this.props.mapActionHandlers.createMap(
             mapState
-        ).then(response => {
-            this.setState({createMapModalOpen:!this.state.createMapModalOpen});
-        });
+        );
     }
+
 
     render(){
         var isOpen = this.state.createMapModalOpen;
@@ -32,7 +31,9 @@ class CreateMapTileComponent extends React.Component{
                 </ListGroupItem>
                 <CreateMapModal 
                     isOpen={isOpen} 
-                    toggle={toggle} 
+                    toggle={()=>this.setState({
+                        createMapModalOpen:!this.state.createMapModalOpen
+                    })} 
                     handler={handler} 
                     university={this.props.university}
                     programs={this.props.programs}
