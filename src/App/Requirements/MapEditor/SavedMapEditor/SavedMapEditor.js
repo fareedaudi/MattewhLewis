@@ -22,8 +22,7 @@ class SavedMapEditorComponent extends React.Component{
     }
 
     handleSaveMap = (mapData) => {
-        this.props.mapActionHandlers.saveMap(mapData);
-        this.props.mapActionHandlers.getSavedMaps();
+        return this.props.mapActionHandlers.saveMap(mapData);
     }
 
     componentWillUnmount(){

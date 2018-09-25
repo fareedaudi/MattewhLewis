@@ -62,7 +62,10 @@ export class MapFormComponent extends React.Component{
             noteModalOpen:false,
             noteModalNote:{},
             noteModalCourse:{},
-            noteModalSlot:{}
+            noteModalSlot:{},
+            savingMap:false,
+            saveError:false,
+            saved:false
 
         };
         this.applicableCourseIds = new Set(this.state.savedMapToEdit.applicable_courses.map(course=>String(course.id)));
@@ -245,6 +248,38 @@ export class MapFormComponent extends React.Component{
             });
         }
 
+        saveMapHandler = (savedMapToEdit) => {
+            this.setState({
+                savingMap:true,
+                saveError:false,
+                saved:false
+            });
+            this.props.handleSave(savedMapToEdit).then(
+                ()=> {
+                    this.timer = setTimeout(_ => {
+                        this.setState({
+                            savingMap: false,
+                            saved:true
+                        },
+                            _ => {
+                                this.timer = setTimeout(_ => {
+                                    this.setState({saved:false});
+                                },1500);
+                            }
+                        );
+
+                        }, 500);
+                }
+            ).catch(
+                (e)=>{
+                    this.setState({
+                        savingMap:false,
+                        saveError:true
+                    });
+                }
+            );
+        }
+
     render(){
         /*
         window.onbeforeunload = () => {
@@ -347,7 +382,16 @@ export class MapFormComponent extends React.Component{
             <Form>
                 <FormGroup>
                     <Button className="btn-sm" color="secondary" onClick={this.props.handleClose}>Close</Button>
-                    <Button className="btn-sm" color="primary" onClick={()=>this.props.handleSave(this.state.savedMapToEdit)}>Save</Button>
+                    <Button className="btn-sm" color="primary" onClick={()=>this.saveMapHandler(this.state.savedMapToEdit)}>Save</Button>
+                    {
+                        this.state.savingMap?<span style={{color:"green"}}>&nbsp;&nbsp;&nbsp;Saving...</span>:null
+                    }
+                    {
+                        this.state.saveError?<span style={{color:"red"}}>&nbsp;&nbsp;&nbsp;Something went wrong. Try again!</span>:null
+                    }
+                    {
+                        this.state.saved?<span style={{color:"green"}}>&nbsp;&nbsp;&nbsp;Saved!</span>:null
+                    }
                 </FormGroup>
             </Form>
             <AlternativeCourseModal
