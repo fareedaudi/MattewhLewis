@@ -28,7 +28,13 @@ class SavedMapsContextProviderComponent extends React.Component{
         axios.delete(
             `${ROOT_URL}/api/maps/${map_id}`, {headers: {Authorization}}
             ).then(
-                response => response.data
+                response => {
+                    if(response.status==200){
+                        console.log('Map successfully deleted!');
+                        return response.data;
+                    }
+                    throw new Error('Could not delete map.');  
+                }
             ).then(
                 (result) => {this.setState({
                             savedMaps:this.state.savedMaps.filter((savedMap)=>(savedMap.id!==Number(map_id)))
@@ -45,7 +51,13 @@ class SavedMapsContextProviderComponent extends React.Component{
             headers: {Authorization},
             data:map
         }).then(
-            response => response.data
+            response => {
+                if(response.status==200){
+                    console.log('Map successfully updated!');
+                    return response.data;
+                }
+                throw new Error('Something went wrong');
+            }
         ).then(
             result => {
                 if(result.collaboratorsUpdated){
@@ -87,7 +99,8 @@ class SavedMapsContextProviderComponent extends React.Component{
             data:mapState
         }).then(
             response=>{
-                if(response.status===200){
+                if(response.status==200){
+                    console.log('Map successfully created!');
                     this.getSavedMaps();
                 } else {
                     throw new Error('Error!');
@@ -119,7 +132,13 @@ class SavedMapsContextProviderComponent extends React.Component{
         axios.get(
             `${ROOT_URL}/api/maps`,{headers: {Authorization}}
         )
-        .then(response => response.data)
+        .then(response => {
+            if(response.status==200){
+                console.log('Maps gotten!');
+                return response.data;
+            }
+            throw new Error('Maps could not be retrieved from server');
+        })
         .then(({maps}) => this.setState({savedMaps:maps}));
     }
 

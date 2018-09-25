@@ -18,8 +18,13 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "react-scripts test --env=jsdom --univ=3 --browser=chrome",
     "eject": "react-scripts eject",
-    "play":"echo 'This is a test'; echo 'This is also a test';"
-  }
+    "play": "echo 'This is a test'; echo 'This is also a test';"
+  },
+  "devDependencies": {
+    "chromedriver": "^2.42.0",
+    "geckodriver": "^1.12.2",
+    "selenium-webdriver": "^4.0.0-alpha.1"
+}
 }

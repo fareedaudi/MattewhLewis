@@ -66,6 +66,10 @@ export default class CreateMapModal extends React.Component{
         });
     }
     
+    testMethod = () => {
+        console.log('Test method run!');
+    }
+
     handleCollaboratorAdd = ([selectedCollaborator]) => {
         let currentCollaborators = this.state.newMapCollaborators;
         let isNewCollaborator = currentCollaborators.indexOf(selectedCollaborator) < 0;
@@ -207,14 +211,4 @@ export default class CreateMapModal extends React.Component{
             </Modal>
             );
         }
-    }
-
-    CreateMapModal.propTypes = {
-        isOpen:PropTypes.bool.isRequired,
-        toggle:PropTypes.func.isRequired,
-        handler:PropTypes.func.isRequired,
-        university:PropTypes.object.isRequired,
-        programs:PropTypes.array.isRequired,
-        collaborators:PropTypes.array.isRequired,
-        login:PropTypes.object.isRequired
     }
