@@ -11,7 +11,7 @@ const DeleteMapModal = (props) => (
         </ModalBody>
         <ModalFooter>
             <Button color="secondary" onClick={props.toggle}>Close</Button>
-            <Button color="danger" onClick={()=>{props.handler(props.map_id)}}>Let's Do This!</Button>
+            <Button color="danger" name="delete-map-button" onClick={()=>{props.handler(props.map_id)}}>Delete FOR-EV-ER</Button>
         </ModalFooter>
     </Modal>
 );

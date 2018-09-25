@@ -13,7 +13,7 @@ universityId = universityId || 1;
 browserName = String(browserCLIArg.split("=").slice(-1).pop());
 browserName = browserName || 'chrome';
 
-const rootURL = 'http://159.89.153.160/';
+const rootURL = 'http://localhost:3000/';
 
 
 
@@ -144,7 +144,7 @@ it('should close modal', async () => {
 
 it('should delete the map it created', async () => {
     let deleteButtonXpath = `//li[child::a[text()="${testMapName}"]]/span/span[child::span[contains(@id,"delete")]]/span`;
-    let confirmDeleteButtonXpath = '//button[text()="Let\'s Do This!"]';
+    let confirmDeleteButtonXpath = '//button[@name="delete-map-button"]';
     el = await getElementByXpath(deleteButtonXpath);
     await el.click();
     el = await getElementByXpath(confirmDeleteButtonXpath);
