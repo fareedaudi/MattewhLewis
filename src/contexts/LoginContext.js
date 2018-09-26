@@ -90,9 +90,7 @@ export default class LoginContextProvider extends React.Component{
                         this.updateLoginData(loginDetails);
                     }
                 }
-            ).catch(error => {
-                throw error;
-            });
+            );
     }
 
     setTime = () => {

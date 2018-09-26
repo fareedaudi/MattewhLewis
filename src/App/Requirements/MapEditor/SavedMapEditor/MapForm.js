@@ -344,6 +344,8 @@ export class MapFormComponent extends React.Component{
                                         </InputGroupAddon>:
                                         null
                                      }
+                                     <FormFeedback valid>The above course applies to the selected transfer program.</FormFeedback>
+                                     <FormFeedback invalid>The above course may not be applicable to the selected transfer program.</FormFeedback>
                                     
                                     </InputGroup>
                                     

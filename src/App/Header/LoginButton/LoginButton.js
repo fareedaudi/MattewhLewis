@@ -23,15 +23,8 @@ class LoginButtonComponent extends React.Component{
         }
     }
 
-    loginHandler = (credentials)=>{
-        return this.props.login.actions.loginFromCredentials(credentials).catch(
-            error => {
-                throw error;
-            }
-        )
-    }
-
     render(){
+        let loginHandler = this.props.login.actions.loginFromCredentials;
         return(
             <div>
                 {
@@ -43,7 +36,7 @@ class LoginButtonComponent extends React.Component{
                         <Button color="danger" className="btn-sm" onClick={this.logoutHandler}>Logout</Button>
                     </div>
                 }
-                <LoginModal isOpen={this.state.modal} toggle={this.toggle} loginHandler={this.loginHandler}/>
+                <LoginModal isOpen={this.state.modal} toggle={this.toggle} loginHandler={loginHandler}/>
             </div>
         )
     }
