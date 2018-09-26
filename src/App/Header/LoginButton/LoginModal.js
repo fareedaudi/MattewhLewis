@@ -64,7 +64,16 @@ export default class LoginModal extends React.Component{
     )
     }
 
+    inputValid = () => !!this.state.loginEmail && !!this.state.loginPassword;
+
+    handleKeyPress = (e) => {
+        if(e.key === 'Enter' && this.inputValid()){
+            this.handleSubmit();
+        }
+    }
+
     render(){
+        
         return (
             <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={this.props.className}>
                 <ModalHeader toggle={this.props.toggle}>Please Login</ModalHeader>
@@ -72,12 +81,12 @@ export default class LoginModal extends React.Component{
                 <form id="login">
                 <div className="form-group row">
                     <div className="col-sm-10">
-                    <input className="form-control" type="email" placeholder="Email" value={this.state.loginEmail} onChange={this.updateEmail}/>
+                    <input className="form-control" type="email" placeholder="Email" value={this.state.loginEmail} onChange={this.updateEmail} onKeyPress={this.handleKeyPress}/>
                     </div>
                 </div>
                 <div className="form-group row">
                     <div className="col-sm-10">
-                    <input className="form-control" type="password" placeholder="Password" value={this.state.loginPassword} onChange={this.updatePassword}/>
+                    <input className="form-control" type="password" placeholder="Password" value={this.state.loginPassword} onChange={this.updatePassword} onKeyPress={this.handleKeyPress}/>
                     </div>
                 </div>
                 </form>
@@ -96,7 +105,7 @@ export default class LoginModal extends React.Component{
                         this.state.loggingIn?<span style={{color:'green'}}>Logging in...</span>:null
                     }
                     <Button color="secondary" onClick={this.props.toggle}>Close</Button>
-                    <Button color="primary" onClick={this.handleSubmit}>Submit</Button>
+                    <Button color="primary" onClick={this.handleSubmit} disabled={!this.inputValid()}>Submit</Button>
                 </ModalFooter>
             </Modal>
         )
