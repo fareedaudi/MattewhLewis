@@ -16,8 +16,7 @@ export default class LoginModal extends React.Component{
             loginPassword:'',
             loggingIn:false,
             badCredentialsError:false,
-            otherError:false,
-            loggedIn:false
+            otherError:false
         }
         this.updatePassword = (ev) => this.setState({loginPassword:ev.target.value});
         this.updateEmail = (ev) => this.setState({loginEmail:ev.target.value});
@@ -27,23 +26,14 @@ export default class LoginModal extends React.Component{
         this.setState({
             loggingIn:true,
             badCredentialsError:false,
-            otherError:false,
-            loggedIn:false
+            otherError:false
         });
         this.props.loginHandler(this.state).then(
             ()=>{
                 this.setState({
                     loggingIn:false,
-                    loggedIn:true
                 });
-                this.timer = setTimeout(
-                    ()=>{
-                        this.setState({
-                            loggedIn:false
-                        });
-                        this.props.toggle();
-                    },500
-                );
+                this.props.toggle();
             }
         ).catch(
             error=>{
@@ -97,9 +87,6 @@ export default class LoginModal extends React.Component{
                     }
                     {
                         this.state.otherError?<span style={{color:'red'}}>Something went wrong... Try again!</span>:null
-                    }
-                    {
-                        this.state.loggedIn?<span style={{color:'green'}}>Logged in!</span>:null
                     }
                     {
                         this.state.loggingIn?<span style={{color:'green'}}>Logging in...</span>:null
