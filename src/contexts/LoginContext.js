@@ -75,12 +75,14 @@ export default class LoginContextProvider extends React.Component{
     }
 
     loginFromCredentials({loginEmail,loginPassword}){
-        axios.post(
+        return axios.post(
             `${ROOT_URL}/api/login`, {loginEmail,loginPassword}
             ).then(
                response => {
-                   this.setTime();
-                   return response.data;
+                   if(response.status == 200){
+                        this.setTime();
+                        return response.data;
+                   }
                 }
             ).then(
                 (loginDetails) => {
@@ -88,7 +90,9 @@ export default class LoginContextProvider extends React.Component{
                         this.updateLoginData(loginDetails);
                     }
                 }
-            );
+            ).catch(error => {
+                throw error;
+            });
     }
 
     setTime = () => {

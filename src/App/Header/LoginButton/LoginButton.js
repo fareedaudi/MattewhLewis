@@ -9,10 +9,9 @@ class LoginButtonComponent extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            modal:false,
+            modal:false
         };
         this.toggle = () => {this.setState({modal:!this.state.modal})};
-        this.loginHandler = (credentials) => {props.login.actions.loginFromCredentials(credentials); this.toggle();};
         this.logoutHandler = props.login.actions.logout.bind(this);
     }
 
@@ -24,17 +23,27 @@ class LoginButtonComponent extends React.Component{
         }
     }
 
+    loginHandler = (credentials)=>{
+        return this.props.login.actions.loginFromCredentials(credentials).catch(
+            error => {
+                throw error;
+            }
+        )
+    }
 
     render(){
         return(
-            (!this.props.login.state.loggedIn)?
             <div>
-                <Button color="primary" className="btn-sm" onClick={this.toggle}>Login</Button>
+                {
+                    !this.props.login.state.loggedIn?
+                    <Button color="primary" className="btn-sm" onClick={this.toggle}>Login</Button>
+                    :
+                    <div>
+                        {this.props.login.state.userEmail}{' '}
+                        <Button color="danger" className="btn-sm" onClick={this.logoutHandler}>Logout</Button>
+                    </div>
+                }
                 <LoginModal isOpen={this.state.modal} toggle={this.toggle} loginHandler={this.loginHandler}/>
-            </div>:
-            <div>
-                {this.props.login.state.userEmail}{' '}
-                <Button color="danger" className="btn-sm" onClick={this.logoutHandler}>Logout</Button>
             </div>
         )
     }

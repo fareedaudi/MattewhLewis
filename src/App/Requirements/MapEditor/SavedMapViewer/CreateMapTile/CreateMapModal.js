@@ -115,7 +115,8 @@ export default class CreateMapModal extends React.Component{
                             });
                         },500);
                 }).catch(
-                    err => {
+                    error => {
+                        console.log({error});
                         this.setState({
                             creating:false,
                             createError:true

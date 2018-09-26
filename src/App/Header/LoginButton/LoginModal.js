@@ -13,11 +13,55 @@ export default class LoginModal extends React.Component{
         super(props);
         this.state = {
             loginEmail:'',
-            loginPassword:''
+            loginPassword:'',
+            loggingIn:false,
+            badCredentialsError:false,
+            otherError:false,
+            loggedIn:false
         }
         this.updatePassword = (ev) => this.setState({loginPassword:ev.target.value});
         this.updateEmail = (ev) => this.setState({loginEmail:ev.target.value});
-        this.handleSubmit = () => {this.props.loginHandler(this.state);}
+    }
+
+    handleSubmit = () => {
+        this.setState({
+            loggingIn:true,
+            badCredentialsError:false,
+            otherError:false,
+            loggedIn:false
+        });
+        this.props.loginHandler(this.state).then(
+            ()=>{
+                this.setState({
+                    loggingIn:false,
+                    loggedIn:true
+                });
+                this.timer = setTimeout(
+                    ()=>{
+                        this.setState({
+                            loggedIn:false
+                        });
+                        this.props.toggle();
+                    },500
+                );
+            }
+        ).catch(
+            error=>{
+                if(error.response){
+                    if(error.response.status===401){
+                        this.setState({
+                            loggingIn:false,
+                            badCredentialsError:true
+                        });
+                    }
+                } else {
+                    this.setState({
+                        loggingIn:false,
+                        otherError:true
+                    });
+                }
+            }
+    )
     }
 
     render(){
@@ -39,6 +83,18 @@ export default class LoginModal extends React.Component{
                 </form>
                 </ModalBody>
                 <ModalFooter>
+                    {
+                        this.state.badCredentialsError?<span style={{color:'red'}}>Bad login credentials. Try again.</span>:null
+                    }
+                    {
+                        this.state.otherError?<span style={{color:'red'}}>Something went wrong... Try again!</span>:null
+                    }
+                    {
+                        this.state.loggedIn?<span style={{color:'green'}}>Logged in!</span>:null
+                    }
+                    {
+                        this.state.loggingIn?<span style={{color:'green'}}>Logging in...</span>:null
+                    }
                     <Button color="secondary" onClick={this.props.toggle}>Close</Button>
                     <Button color="primary" onClick={this.handleSubmit}>Submit</Button>
                 </ModalFooter>

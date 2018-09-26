@@ -1,4 +1,4 @@
-const {Builder, By, Key, until, elementLocated} = require('selenium-webdriver')
+const {Builder, By,until} = require('selenium-webdriver')
 require('selenium-webdriver/chrome')
 require('selenium-webdriver/firefox')
 require('chromedriver')
@@ -8,9 +8,9 @@ let browserName,universityId;
 
 let univCLIArg = process.argv.filter(arg=>arg.includes('--univ'))[0];
 let browserCLIArg = process.argv.filter(arg=>arg.includes('--browser'))[0];
-universityId =  Number(univCLIArg.split("=").slice(-1).pop());
+if(univCLIArg){universityId =  Number(univCLIArg.split("=").slice(-1).pop());}
+if(browserCLIArg){browserName = String(browserCLIArg.split("=").slice(-1).pop());}
 universityId = universityId || 1;
-browserName = String(browserCLIArg.split("=").slice(-1).pop());
 browserName = browserName || 'chrome';
 
 const rootURL = 'http://localhost:3000/';

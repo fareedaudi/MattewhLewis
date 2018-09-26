@@ -106,7 +106,7 @@ class SavedMapsContextProviderComponent extends React.Component{
                     throw new Error('Error!');
                 }
             }
-        )
+        ).catch(error=>{throw new Error("test error!");});
     }
 
     approveMap = () => {
