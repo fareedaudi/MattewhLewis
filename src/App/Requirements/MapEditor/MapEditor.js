@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import SavedMapViewer from './SavedMapViewer/SavedMapViewer';
 import SavedMapEditor from './SavedMapEditor/SavedMapEditor';
 import {WithLogin} from '../../../contexts/LoginContext';
+import {WithMapActionHandlers} from '../../../contexts/SavedMapsContext';
 
 class MapEditorComponent extends React.Component{
     constructor(props){
@@ -19,7 +20,8 @@ class MapEditorComponent extends React.Component{
             selectedProgram:{
                 program_id:-1
             },
-            associateDegreeId:'-1'
+            associateDegreeId:'-1',
+            mapSaved:false,
         }
         this.associateDegrees = {
             '1':{
@@ -624,10 +626,18 @@ class MapEditorComponent extends React.Component{
                 this.setState({selectedProgram});
                 this.props.setProgramInRequirement(selectedProgram);
             });
-
     }
 
     toggleEditMode = () => {
+        if(this.state.editMode && this.state.mapSaved){
+            this.props.mapActionHandlers.getSavedMaps().then(
+                _ => {            
+                        this.setState({
+                            mapSaved:false
+                        });
+                    }
+            );
+        }
         this.setState({
             editMode:!this.state.editMode
         });
@@ -642,6 +652,12 @@ class MapEditorComponent extends React.Component{
     toggleEditModeOff = () => {
         this.setState({
             editMode:false
+        });
+    }
+
+    toggleMapSavedTrue = () => {
+        this.setState({
+            mapSaved:true
         });
     }
 
@@ -677,6 +693,7 @@ class MapEditorComponent extends React.Component{
                             login={this.props.login}
                             associateDegrees={this.associateDegrees}
                             associateDegree={associateDegree}
+                            mapSaved={this.toggleMapSavedTrue}
                         />
                         :
                         <SavedMapViewer
@@ -715,6 +732,6 @@ MapEditorComponent.propTypes = {
 }
 
 
-const MapEditor = WithLogin(MapEditorComponent);
+const MapEditor = WithMapActionHandlers(WithLogin(MapEditorComponent));
 
 export default MapEditor;

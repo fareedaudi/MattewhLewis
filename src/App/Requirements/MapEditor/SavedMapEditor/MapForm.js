@@ -267,9 +267,9 @@ export class MapFormComponent extends React.Component{
                                 },1500);
                             }
                         );
-
+                        this.props.mapSaved();
                         }, 500);
-                }
+                    }
             ).catch(
                 (e)=>{
                     this.setState({

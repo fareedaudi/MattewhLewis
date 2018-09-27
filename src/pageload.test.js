@@ -15,8 +15,6 @@ browserName = browserName || 'chrome';
 
 const rootURL = 'http://localhost:3000/';
 
-
-
 const d = new Builder().forBrowser(browserName).build();
 const waitUntilTime = 3000;
 let driver, el, actual, expected, child;

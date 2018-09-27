@@ -129,7 +129,7 @@ class SavedMapsContextProviderComponent extends React.Component{
     getSavedMaps = () => {
         var token = localStorage.getItem('jwtToken');
         const Authorization = `Bearer ${token}`;
-        axios.get(
+        return axios.get(
             `${ROOT_URL}/api/maps`,{headers: {Authorization}}
         )
         .then(response => {

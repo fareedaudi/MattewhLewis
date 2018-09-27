@@ -21,6 +21,10 @@ export default class MapActionButton extends React.Component{
             delete:{
                 faClass:'fa fa-trash',
                 tooltipText:'Delete map.'
+            },
+            print:{
+                faClass:'fa fa-file-pdf',
+                tooltipText:'Download as PDF file.'
             }
         }
         this.myRef = React.createRef();

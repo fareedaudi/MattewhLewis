@@ -61,6 +61,29 @@ export const getUsers = () => {
     });
 }
 
+export const getPrintableMap = (mapId,mapName) => {
+    let token = localStorage.getItem('jwtToken');
+    const Authorization = `Bearer ${token}`;
+    let url = `${ROOT_URL}/api/report/${mapId}`;
+    console.log(url);
+    return axios.get(
+        url, 
+        {
+            headers:{Authorization},
+            responseType:'blob'
+        },
+    ).then(
+        response => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${mapName}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+        }
+    )
+}
+
 // GET /requirements_by_program
 
 // GET /get_core

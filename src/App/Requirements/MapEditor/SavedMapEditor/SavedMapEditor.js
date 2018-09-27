@@ -40,6 +40,7 @@ class SavedMapEditorComponent extends React.Component{
                     handleSave={this.handleSaveMap}
                     login={this.props.login}
                     associateDegrees={this.props.associateDegrees}
+                    mapSaved={this.props.mapSaved}
                 />
         )
     }

@@ -5,6 +5,7 @@ import MapActionButton from './MapActionButton';
 import DeleteMapModal from './DeleteMapModal';
 import {WithMapActionHandlers} from '../../../../../contexts/SavedMapsContext';
 import AddColaboratorsModal from './AddCollaboratorsModal';
+import {getPrintableMap} from '../../../../../api';
 
 class SavedMapTileComponent extends React.Component{
         
@@ -50,6 +51,10 @@ class SavedMapTileComponent extends React.Component{
         this.props.setMapToEdit(this.props.id);
     }
 
+    getPDF = () => {
+        getPrintableMap(this.props.id,this.props.name);
+    }
+
     render(){
         console.log(this.props.map);
         let {approveMap} = this.props.mapActionHandlers;
@@ -57,6 +62,7 @@ class SavedMapTileComponent extends React.Component{
             <ListGroupItem className="justify-content-between d-flex">
                 <a id={this.props.id} href="" onClick={this.launchMapEditor} style={{maxWidth:"200px"}}>{this.props.name}</a>
                 <span className="pull-right">
+                    <MapActionButton type="print" map_id={this.props.id} handler={this.getPDF}/>&nbsp;&nbsp;
                     <MapActionButton type="approve" map_id={this.props.id} handler={approveMap} disabled={true}/>&nbsp;&nbsp;
                     <MapActionButton type="share" activated={this.props.map.users.length>1} disabled={true} map_id={this.props.id} handler={this.toggleCollaboratorsModal}/>&nbsp;&nbsp;
                     <MapActionButton type="delete" map_id={this.props.id} handler={this.toggleDeleteModal}/>
