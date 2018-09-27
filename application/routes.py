@@ -77,99 +77,6 @@ class ProgramsByUniv(Resource):
             } for program in programs
         ]
 
-class RequirementsByProgram(Resource):
-    def get(self,prog_id):
-        program = db.session.query(Program).filter_by(id=prog_id).first()
-        return {
-            k:v for k,v in zip(
-                ('program_link',
-                'program_id',
-                'program_name',
-                'components'),
-                (program.link,
-                program.id,
-                program.name,
-                [
-                    {
-                        k:v for k,v in zip(
-                            ('component_id',
-                            'component_name',
-                            'requirements'),
-                            (component.id,
-                            component.name,
-                            [
-                                {
-                                    k:v for k,v in zip(
-                                        ('requirement_id',
-                                        'requirement_name',
-                                        'courses'),
-                                        (requirement.id,
-                                        requirement.name,
-                                        [
-                                            {
-                                                k:v for k,v in zip(
-                                                    ('course_id',
-                                                    'course_rubric',
-                                                    'course_number',
-                                                    'course_name',
-                                                    'sjc_course'),
-                                                    (course.id,
-                                                    course.rubric,
-                                                    course.number,
-                                                    course.name,
-                                                    {
-                                                        k:v for k,v in zip(
-                                                            ('sjc_id',
-                                                            'sjc_rubric',
-                                                            'sjc_number',
-                                                            'sjc_name'), 
-                                                            (db.session.query(SJC).filter_by(id=course.sjc_id).first().id,
-                                                             db.session.query(SJC).filter_by(id=course.sjc_id).first().rubric,
-                                                             db.session.query(SJC).filter_by(id=course.sjc_id).first().number,
-                                                             db.session.query(SJC).filter_by(id=course.sjc_id).first().name)
-                                                        )
-                                                    } if course.sjc else None)
-                                                )
-                                            } for course in requirement.courses
-                                        ])
-                                    )
-                                } for requirement in component.requirements
-                            ])
-                        )
-                    } for component in program.components
-                    ]))
-          }
-
-@application.route('/api/reqs_by_program/<int:prog_id>')
-def reqs_by_program(prog_id):
-    program = db.session.query(Program).get(prog_id)
-    return JSON.dumps({
-        k:v for k,v in zip(
-            ('program_link','program_id','program_name','requirements'),
-            (program.link,program.id,program.name,[
-                {
-                    k:v for k,v in zip(
-                        ('requirement_id','requirement_name','requirement_code','courses'),
-                        (requirement.id,requirement.name,requirement.code,[
-                            {
-                                k:v for k,v in zip(
-                                    ('course_id','course_rubric','course_number','course_name','sjc_course'),
-                                    (course.id,course.rubric,course.number,course.name,{
-                                        k:v for k,v in zip(
-                                            ('sjc_id','sjc_rubric','sjc_number','sjc_name'),
-                                            (db.session.query(SJC).get(course.sjc_id).id,
-                                            db.session.query(SJC).get(course.sjc_id).rubric,
-                                            db.session.query(SJC).get(course.sjc_id).number,
-                                            db.session.query(SJC).get(course.sjc_id).name
-                                        ))
-                                    } if course.sjc else None)
-                                )
-                            }
-                        for course in requirement.courses])
-                    )
-                }    
-            for requirement in program.core_requirements]))
-    })
 
 @application.route('/api/requirements_by_program/<int:prog_id>')
 def requirements_by_program(prog_id):
@@ -215,18 +122,6 @@ class MapsByUserId(Resource):
     def get(self,user_id):
         maps = db.session.query(Map).filter_by(user_id=user_id).all()
         return [get_dict(map_) for map_ in maps]
-
-
-
-@application.route('/api/maps_by_user',methods=['GET'])
-def maps_by_user():
-    user_id = request.args.get('userId')
-    if(user_id):
-        user = db.session.query(User).get(user_id)
-        maps = [map_ for map_ in db.session.query(Map).all() if user in map_.users]
-        return JSON.dumps([get_dict(map_) for map_ in maps])
-    else:
-        return 'No params',404
 
 @application.route('/api/sjc_courses',methods=['GET'])
 def sjc_courses():
@@ -282,108 +177,6 @@ def load_login_data():
 def logout():
     return 'check console'
 
-
-@application.route('/api/delete_map',methods=['POST'])
-def delete_map():
-    user = None
-    form_data = json.loads(request.data)
-    token = form_data['token']
-    map_id = form_data['map_id']
-    if(token and map_id):
-        user = User.verify_auth_token(token)
-    if(user):
-        map_ = db.session.query(Map).get(map_id)
-        db.session.delete(map_)
-        db.session.commit()
-        return json.jsonify({
-            'mapDeleted':True
-        })
-    else:
-        return json.jsonify({
-            'mapDeleted':False
-        })
-
-
-@application.route('/api/create_map',methods=['POST'])
-def create_map():
-    user = None
-    form_data = json.loads(request.data)
-    token = form_data['token']
-    if(token != None):
-        user = User.verify_auth_token(token)
-    if(user):
-        map_data = form_data['mapState']
-        new_map = Map(
-            user_id=user.id,
-            univ_id=map_data['selectedUniversityId'],
-            map_name=map_data['newMapName'],
-            prog_id=map_data['selectedProgramId'],
-            assoc_id=map_data['selectedAssociateDegree']
-            )
-        new_map.users.append(user)
-        for collaborator in map_data['newMapCollaborators']:
-            coll_user = db.session.query(User).filter(User.email==collaborator)[0]
-            new_map.users.append(coll_user)
-        db.session.add(new_map)
-        db.session.commit()
-        return json.jsonify({
-            'mapCreated':True
-        })
-    return '',401
-
-@application.route('/api/update_collaborators',methods=['POST'])
-def update_collaborators():
-    user = None
-    form_data = json.loads(request.data)
-    token = form_data['token']
-    if(token != None):
-        user = User.verify_auth_token(token)
-    if(user):
-        map_id = form_data['map_id']
-        newMapCollaborators = form_data['newMapCollaborators']
-        map_ = db.session.query(Map).get(map_id)
-        for old_collaborator in map_.users:
-            if (old_collaborator != user) and (old_collaborator.email not in newMapCollaborators):
-                map_.users.remove(old_collaborator)
-        for email in newMapCollaborators:
-            collaborator = db.session.query(User).filter(User.email==email).first()
-            if collaborator not in map_.users:
-                map_.users.append(collaborator)
-        db.session.commit()
-        return json.jsonify({
-            'collaboratorsUpdated':True
-        })
-    return '',401
-            
-@application.route('/api/save_map',methods=['POST'])
-def save_map():
-    user = None
-    form_data = json.loads(request.data)
-    token = form_data['token']
-    if(token != None):
-        user = User.verify_auth_token(token)
-    if(user):
-        map_data = form_data['mapData']
-        map_id = map_data['id']
-        map_ = db.session.query(Map).get(map_id)
-        if(map_):
-            map_name = map_data['name']
-            component_areas = map_data['componentAreas']
-            if(map_.map_name != map_name):
-                map_.map_name=map_name
-                db.session.commit()
-            for field,course_id in component_areas.items():
-                if(course_id != -1):
-                    setattr(map_,field,course_id)
-                    db.session.commit()
-                else:
-                    pass
-            return json.jsonify({
-                'mapSaved':True
-            })
-    else:
-        return '',401
-
 @application.route('/api/user_emails',methods=['GET'])
 def user_emails():
     users = db.session.query(User).all()
@@ -404,20 +197,6 @@ def degree_components():
 
 api.add_resource(Universities,'/api/universities')
 api.add_resource(ProgramsByUniv,'/api/programs_by_university/<int:univ_id>')
-api.add_resource(RequirementsByProgram,'/api/requirements_by_program/<int:prog_id>')
-
-@application.route('/api/saved_maps_by_user',methods=['POST'])
-def saved_maps_by_user():
-    user = None
-    form_data = json.loads(request.data)
-    token = form_data['token']
-    if(token != None):
-        user = User.verify_auth_token(token)
-    if(user):
-        all_maps = db.session.query(Map).all()
-        user_saved_maps = [appify_map(map_) for map_ in all_maps if user in map_.users]
-        return JSON.dumps(user_saved_maps)
-    return 'Error!',401
 
 def appify_map(map_):
     components = Map.component_areas
@@ -456,37 +235,6 @@ def appify_map(map_):
             } for area in components
         ] 
     }
-
-@application.route('/api/get_core/<int:univ_id>')
-def get_core(univ_id):
-    core = {}
-    univ = db.session.query(University).get(univ_id)
-    if(not univ):
-        return 'Error!',404
-    core_requirements = db.session.query(CoreRequirement).filter(CoreRequirement.univ_id==univ_id).all()
-    return JSON.dumps([
-        {
-            k:v for k,v in zip(
-                ('core_req_id','core_req_name','core_req_univ_id','core_req_code','courses'),
-                (core_req.id,core_req.name,core_req.univ_id,core_req.code,[
-                    {
-                        k:v for k,v in zip(
-                            ('course_id','course_rubric','course_number','course_name','sjc_course'),
-                            (course.id,course.rubric,course.number,course.name,{
-                                        k:v for k,v in zip(
-                                            ('sjc_id','sjc_rubric','sjc_number','sjc_name'),
-                                            (db.session.query(SJC).get(course.sjc_id).id,
-                                            db.session.query(SJC).get(course.sjc_id).rubric,
-                                            db.session.query(SJC).get(course.sjc_id).number,
-                                            db.session.query(SJC).get(course.sjc_id).name
-                                        ))
-                                    } if course.sjc else None)
-                        )
-                    } for course in core_req.courses
-                ])
-            ) for cor_req in core_requirements
-        } for core_req in core_requirements
-    ])
 
 def courseify(course):
     course_dict = {
