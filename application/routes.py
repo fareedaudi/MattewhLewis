@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, json, session
+from flask import render_template, redirect, url_for, request, json, session, send_file
 from sqlalchemy import and_
 from application import application
 from application.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement,AssociateDegree,CourseSlot,CourseNote
@@ -8,6 +8,10 @@ from slugify import slugify
 import json as JSON
 from functools import reduce
 from pprint import pprint
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
+env = Environment(loader=FileSystemLoader('./data'))
+export_template = env.get_template("map_export_template.html")
 
 api = Api(application)
 
@@ -247,7 +251,7 @@ def login():
         'userId':user.id,
         'userEmail':user.email,
         'token':token,
-})
+    }),200
 
 
 
@@ -631,7 +635,6 @@ def get_courses_by_code(PROG_ID):
                 code = '100'
             courses = req['courses']
             courses_by_code[code] = courses_by_code[code]+courses if courses_by_code.get(code) else courses
-    pprint(courses_by_code)
     return courses_by_code
 
 
@@ -739,7 +742,6 @@ def get_user_from_token(request):
     label,token = request.headers['Authorization'].split(' ')
     if(label=="Bearer" and token):
         user = User.verify_auth_token(token)
-        print(user)
     return user
 
 def create_new_map(request):
@@ -996,6 +998,126 @@ users_handlers = {
     'GET':get_users
 }
 
+def create_pdf_of_map(map_,user):
+    map_dict = {
+                k:v for k,v in zip(
+                    (
+                        'id',
+                        'name',
+                        'assoc_id',
+                        'assoc_name',
+                        'prog_id',
+                        'prog_name',
+                        'univ_id',
+                        'univ_name',
+                        'user_id',
+                        'create_at',
+                        'users',
+                        'applicable_courses',
+                        'requirements',
+                        'users'
+                        ),
+                    (
+                        map_.id,
+                        map_.name,
+                        map_.assoc_id,
+                        db.session.query(AssociateDegree).get(map_.assoc_id).name,
+                        map_.prog_id,
+                        db.session.query(Program).get(map_.prog_id).name,
+                        map_.univ_id,
+                        db.session.query(University).get(map_.univ_id).name,
+                        map_.user_id,
+                        map_.created_at,
+                        [
+                            {
+                                k:v for k,v in zip(
+                                    ('id','email'),
+                                    (user.id,user.email)
+                                )
+                            }
+                        for user in map_.users],
+                        [
+                            {
+                                k:v for k,v in zip(
+                                    ('id','rubric','name','number','hours'),
+                                    (course.id,course.rubric,course.number,course.name,course.hours)
+                                )
+                            }
+                        for course in map_.applicable_courses
+                        ],
+                        [
+                        {
+                            k:v for k,v in zip(
+                                (
+                                    'id',
+                                    'name',
+                                    'map_id',
+                                    'code',
+                                    'hours',
+                                    'default_courses',
+                                    'course_slots'
+                                ),
+                                (
+                                    req.id,
+                                    req.name,
+                                    req.map_id,
+                                    req.code,
+                                    req.hours,
+                                    [
+                                        {
+                                            k:v for k,v in zip(
+                                                ('id','rubric','name','number','hours'),
+                                                (course.id,course.rubric,course.name,course.number,course.hours)
+                                            )
+                                        }
+                                    for course in req.default_courses
+                                    ],
+                                    [
+                                        {
+                                            k:v for k,v in zip(
+                                                ('id','name','req_id','course','note'),
+                                                (slot.id,slot.name,slot.req_id,
+                                                {
+                                                    'id':db.session.query(SJC).get(slot.course_id).id,
+                                                    'name':db.session.query(SJC).get(slot.course_id).name,
+                                                    'rubric':db.session.query(SJC).get(slot.course_id).rubric,
+                                                    'number':db.session.query(SJC).get(slot.course_id).number,
+                                                    'hours':db.session.query(SJC).get(slot.course_id).hours
+                                                } if slot.course_id else {},
+                                                {
+                                                    'id':slot.note[0].id,
+                                                    'text':slot.note[0].text,
+                                                    'applicable':slot.note[0].applicable,
+                                                    'slot_id':slot.note[0].slot_id,
+                                                    'course_id':slot.note[0].course_id,
+                                                    'prog_id':slot.note[0].prog_id
+                                                } if slot.note else {}
+                                                )
+                                            )
+                                        }
+                                    for slot in req.course_slots],
+                                )
+                            )
+                        }
+                    for req in map_.requirements],
+                    [
+                        {   
+                            'id':user.id,
+                            'email':user.email
+                        } for user in map_.users
+                    ]+[{'id':user.id,'email':user.email}])
+                )
+            }
+    template_vars = {
+        'map_name':map_dict['name'],
+        'univ_name':map_dict['univ_name'],
+        'prog_name':map_dict['prog_name'],
+        'assoc_name':map_dict['assoc_name'],
+        'requirements':map_dict['requirements']
+    }
+    html_out = export_template.render(template_vars)
+    HTML(string=html_out).write_pdf("report.pdf",stylesheets=["./data/style.css"])
+    return None
 
 @application.route('/api/maps',methods=['POST','GET'])
 def GET_POST_maps():
@@ -1011,3 +1133,15 @@ def DELETE_PATCH_maps(id):
 def GET_users():
     handler = users_handlers[request.method]
     return handler(request)
+
+@application.route('/api/report/<int:map_id>',methods=['GET'])
+def get_pdf(map_id):
+    user = get_user_from_token(request)
+    if not user:
+        return 'Error',401
+    map_ = NewMap.query.get(map_id)
+    if not map:
+        return 'Error',404
+    create_pdf_of_map(map_,user)
+    FILE_PATH = '../report.pdf'
+    return send_file(FILE_PATH,attachment_filename="report1.pdf",mimetype="application/pdf")

@@ -1,8 +1,7 @@
-import sys,os,csv
+import sys,os,csv,json
+
 # Monkeypatch: Allow me to import from parent directory
 sys.path.append(os.path.abspath(os.path.join(os.path.abspath(__file__),os.pardir,os.pardir,os.pardir)))
-
-import csv, json
 from application.models import db,Program,University,CoreRequirement
 
 UH_ID = 2
