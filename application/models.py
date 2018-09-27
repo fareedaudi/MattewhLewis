@@ -201,6 +201,7 @@ class Program(db.Model):
         "ProgramComponent",
         back_populates="program"
     )
+    
 
 class ProgramComponent(db.Model):   
     id = db.Column(db.Integer, primary_key=True)
@@ -367,6 +368,14 @@ class SJC(db.Model):
     notes = db.relationship(
         'CourseNote'
     )
+    def get_object(self):
+        return {
+            'id':self.id,
+            'rubric':self.rubric,
+            'number':self.number,
+            'name':self.name,
+            'hours':self.hours
+        }
 
 class User(UserMixin,db.Model):
     __tablename__ = "user"

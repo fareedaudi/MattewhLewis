@@ -15,45 +15,6 @@ export_template = env.get_template("map_export_template.html")
 
 api = Api(application)
 
-def get_dict(map_):
-    empty_dict = {
-        'id':'',
-        'prog_id':'',
-        'user_id':'',
-        'comm_010_1':'',
-        'comm_010_2':'',
-        'math_020':'',
-        'sci_030_1':'',
-        'sci_030_2':'',
-        'phil_040':'',
-        'arts_050':'',
-        'hist_060_1':'',
-        'hist_060_2':'',
-        'gov_070_1':'',
-        'gov_070_2':'',
-        'soc_080':'',
-        'comp_090_1':'',
-        'comp_090_2':'',
-        'inst_opt_1':'',
-        'inst_opt_2':'',
-        'trans_1':'',
-        'trans_2':'',
-        'trans_3':'',
-        'trans_4':'',
-        'trans_5':'',
-        'trans_6':''
-    }
-    dict_ = map_.__dict__
-    dict_.pop('_sa_instance_state',None)
-    users = dict_.pop('users',[])
-    empty_dict['users']= []
-    for user in users:
-        empty_dict['users'].append(user.id)
-    for key in dict_:
-        empty_dict[key] = dict_[key]
-    return empty_dict
-
-
 class Universities(Resource):
     def get(self):
         universities = db.session.query(University).order_by(University.name).all()
@@ -117,11 +78,6 @@ def requirements_by_program(prog_id):
             ])
         )
     })
-
-class MapsByUserId(Resource):
-    def get(self,user_id):
-        maps = db.session.query(Map).filter_by(user_id=user_id).all()
-        return [get_dict(map_) for map_ in maps]
 
 @application.route('/api/sjc_courses',methods=['GET'])
 def sjc_courses():
@@ -197,44 +153,6 @@ def degree_components():
 
 api.add_resource(Universities,'/api/universities')
 api.add_resource(ProgramsByUniv,'/api/programs_by_university/<int:univ_id>')
-
-def appify_map(map_):
-    components = Map.component_areas
-    univ_name = db.session.query(University).get(map_.univ_id).name
-    prog_name = db.session.query(Program).get(map_.prog_id).name
-    return {
-        'id':map_.id,
-        'name':map_.map_name,
-        'univ_id':map_.univ_id,
-        'univ_name':univ_name,
-        'user_id':map_.user_id,
-        'prog_id':map_.prog_id,
-        'assoc_id':map_.assoc_id,
-        'prog_name':prog_name,
-        'users':[
-            {
-                'id':id,
-                'email':db.session.query(User).get(int(id)).email
-            } for id in get_dict(map_)['users']
-        ],
-        'components':[
-            {
-                'comp_name':area,
-                'fields':[
-                    {
-                        'name':field,
-                        'course': {
-                            'id':get_dict(map_)[field],
-                            'name':'',
-                            'rubric':'',
-                            'number':''
-                        }
-                        
-                    } for field in components[area]
-                ]
-            } for area in components
-        ] 
-    }
 
 def courseify(course):
     course_dict = {
