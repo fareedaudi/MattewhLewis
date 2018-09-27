@@ -38,17 +38,6 @@ class RequirementsComponent extends React.Component{
         this.setState({selectedProgram});
     }
 
-    fetchCoreRequirements = () => {
-        fetch(
-            `${ROOT_URL}/api/get_core/${this.props.university.university_id}`
-        ).then(
-            response => response.json()
-        ).then(
-            coreRequirements => {
-            }
-        )
-    }
-
     resetSelectedProgram = () => {
         let selectedProgram = {
             program_id:-1,
@@ -63,8 +52,6 @@ class RequirementsComponent extends React.Component{
             university:this.props.university
         });
     }
-
-
 
     componentDidUpdate(prevProps,prevState){
         if(this.props.university !== prevProps.university){
