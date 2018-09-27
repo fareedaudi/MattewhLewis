@@ -26,13 +26,13 @@ const SelectedRequirements = (props) => {
                                         }
                                         return(
                                         <li key={i}>
-                                        {name   }
+                                        {name}
                                         <ul>
                                             {requirement.courses.map(
                                                 (course,i) =>
                                                     {
                                                         if(course.sjc_course && showSJCCourses){
-                                                            return <li key={i} style={{color:'green'}}>{course.sjc_course.sjc_rubric} {course.sjc_course.sjc_number} - {course.sjc_course.sjc_name}</li>
+                                                            return <li key={i} style={{color:'green'}}>{course.sjc_course.rubric} {course.sjc_course.number} - {course.sjc_course.name}</li>
                                                         } else {
                                                             return <li key={i}>{course.course_rubric} {course.course_number} - {course.course_name}</li>
                                                         }

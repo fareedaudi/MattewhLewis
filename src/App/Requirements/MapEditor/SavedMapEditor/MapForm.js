@@ -168,11 +168,11 @@ export class MapFormComponent extends React.Component{
     cleanCourses = (sjcCourses) => {
         sjcCourses.forEach(
             course=>{
-                let number = course.sjc_number;
-                course.sjc_number = number.substring(0,1)+'4'+number.substring(2)
-                let parenStuff = course.sjc_name.match(/\(\S+\)/);
+                let number = course.number;
+                course.number = number.substring(0,1)+'4'+number.substring(2)
+                let parenStuff = course.name.match(/\(\S+\)/);
                 if(parenStuff){
-                    course.sjc_name=course.sjc_name.substring(0,parenStuff.index)
+                    course.name=course.name.substring(0,parenStuff.index)
                 }
             }
         )
@@ -185,10 +185,10 @@ export class MapFormComponent extends React.Component{
     }
 
     sortByRubricThenNumber = (course1,course2) => {
-        if(course1.sjc_rubric>course2.sjc_rubric){
+        if(course1.rubric>course2.rubric){
             return 1;
-        } else if(course1.sjc_rubric===course2.sjc_rubric){
-            if(course1.sjc_number>course2.sjc_number){
+        } else if(course1.rubric===course2.rubric){
+            if(course1.number>course2.number){
                 return 1;
             } else {
                 return -1;
