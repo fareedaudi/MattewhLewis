@@ -59,7 +59,7 @@ def requirements_by_program(prog_id):
                                                 ('course_id','course_rubric','course_number','course_name','sjc_course'),
                                                 (course.id,course.rubric,course.number,course.name, {
                                                     k:v for k,v in zip(
-                                                        ('sjc_id','sjc_rubric','sjc_number','sjc_name'),
+                                                        ('id','rubric','number','name'),
                                                         (db.session.query(SJC).get(course.sjc_id).id,
                                                         db.session.query(SJC).get(course.sjc_id).rubric,
                                                         db.session.query(SJC).get(course.sjc_id).number,
@@ -166,11 +166,11 @@ def courseify(course):
     if(course.sjc_id):
         SJC_course = db.session.query(SJC).get(course.sjc_id)
         sjc = {
-            'sjc_id':SJC_course.id,
-            'sjc_name':SJC_course.name,
-            'sjc_rubric':SJC_course.rubric,
-            'sjc_number':SJC_course.number,
-            'sjc_hours':SJC_course.hours
+            'id':SJC_course.id,
+            'name':SJC_course.name,
+            'rubric':SJC_course.rubric,
+            'number':SJC_course.number,
+            'hours':SJC_course.hours
         }
     course_dict['sjc_course'] = sjc
     return course_dict
@@ -264,12 +264,13 @@ def get_program(prog_id):
                                     (prog_comp_req.id,prog_comp_req.name,prog_comp_req.hours,prog_comp_req.code,[
                                         {
                                             k:v for k,v in zip(
-                                                ('sjc_id','sjc_rubric','sjc_number','sjc_name'),
+                                                ('id','rubric','number','name','hours'),
                                                 (
                                                     db.session.query(SJC).get(course.sjc_id).id,
                                                     db.session.query(SJC).get(course.sjc_id).rubric,
                                                     db.session.query(SJC).get(course.sjc_id).number,
-                                                    db.session.query(SJC).get(course.sjc_id).name
+                                                    db.session.query(SJC).get(course.sjc_id).name,
+                                                    db.session.query(SJC).get(course.sjc_id).hours
                                                 )
                                             )
                                         } for course in prog_comp_req.courses if course.sjc
@@ -321,7 +322,7 @@ def create_new_requirement(map_id,code,info,program_courses):
     if(code not in ('inst','trans')):
         applicable_courses = program_courses.get(code) or []
         for course_obj in applicable_courses:
-            course = db.session.query(SJC).get(course_obj['sjc_id'])
+            course = db.session.query(SJC).get(course_obj['id'])
             new_req.default_courses.append(course)
     if(code == 'inst'):
         for id in SJC_ids_for_comp_area:
@@ -355,14 +356,14 @@ def add_requirements(map_,program_courses):
         map_.requirements.append(new_req)
         applicable_courses = consummable_program_courses.pop(code,None) or []
         for course_obj in applicable_courses:
-            course = db.session.query(SJC).get(course_obj['sjc_id'])
+            course = db.session.query(SJC).get(course_obj['id'])
             if(course not in map_.applicable_courses):
                 map_.applicable_courses.append(course)
     other_courses = []
     for code in consummable_program_courses:
         other_courses += consummable_program_courses[code]
     for course_object in other_courses:
-        course = db.session.query(SJC).get(course_object['sjc_id'])
+        course = db.session.query(SJC).get(course_object['id'])
         if(course not in map_.applicable_courses):
             map_.applicable_courses.append(course)
     trans_req = MapRequirement.query.filter_by(map_id=map_.id,code='trans').first()
@@ -376,7 +377,7 @@ def add_requirements(map_,program_courses):
         for course_obj in program_courses.get(code):
             if code in ['trans','inst','100']:
                 continue
-            sjc_id = course_obj.get('sjc_id')
+            sjc_id = course_obj.get('id')
             if(not sjc_id):
                 continue
             sjc_course = SJC.query.get(sjc_id)
