@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, json, session, send_file
+from flask import render_template, redirect, url_for, request, json,send_file
 from sqlalchemy import and_
 from application import application
 from application.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement,AssociateDegree,CourseSlot,CourseNote
@@ -55,16 +55,12 @@ def requirements_by_program(prog_id):
                                         {
                                             k:v for k,v in zip(
                                                 ('course_id','course_rubric','course_number','course_name','sjc_course'),
-                                                (course.id,course.rubric,course.number,course.name, {
-                                                    k:v for k,v in zip(
-                                                        ('id','rubric','number','name'),
-                                                        (db.session.query(SJC).get(course.sjc_id).id,
-                                                        db.session.query(SJC).get(course.sjc_id).rubric,
-                                                        db.session.query(SJC).get(course.sjc_id).number,
-                                                        db.session.query(SJC).get(course.sjc_id).name
-                                                        )
-                                                    )
-                                                 } if course.sjc else None )
+                                                (
+                                                    course.id,
+                                                    course.rubric,
+                                                    course.number,
+                                                    course.name, 
+                                                    SJC.query.get(course.sjc_id).get_object() if course.sjc else None )
                                             )
                                         } for course in prog_comp_req.courses
                                     ])
