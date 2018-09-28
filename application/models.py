@@ -580,7 +580,9 @@ class NewMap(db.Model):
             for course_obj in program_courses.get(code):
                 if code in ['trans','inst','100']:
                     continue
-                sjc_id = course_obj.get('id')
+                if(not course_obj['sjc_course']):
+                    continue
+                sjc_id = course_obj['sjc_course'].get('id')
                 if(not sjc_id):
                     continue
                 sjc_course = SJC.query.get(sjc_id)
@@ -682,7 +684,7 @@ class NewMap(db.Model):
                             text = note_obj.get('text') or '',
                             applicable = note_obj.get('applicable') or False,
                             course_id = course_id,
-                            prog_id = map_to_edit.prog_id,
+                            prog_id = self.prog_id,
                             slot_id = course_slot.id
                         )
                         db.session.add(note)
