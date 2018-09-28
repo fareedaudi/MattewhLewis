@@ -240,45 +240,66 @@ export class MapFormComponent extends React.Component{
         );
     }
 
-        initializeAltCourseModal = (reqId,slotId) => {
-            this.setState({
-                altCourseModalReqId:reqId,
-                altCourseModalSlotId:slotId,
-                altCourseModalOpen:!this.state.altCourseModalOpen
-            });
-        }
+    initializeAltCourseModal = (reqId,slotId) => {
+        this.setState({
+            altCourseModalReqId:reqId,
+            altCourseModalSlotId:slotId,
+            altCourseModalOpen:!this.state.altCourseModalOpen
+        });
+    }
 
-        saveMapHandler = (savedMapToEdit) => {
-            this.setState({
-                savingMap:true,
-                saveError:false,
-                saved:false
-            });
-            this.props.handleSave(savedMapToEdit).then(
-                ()=> {
-                    this.timer = setTimeout(_ => {
-                        this.setState({
-                            savingMap: false,
-                            saved:true
-                        },
-                            _ => {
-                                this.timer = setTimeout(_ => {
-                                    this.setState({saved:false});
-                                },1500);
-                            }
-                        );
-                        this.props.mapSaved();
-                        }, 500);
-                    }
-            ).catch(
-                (e)=>{
+    saveMapHandler = (savedMapToEdit) => {
+        this.setState({
+            savingMap:true,
+            saveError:false,
+            saved:false
+        });
+        this.props.handleSave(savedMapToEdit).then(
+            ()=> {
+                this.timer = setTimeout(_ => {
                     this.setState({
-                        savingMap:false,
-                        saveError:true
-                    });
+                        savingMap: false,
+                        saved:true
+                    },
+                        _ => {
+                            this.timer = setTimeout(_ => {
+                                this.setState({saved:false});
+                            },1500);
+                        }
+                    );
+                    this.props.mapSaved();
+                    }, 500);
                 }
-            );
-        }
+        ).catch(
+            (e)=>{
+                this.setState({
+                    savingMap:false,
+                    saveError:true
+                });
+            }
+        );
+    }
+    
+    addHandler = (reqId,nextNumber) => {
+        let requirement = this.state.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
+        let slotName = `component-area-option-${nextNumber}`;
+        let newSlot = {
+            id:null,
+            name:slotName,
+            req_id:reqId,
+            course:{},
+            note:{}
+        };
+        requirement.course_slots.push(newSlot);
+        this.props.mapSaved();
+        this.setState({
+            ...this.state,
+            courseSlots:{
+                ...this.state.courseSlots,
+                [slotName]:{}
+            }
+        });
+    }
 
     render(){
         /*
@@ -287,6 +308,7 @@ export class MapFormComponent extends React.Component{
         }
         */
        console.log('Saved Map',this.state.savedMapToEdit);
+       console.log(this.state.courseSlots);
         let {univ_name,prog_name,assoc_name,requirements} = this.state.savedMapToEdit;
         let totalHours = 0;
         let courseSelectionFields = requirements.map(
@@ -307,11 +329,10 @@ export class MapFormComponent extends React.Component{
                                 let notePresent = isObjNotEmpty(slot.note);
                                 let noteColor = notePresent?'black':'gray';
                                 return (<div key={slot.name}>
-                                    
                                     <InputGroup>
         
                                     <Input
-                                        key={slot.name}
+                                        
                                         //style={{width:'90%'}}
                                         type={"select"}
                                         value={isObjNotEmpty(course)?course.id:"-1"}
@@ -354,6 +375,7 @@ export class MapFormComponent extends React.Component{
                                     )
                             }
                         )}
+                        {requirement.name.includes("Component")?<a href="#" onClick={(e)=>{e.preventDefault();this.addHandler(requirement.id,requirement.course_slots.length);}}>Add Course Slot</a>:null}
                     </FormGroup>
                 );}
         );
