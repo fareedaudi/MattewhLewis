@@ -107,7 +107,6 @@ def create_new_map(request):
     initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collaborators)
     return 'Success!',200
     
-
 def get_maps_(request):
     user = get_user_from_token(request)
     if(not user):
