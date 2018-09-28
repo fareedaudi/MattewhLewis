@@ -17,6 +17,13 @@ from flask import json
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import (JSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
+from slugify import slugify
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
+
+env = Environment(loader=FileSystemLoader('./data'))
+export_template = env.get_template("map_export_template.html")
+
 
 @login.user_loader
 def load_user(id):
@@ -128,10 +135,10 @@ class Course(db.Model):
         back_populates="courses")
     def get_object(self):
         return {
-            'course_id':self.id,
-            'course_rubric':self.rubric,
-            'course_number':self.number,
-            'course_name':self.name,
+            'id':self.id,
+            'rubric':self.rubric,
+            'number':self.number,
+            'name':self.name,
             'sjc_course':SJC.query.get(self.sjc_id).get_object() if self.sjc else None
         }
 
@@ -179,7 +186,19 @@ class Program(db.Model):
         return Program.query.filter_by(univ_id=univ_id).all()
     def get_name(self):
         return self.name
-    
+    @staticmethod
+    def get_courses_by_code(prog_id):
+        prog = Program.query.get(prog_id)
+        courses_by_code = dict()
+        for comp in prog.program_components:
+            for req in comp.requirements:
+                code = req.code
+                if(not code):
+                    code='100'
+                courses = req.courses.copy()
+                courses = [course.get_object() for course in courses]
+                courses_by_code[code] = courses_by_code[code] + courses if courses_by_code.get(code) else courses
+        return courses_by_code
 
 class ProgramComponent(db.Model):   
     id = db.Column(db.Integer, primary_key=True)
@@ -382,7 +401,6 @@ class User(UserMixin,db.Model):
             'id':self.id,
             'email':self.email
         }
-        
 
     def set_password(self,password):
         self.password_hash = generate_password_hash(password)
@@ -478,7 +496,152 @@ class NewMap(db.Model):
             'hours':'12'
         }
     }
+    SJC_ids_for_comp_area = [132,37,253]
+    def _add_users(self,user_emails):
+        user = User.query.get(self.user_id)
+        for email in user_emails:
+            if(email == user.email):
+                continue
+            user = db.session.query(User).filter(User.email==email).first()
+            if(not user):
+                return
+            self.users.append(user)
+        db.session.commit()
+    def _create_new_requirement(self,code,info,program_courses):
+        name = info['name']
+        hours = info['hours']
+        new_req = MapRequirement(
+            name=info['name'],
+            code = code,
+            map_id = self.id,
+            hours = info['hours']
+        )
+        try:
+            db.session.add(new_req)
+            db.session.commit()
+        except:
+            pass
+        if(code not in ('inst','trans')):
+            applicable_courses = program_courses.get(code) or []
+            for course_obj in applicable_courses:
+                if(not course_obj['sjc_course']):
+                    continue
+                sjc_id = course_obj['sjc_course'].get('id')
+                if(not sjc_id):
+                    continue
+                course = SJC.query.get(course_obj['sjc_course']['id'])
+                new_req.default_courses.append(course)
+        if(code == 'inst'):
+            for id in self.SJC_ids_for_comp_area:
+                sjc_course = SJC.query.get(id)
+                new_req.default_courses.append(sjc_course)
+        no_slots = int(hours)//3
+        for i in range(no_slots):
+            slot_name = slugify(new_req.name)+"-"+str(i)
+            slot = CourseSlot(name=slot_name,req_id=new_req.id)
+            db.session.add(slot)
+        db.session.commit()
+        return new_req
+    def _add_requirements(self,program_courses):
+        consummable_program_courses = program_courses.copy()
+        for code,info in NewMap.general_associates_degree.items():
+            new_req = self._create_new_requirement(code,info,program_courses)
+            self.requirements.append(new_req)
+            applicable_courses = consummable_program_courses.pop(code,None) or []
+            for course_obj in applicable_courses:
+                if(not course_obj['sjc_course']):
+                    continue
+                sjc_id = course_obj['sjc_course'].get('id')
+                if(not sjc_id):
+                    continue
+                course = db.session.query(SJC).get(course_obj['sjc_course']['id'])
+                if(course not in self.applicable_courses):
+                    self.applicable_courses.append(course)
+        other_courses = []
+        for code in consummable_program_courses:
+            other_courses += consummable_program_courses[code]
+        for course_object in other_courses:
+            if(not course_object['sjc_course']):
+                continue
+            sjc_id = course_object['sjc_course'].get('id')
+            if(not sjc_id):
+                continue
+            course = db.session.query(SJC).get(course_object['sjc_course']['id'])
+            if(course not in self.applicable_courses):
+                self.applicable_courses.append(course)
+        trans_req = MapRequirement.query.filter_by(map_id=self.id,code='trans').first()
+        if(not trans_req):
+            raise ValueError('Something went wrong finding the trans requiremnet!')
+        trans_req.default_courses = self.applicable_courses.copy()
+        comp_req = MapRequirement.query.filter_by(map_id=self.id,code='090').first()
+        if(not comp_req):
+            raise ValueError('Something went wrong finding the comp requiremnet!')
+        for code in program_courses:
+            for course_obj in program_courses.get(code):
+                if code in ['trans','inst','100']:
+                    continue
+                sjc_id = course_obj.get('id')
+                if(not sjc_id):
+                    continue
+                sjc_course = SJC.query.get(sjc_id)
+                if(not sjc_course):
+                    raise ValueError('Something went wrong finding SJC course!')
+                if(sjc_course not in comp_req.default_courses):
+                    comp_req.default_courses.append(sjc_course)
+        db.session.commit()
+    @staticmethod
+    def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collaborators):
+        self = __init__(
+            name=name,
+            assoc_id=assoc_id,
+            prog_id=prog_id,
+            univ_id=univ_id,
+            user_id=user_id,
+            created_at=created_at
+        )
+        user = User.query.get(user_id)
+        self.users.append(user)
+        db.session.add(self)
+        db.session.commit()
+        program_courses = __class__._get_courses_by_code(prog_id)
+        self._add_requirements(program_courses)
+        self._add_users(collaborators)
     
+    @staticmethod
+    def _get_courses_by_code(PROG_ID):
+        program = __class__._get_program(PROG_ID)
+
+        program_name = program['program_name']
+        program_link = program['program_link']
+        program_components = program['program_components']
+
+        courses_by_code = dict()
+
+        for comp in program_components:
+            reqs = comp['requirements']
+            for req in reqs:
+                code = req['prog_comp_req_code']
+                if(not code):
+                    code = '100'
+                courses = req['courses']
+                courses_by_code[code] = courses_by_code[code]+courses if courses_by_code.get(code) else courses
+        return courses_by_code
+    def _get_program(prog_id):
+        program = Program.query.get(prog_id)
+        return program.get_object()
+    def create_pdf_of_map(self):
+        map_dict = self.get_object()
+        template_vars = {
+            'map_name':map_dict['name'],
+            'univ_name':map_dict['univ_name'],
+            'prog_name':map_dict['prog_name'],
+            'assoc_name':map_dict['assoc_name'],
+            'requirements':map_dict['requirements']
+        }
+        html_out = export_template.render(template_vars)
+        HTML(string=html_out).write_pdf("./report.pdf",stylesheets=["./data/style.css"])
+        return None
+
 
 class MapRequirement(db.Model):
     __tablename__ = "map_requirement"

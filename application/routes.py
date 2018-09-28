@@ -5,10 +5,6 @@ import json as JSON
 from slugify import slugify
 from functools import reduce
 from pprint import pprint
-from jinja2 import Environment, FileSystemLoader
-from weasyprint import HTML
-env = Environment(loader=FileSystemLoader('./data'))
-export_template = env.get_template("map_export_template.html")
 
 @application.route('/api/universities',methods=["GET"])
 def get_universities():
@@ -72,112 +68,6 @@ def user_emails():
     users = User.query.all()
     return JSON.dumps([user.get_email() for user in users])
 
-def get_program(prog_id):
-    program = Program.query.get(prog_id)
-    return program.get_object()
-
-def get_courses_by_code(PROG_ID):
-    program = get_program(PROG_ID)
-
-    program_name = program['program_name']
-    program_link = program['program_link']
-    program_components = program['program_components']
-
-    courses_by_code = dict()
-
-    for comp in program_components:
-        reqs = comp['requirements']
-        for req in reqs:
-            code = req['prog_comp_req_code']
-            if(not code):
-                code = '100'
-            courses = req['courses']
-            courses_by_code[code] = courses_by_code[code]+courses if courses_by_code.get(code) else courses
-    return courses_by_code
-
-
-def create_new_requirement(map_id,code,info,program_courses):
-    name = info['name']
-    hours = info['hours']
-    new_req = MapRequirement(
-        name=info['name'],
-        code = code,
-        map_id = map_id,
-        hours = info['hours']
-    )
-    try:
-        db.session.add(new_req)
-        db.session.commit()
-    except:
-        pass
-    if(code not in ('inst','trans')):
-        applicable_courses = program_courses.get(code) or []
-        for course_obj in applicable_courses:
-            course = db.session.query(SJC).get(course_obj['id'])
-            new_req.default_courses.append(course)
-    if(code == 'inst'):
-        for id in SJC_ids_for_comp_area:
-            sjc_course = SJC.query.get(id)
-            new_req.default_courses.append(sjc_course)
-    no_slots = int(hours)//3
-    for i in range(no_slots):
-        slot_name = slugify(new_req.name)+"-"+str(i)
-        slot = CourseSlot(name=slot_name,req_id=new_req.id)
-        db.session.add(slot)
-    db.session.commit()
-    return new_req
-
-def add_users(map_,user_emails):
-    user = User.query.get(map_.user_id)
-    for email in user_emails:
-        if(email == user.email):
-            continue
-        user = db.session.query(User).filter(User.email==email).first()
-        if(not user):
-            return
-        map_.users.append(user)
-    db.session.commit()
-
-SJC_ids_for_comp_area = [132,37,253]
-
-def add_requirements(map_,program_courses):
-    consummable_program_courses = program_courses.copy()
-    for code,info in NewMap.general_associates_degree.items():
-        new_req = create_new_requirement(map_.id,code,info,program_courses)
-        map_.requirements.append(new_req)
-        applicable_courses = consummable_program_courses.pop(code,None) or []
-        for course_obj in applicable_courses:
-            course = db.session.query(SJC).get(course_obj['id'])
-            if(course not in map_.applicable_courses):
-                map_.applicable_courses.append(course)
-    other_courses = []
-    for code in consummable_program_courses:
-        other_courses += consummable_program_courses[code]
-    for course_object in other_courses:
-        course = db.session.query(SJC).get(course_object['id'])
-        if(course not in map_.applicable_courses):
-            map_.applicable_courses.append(course)
-    trans_req = MapRequirement.query.filter_by(map_id=map_.id,code='trans').first()
-    if(not trans_req):
-        raise ValueError('Something went wrong finding the trans requiremnet!')
-    trans_req.default_courses = map_.applicable_courses.copy()
-    comp_req = MapRequirement.query.filter_by(map_id=map_.id,code='090').first()
-    if(not comp_req):
-        raise ValueError('Something went wrong finding the comp requiremnet!')
-    for code in program_courses:
-        for course_obj in program_courses.get(code):
-            if code in ['trans','inst','100']:
-                continue
-            sjc_id = course_obj.get('id')
-            if(not sjc_id):
-                continue
-            sjc_course = SJC.query.get(sjc_id)
-            if(not sjc_course):
-                raise ValueError('Something went wrong finding SJC course!')
-            if(sjc_course not in comp_req.default_courses):
-                comp_req.default_courses.append(sjc_course)
-    db.session.commit()
-
 def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collaborators):
     map_ = NewMap(
         name=name,
@@ -191,9 +81,9 @@ def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collabor
     map_.users.append(user)
     db.session.add(map_)
     db.session.commit()
-    program_courses = get_courses_by_code(prog_id)
-    add_requirements(map_,program_courses)
-    add_users(map_,collaborators)
+    program_courses = Program.get_courses_by_code(prog_id)
+    map_._add_requirements(program_courses)
+    map_._add_users(collaborators)
 
 def get_user_from_token(request):
     user = None
@@ -345,19 +235,6 @@ users_handlers = {
     'GET':get_users
 }
 
-def create_pdf_of_map(map_,user):
-    map_dict = map_.get_object()
-    template_vars = {
-        'map_name':map_dict['name'],
-        'univ_name':map_dict['univ_name'],
-        'prog_name':map_dict['prog_name'],
-        'assoc_name':map_dict['assoc_name'],
-        'requirements':map_dict['requirements']
-    }
-    html_out = export_template.render(template_vars)
-    HTML(string=html_out).write_pdf("report.pdf",stylesheets=["./data/style.css"])
-    return None
-
 @application.route('/api/maps',methods=['POST','GET'])
 def GET_POST_maps():
     handler = maps_handlers[request.method]
@@ -381,6 +258,6 @@ def get_pdf(map_id):
     map_ = NewMap.query.get(map_id)
     if not map:
         return 'Error',404
-    create_pdf_of_map(map_,user)
+    map_.create_pdf_of_map()
     FILE_PATH = '../report.pdf'
     return send_file(FILE_PATH,attachment_filename="report1.pdf",mimetype="application/pdf")
