@@ -65,18 +65,6 @@ programs_sjc_courses = db.Table(
     db.Column('sjc_course_id', db.ForeignKey('SJC.id'), primary_key=True)
     )
 
-components_programs = db.Table(
-    'components_programs', 
-    db.Column('program_id', db.ForeignKey('program.id'), primary_key=True),
-    db.Column('component_id', db.ForeignKey('component.id'), primary_key=True)
-    )
-
-components_courses = db.Table(
-    'components_courses',
-    db.Column('course_id', db.ForeignKey('course.id'), primary_key=True),
-    db.Column('component_id', db.ForeignKey('component.id'), primary_key=True)
-)
-
 requirements_courses = db.Table(
     'requirements_courses',
     db.Column('course_id', db.ForeignKey('course.id'), primary_key=True),
@@ -86,12 +74,6 @@ requirements_courses = db.Table(
 requirements_programs = db.Table(
     'requirements_programs',
     db.Column('program_id', db.ForeignKey('program.id'), primary_key=True),
-    db.Column('requirement_id', db.ForeignKey('requirement.id'), primary_key=True)
-)
-
-components_requirements = db.Table(
-    'components_requirements',
-    db.Column('component_id', db.ForeignKey('component.id'), primary_key=True),
     db.Column('requirement_id', db.ForeignKey('requirement.id'), primary_key=True)
 )
 
@@ -149,10 +131,6 @@ class Course(db.Model):
         "Program", 
         secondary=course_programs,
         back_populates="courses",)
-    components = db.relationship(
-        "Component", 
-        secondary=components_courses,
-        back_populates="courses")
     requirements = db.relationship(
         "Requirement",
         secondary=requirements_courses,
@@ -196,12 +174,6 @@ class Program(db.Model):
         "Course", 
         secondary=course_programs, 
         back_populates="programs")
-
-    components = db.relationship(
-        "Component", 
-        secondary=components_programs,
-        back_populates="programs"
-        )
 
     requirements = db.relationship(
         "Requirement",
@@ -294,26 +266,6 @@ class ProgramComponentRequirement(db.Model):
         }
 
 
-class Component(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-    univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
-    prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
-    name = db.Column(db.String(250), nullable=False)
-    courses = db.relationship(
-        "Course", 
-        secondary=components_courses, 
-        back_populates="components")
-    programs = db.relationship(
-        "Program",
-        secondary=components_programs,
-        back_populates="components")
-    requirements = db.relationship(
-        "Requirement",
-        secondary=components_requirements,
-        back_populates="components"
-    )
-
 class ProgramCoreRequirement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
@@ -343,11 +295,6 @@ class Requirement(db.Model):
     programs = db.relationship(
         "Program",
         secondary=requirements_programs,
-        back_populates="requirements"
-    )
-    components = db.relationship(
-        "Component",
-        secondary=components_requirements,
         back_populates="requirements"
     )
 
@@ -442,11 +389,6 @@ class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    maps = db.relationship(
-        "Map", 
-        secondary=users_maps,
-        back_populates="users"
-        )
     new_maps = db.relationship(
         "NewMap",
         secondary=users_new_maps,
@@ -624,89 +566,3 @@ class AssociateDegree(db.Model):
     type_ = db.Column(db.String(255))
     def get_name(self):
         return self.name
-
-class Map(db.Model):
-    __tablename__ = "map"
-    id = db.Column(db.Integer, primary_key=True)
-    map_name = db.Column(db.String(255), nullable=True)
-    assoc_id = db.Column(db.Integer)
-    prog_id = db.Column(db.Integer, db.ForeignKey('program.id'))
-    univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    comm_010_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    comm_010_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    math_020 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    sci_030_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    sci_030_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    phil_040 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    arts_050 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    hist_060_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    hist_060_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    gov_070_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    gov_070_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    soc_080 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    comp_090_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    comp_090_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    oral_090 = db.Column(db.Integer) # Hacky
-    phys = db.Column(db.Integer) # and temporary.
-    inst_opt_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    inst_opt_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    trans_1 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    trans_2 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    trans_3 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    trans_4 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    trans_5 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    trans_6 = db.Column(db.Integer, db.ForeignKey('SJC.id'))
-    empty_dict = {
-        'id':'',
-        'prog_id':'',
-        'user_id':'',
-        'comm_010_1':'',
-        'comm_010_2':'',
-        'math_020':'',
-        'sci_030_1':'',
-        'sci_030_2':'',
-        'phil_040':'',
-        'arts_050':'',
-        'hist_060_1':'',
-        'hist_060_2':'',
-        'gov_070_1':'',
-        'gov_070_2':'',
-        'soc_080':'',
-        'comp_090_1':'',
-        'comp_090_2':'',
-        'inst_opt_1':'',
-        'inst_opt_2':'',
-        'trans_1':'',
-        'trans_2':'',
-        'trans_3':'',
-        'trans_4':'',
-        'trans_5':'',
-        'trans_6':''
-    }
-    component_areas = {
-        'Communication (6 hours)':['comm_010_1','comm_010_2'],
-        'Mathematics (3 hours)':['math_020'],
-        'Life and Physical Sciences (8 hours)':['sci_030_1','sci_030_2'],
-        'Language, Philosophy, and Culture (3 hours)':['phil_040'],
-        'Creative Arts (3 hours)':['arts_050'],
-        'American History (6 hours)':['hist_060_1','hist_060_2'],
-        'Government/Political Science (6 hours)':['gov_070_1','gov_070_2'],
-        'Social and Behavioral Sciences (3 hours)':['soc_080'],
-        'Oral Communication (3 hours)':['oral_090'],
-        'Physical Education Activity (1 hour)':['phys'],
-        'Institutional Option (6 hours)':['inst_opt_1','inst_opt_2'],
-        'Transfer Path (12 hours)':[f'trans_{i}' for i in range(1,5)]
-    }
-    
-    def get_dict(self):
-        dict_ = self.__dict__
-        dict_.pop('_sa_instance_state',None)
-        for key in dict_:
-            self.empty_dict[key] = dict_[key]
-        return self.empty_dict
-    users = db.relationship(
-        "User", 
-        secondary=users_maps,
-        back_populates="maps"
-        )
