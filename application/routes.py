@@ -147,65 +147,14 @@ def update_map_(id,request):
     user = get_user_from_token(request)
     if(not user):
         return 'error',401
-    
     #Fetch map to update
     map_to_edit = db.session.query(NewMap).get(id)
     if(not map_to_edit):
         return 'Error',404
-
     map_data = JSON.loads(request.data)
-
-    # Update name
-    new_map_name = map_data['name']
-    if(map_to_edit.name != new_map_name):
-        map_to_edit.name = new_map_name
-
-    #Update requirements
-    requirements_objects = map_data['requirements']
-    for req_obj in requirements_objects:
-        req = db.session.query(MapRequirement).get(req_obj['id'])
-        if(not req):
-            return 'Error',500
-        
-        #Update course_slots
-        course_slot_objects = req_obj['course_slots']
-        for course_slot_obj in course_slot_objects:
-            if(course_slot_obj['course']):
-                course_slot = db.session.query(CourseSlot).get(course_slot_obj['id'])
-                if(not course_slot):
-                    return 'Error',500
-                course_id = course_slot_obj['course']['id']
-                if(course_slot.course_id != course_id):
-                    course_slot.course_id = course_id
-                if(course_slot_obj['note']):
-                    note_obj = course_slot_obj['note']
-                    if(course_slot.note): # Note existed previously; just needs an update.
-                        note = course_slot.note[0]
-                        note.text = note_obj.get('text') or ''
-                        note.applicable = note_obj.get('applicable') or False
-                        note.course_id = course_id
-                        print('Note updated!')
-                    else: # Note did not previously exist; create new note.
-                        note = CourseNote(
-                            text = note_obj.get('text') or '',
-                            applicable = note_obj.get('applicable') or False,
-                            course_id = course_id,
-                            prog_id = map_to_edit.prog_id,
-                            slot_id = course_slot.id
-                        )
-                        db.session.add(note)
-                        print('Note created!')
-
-        #Update users
-    map_to_edit.users = []
-    for new_user_obj in map_data['users']:
-        new_user = db.session.query(User).get(new_user_obj['id'])
-        map_to_edit.users.append(new_user)
-        
-    db.session.commit()
+    map_to_edit.update_map(map_data)
     return '',200
     
-
 maps_handlers = {
     'POST':create_new_map,
     'GET':get_maps_,

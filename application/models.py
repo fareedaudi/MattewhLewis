@@ -641,6 +641,44 @@ class NewMap(db.Model):
         html_out = export_template.render(template_vars)
         HTML(string=html_out).write_pdf("./report.pdf",stylesheets=["./data/style.css"])
         return None
+    def update_map(self,map_data):
+        self.name = map_data['name']
+        requirements_objects = map_data['requirements']
+        for req_obj in requirements_objects:
+            req = MapRequirement.query.get(req_obj['id'])
+            #Update course_slots
+            course_slot_objects = req_obj['course_slots']
+            for course_slot_obj in course_slot_objects:
+                if(course_slot_obj['course']):
+                    course_slot = CourseSlot.query.get(course_slot_obj['id'])
+                    course_id = course_slot_obj['course']['id']
+                    if(course_slot.course_id != course_id):
+                        course_slot.course_id = course_id
+                    if(course_slot_obj['note']):
+                        note_obj = course_slot_obj['note']
+                        if(course_slot.note): # Note existed previously; just needs an update.
+                            note = course_slot.note[0]
+                            note.text = note_obj.get('text') or ''
+                            note.applicable = note_obj.get('applicable') or False
+                            note.course_id = course_id
+                            print('Note updated!')
+                        else: # Note did not previously exist; create new note.
+                            note = CourseNote(
+                                text = note_obj.get('text') or '',
+                                applicable = note_obj.get('applicable') or False,
+                                course_id = course_id,
+                                prog_id = map_to_edit.prog_id,
+                                slot_id = course_slot.id
+                            )
+                            db.session.add(note)
+                            print('Note created!')
+        #Update users
+        self.users = []
+        for new_user_obj in map_data['users']:
+            new_user = User.query.get(new_user_obj['id'])
+            self.users.append(new_user)
+        db.session.commit()
+        
 
 
 class MapRequirement(db.Model):
