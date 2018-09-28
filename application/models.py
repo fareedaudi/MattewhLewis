@@ -265,7 +265,6 @@ class ProgramComponentRequirement(db.Model):
             ]
         }
 
-
 class ProgramCoreRequirement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
@@ -482,6 +481,53 @@ class NewMap(db.Model):
             'applicable_courses':[course.get_object() for course in self.applicable_courses],
             'requirements':[req.get_object() for req in self.requirements]
         }
+    general_associates_degree = {
+        '010':{
+            'name':'Communication',
+            'hours':'6'
+        },
+        '020':{
+            'name':'Mathematics',
+            'hours':'3'
+        },
+        '030':{
+            'name':'Life and Physical Sciences',
+            'hours':'8'
+        },
+        '040':{
+            'name':'Language, Philosophy, and Culture',
+            'hours':'3'
+        },
+        '050':{
+            'name':'Creative Arts',
+            'hours':'3'
+        },
+        '060':{
+            'name':'American History',
+            'hours':'6'
+        },
+        '070':{
+            'name':'Government/Political Science',
+            'hours':'6'
+        },
+        '080':{
+            'name':'Social and Behavioral Sciences',
+            'hours':'3'
+        },
+        'inst':{
+            'name':'Institutional Option',
+            'hours':'6'
+        },
+        '090':{
+            'name':'Component Area Option',
+            'hours':'6'
+        },
+        'trans':{
+            'name':'Transfer Path',
+            'hours':'12'
+        }
+    }
+    
 
 class MapRequirement(db.Model):
     __tablename__ = "map_requirement"
@@ -556,7 +602,6 @@ class CourseNote(db.Model):
             'course_id':self.course_id,
             'prog_id':self.prog_id
         }
-
 
 
 class AssociateDegree(db.Model):
