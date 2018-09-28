@@ -2,9 +2,6 @@ from flask import render_template, redirect, url_for, request, json, session, se
 from sqlalchemy import and_
 from application import application
 from application.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement,AssociateDegree,CourseSlot,CourseNote
-from flask_login import current_user, login_user, logout_user
-from flask_restful import Resource,Api
-from slugify import slugify
 import json as JSON
 from functools import reduce
 from pprint import pprint
@@ -13,30 +10,31 @@ from weasyprint import HTML
 env = Environment(loader=FileSystemLoader('./data'))
 export_template = env.get_template("map_export_template.html")
 
-api = Api(application)
-
-class Universities(Resource):
-    def get(self):
-        universities = db.session.query(University).order_by(University.name).all()
-        universities_list = [
-            {k:v for k,v in zip(
+@application.route('/api/universities',methods=["GET"])
+def get_universities():
+    universities = University.query.all()
+    universities_list = [
+        {
+            k:v for k,v in zip(
                 ('university_id','university_name'),
                 (university.id,university.name)
-            )} for university in universities
-        ]
-        return universities_list
+            )
+        } for university in universities
+    ]
+    return JSON.dumps(universities_list)
 
-class ProgramsByUniv(Resource):
-    def get(self,univ_id):
-        programs = db.session.query(Program).filter_by(univ_id=univ_id).order_by(Program.name)
-        return [
-            {
-                k:v for k,v in zip(
-                    ('program_id','program_name'),
-                    (program.id,program.name)
-                )
-            } for program in programs
-        ]
+@application.route('/api/programs_by_university/<int:univ_id>')
+def get_programs(univ_id):
+    programs = Program.query.filter_by(univ_id=univ_id).all()
+    programs_list = [
+        {
+            k:v for k,v in zip(
+                ('program_id','program_name'),
+                (program.id,program.name)
+            )
+        } for program in programs
+    ]
+    return JSON.dumps(programs_list)
 
 
 @application.route('/api/requirements_by_program/<int:prog_id>')
@@ -150,9 +148,6 @@ def degree_components():
             } for area in components
         ]
     )
-
-api.add_resource(Universities,'/api/universities')
-api.add_resource(ProgramsByUniv,'/api/programs_by_university/<int:univ_id>')
 
 def courseify(course):
     course_dict = {
