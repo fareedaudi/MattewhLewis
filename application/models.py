@@ -649,29 +649,44 @@ class NewMap(db.Model):
             #Update course_slots
             course_slot_objects = req_obj['course_slots']
             for course_slot_obj in course_slot_objects:
-                if(course_slot_obj['course']):
-                    course_slot = CourseSlot.query.get(course_slot_obj['id'])
-                    course_id = course_slot_obj['course']['id']
-                    if(course_slot.course_id != course_id):
-                        course_slot.course_id = course_id
-                    if(course_slot_obj['note']):
-                        note_obj = course_slot_obj['note']
-                        if(course_slot.note): # Note existed previously; just needs an update.
-                            note = course_slot.note[0]
-                            note.text = note_obj.get('text') or ''
-                            note.applicable = note_obj.get('applicable') or False
-                            note.course_id = course_id
-                            print('Note updated!')
-                        else: # Note did not previously exist; create new note.
-                            note = CourseNote(
-                                text = note_obj.get('text') or '',
-                                applicable = note_obj.get('applicable') or False,
-                                course_id = course_id,
-                                prog_id = map_to_edit.prog_id,
-                                slot_id = course_slot.id
-                            )
-                            db.session.add(note)
-                            print('Note created!')
+                if(not course_slot_obj['id']):
+                    course_slot = CourseSlot(
+                        req_id=course_slot_obj['req_id'],
+                        name=course_slot_obj['name']
+                    )
+                    db.session.add(course_slot)
+                    db.session.commit()
+                    course_slot_obj['id'] = course_slot.id
+                course_slot = CourseSlot.query.get(course_slot_obj['id'])
+                if(not len(course_slot_obj['course'])):
+                    course_slot.course_id = None
+                    if(course_slot.note):
+                        note = course_slot.note[0]
+                        db.session.delete(note)
+                        db.session.commit()
+                    continue
+                print(course_slot_obj['course'])
+                course_id = course_slot_obj['course']['id']
+                if(course_slot.course_id != course_id):
+                    course_slot.course_id = course_id
+                if(course_slot_obj['note']):
+                    note_obj = course_slot_obj['note']
+                    if(course_slot.note): # Note existed previously; just needs an update.
+                        note = course_slot.note[0]
+                        note.text = note_obj.get('text') or ''
+                        note.applicable = note_obj.get('applicable') or False
+                        note.course_id = course_id
+                        print('Note updated!')
+                    else: # Note did not previously exist; create new note.
+                        note = CourseNote(
+                            text = note_obj.get('text') or '',
+                            applicable = note_obj.get('applicable') or False,
+                            course_id = course_id,
+                            prog_id = map_to_edit.prog_id,
+                            slot_id = course_slot.id
+                        )
+                        db.session.add(note)
+                        print('Note created!')
         #Update users
         self.users = []
         for new_user_obj in map_data['users']:
@@ -679,7 +694,6 @@ class NewMap(db.Model):
             self.users.append(new_user)
         db.session.commit()
         
-
 
 class MapRequirement(db.Model):
     __tablename__ = "map_requirement"
