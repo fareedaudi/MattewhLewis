@@ -52,17 +52,7 @@ def requirements_by_program(prog_id):
                                 k:v for k,v in zip(
                                     ('prog_comp_req_id','prog_comp_req_name','prog_comp_req_hours','prog_comp_req_code','courses'),
                                     (prog_comp_req.id,prog_comp_req.name,prog_comp_req.hours,prog_comp_req.code,[
-                                        {
-                                            k:v for k,v in zip(
-                                                ('course_id','course_rubric','course_number','course_name','sjc_course'),
-                                                (
-                                                    course.id,
-                                                    course.rubric,
-                                                    course.number,
-                                                    course.name, 
-                                                    SJC.query.get(course.sjc_id).get_object() if course.sjc else None )
-                                            )
-                                        } for course in prog_comp_req.courses
+                                        course.get_object() for course in prog_comp_req.courses
                                     ])
                                 )
                             } for prog_comp_req in prog_comp.requirements

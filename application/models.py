@@ -163,6 +163,15 @@ class Course(db.Model):
         "ProgramComponentRequirement",
         secondary=program_component_requirement_courses,
         back_populates="courses")
+    def get_object(self):
+        return {
+            'course_id':self.id,
+            'course_rubric':self.rubric,
+            'course_number':self.number,
+            'course_name':self.name,
+            'sjc_course':SJC.query.get(self.sjc_id).get_object() if self.sjc else None
+        }
+
 
 University.courses = db.relationship("Course", order_by=Course.id, back_populates="university")
 
