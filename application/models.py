@@ -38,6 +38,8 @@ class University(db.Model):
     @staticmethod
     def get_universities():
         return __class__.query.all()
+    def get_name(self):
+        return self.name
 
 course_programs = db.Table(
     'course_programs', 
@@ -235,6 +237,8 @@ class Program(db.Model):
     @staticmethod
     def get_programs_by_univ_id(univ_id):
         return Program.query.filter_by(univ_id=univ_id).all()
+    def get_name(self):
+        return self.name
     
 
 class ProgramComponent(db.Model):   
@@ -429,6 +433,9 @@ class SJC(db.Model):
             'name':self.name,
             'hours':self.hours
         }
+    @staticmethod
+    def get_all_sjc_courses():
+        return __class__.query.all()
 
 class User(UserMixin,db.Model):
     __tablename__ = "user"
@@ -478,6 +485,11 @@ class User(UserMixin,db.Model):
             return None,None
         token = user.generate_auth_token().decode('ascii')
         return user,token
+    def get_object(self):
+        return {
+            'id':self.id,
+            'email':self.email
+        }
         
 
     def set_password(self,password):
@@ -512,6 +524,22 @@ class NewMap(db.Model):
         "SJC",
         secondary=applicable_SJC
     )
+    def get_object(self):
+        return {
+            'id':self.id,
+            'name':self.name,
+            'assoc_id':self.assoc_id,
+            'assoc_name':AssociateDegree.query.get(self.assoc_id).get_name(),
+            'prog_id':self.prog_id,
+            'prog_name':Program.query.get(self.prog_id).get_name(),
+            'univ_id':self.univ_id,
+            'univ_name':University.query.get(self.univ_id).get_name(),
+            'user_id':self.user_id,
+            'create_at':self.created_at,
+            'users':[user.get_object() for user in self.users],
+            'applicable_courses':[course.get_object() for course in self.applicable_courses],
+            'requirements':[req.get_object() for req in self.requirements]
+        }
 
 class MapRequirement(db.Model):
     __tablename__ = "map_requirement"
@@ -536,6 +564,16 @@ class MapRequirement(db.Model):
     course_slots = db.relationship(
         "CourseSlot"
     )
+    def get_object(self):
+        return {
+            'id':self.id,
+            'name':self.name,
+            'map_id':self.map_id,
+            'code':self.code,
+            'hours':self.hours,
+            'default_courses':[course.get_object() for course in self.default_courses],
+            'course_slots':[slot.get_object() for slot in self.course_slots]
+        }
 
 class CourseSlot(db.Model):
     __tablename__ = "course_slot"
@@ -550,6 +588,14 @@ class CourseSlot(db.Model):
     note = db.relationship(
         "CourseNote"
     )
+    def get_object(self):
+        return {
+            'id':self.id,
+            'name':self.name,
+            'req_id':self.req_id,
+            'course':SJC.query.get(self.course_id).get_object() if self.course_id else {},
+            'note':self.note[0].get_object() if self.note else {}
+        }
 
 class CourseNote(db.Model):
     __tablename__ = "course_note"
@@ -559,6 +605,16 @@ class CourseNote(db.Model):
     slot_id = db.Column(db.Integer, db.ForeignKey('course_slot.id'), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey('SJC.id'),nullable=False)
     prog_id = db.Column(db.Integer, db.ForeignKey('program.id'),nullable=False)
+    def get_object(self):
+        return {
+            'id':self.id,
+            'text':self.text,
+            'applicable':self.applicable,
+            'slot_id':self.slot_id,
+            'course_id':self.course_id,
+            'prog_id':self.prog_id
+        }
+
 
 
 class AssociateDegree(db.Model):
@@ -566,6 +622,8 @@ class AssociateDegree(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(255))
     type_ = db.Column(db.String(255))
+    def get_name(self):
+        return self.name
 
 class Map(db.Model):
     __tablename__ = "map"

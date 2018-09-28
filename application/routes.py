@@ -25,8 +25,7 @@ def requirements_by_program(prog_id):
 
 @application.route('/api/sjc_courses',methods=['GET'])
 def sjc_courses():
-    courses = SJC.query.all()
-    return JSON.dumps([course.get_object() for course in courses])
+    return JSON.dumps([crs.get_object() for crs in SJC.get_all_sjc_courses()])
 
 @application.route('/api/login',methods=['POST'])
 def login():
@@ -70,7 +69,7 @@ def load_login_data():
 
 @application.route('/api/user_emails',methods=['GET'])
 def user_emails():
-    users = db.session.query(User).all()
+    users = User.query.all()
     return JSON.dumps([user.get_email() for user in users])
 
 general_associates_degree = {
@@ -123,7 +122,6 @@ general_associates_degree = {
 def get_program(prog_id):
     program = Program.query.get(prog_id)
     return program.get_object()
-
 
 def get_courses_by_code(PROG_ID):
     program = get_program(PROG_ID)
@@ -276,117 +274,7 @@ def get_maps_(request):
     all_maps = NewMap.query.all()
     maps = [map_ for map_ in all_maps if user in map_.users]
     maps_data = JSON.dumps({
-        'maps':[
-            {
-                k:v for k,v in zip(
-                    (
-                        'id',
-                        'name',
-                        'assoc_id',
-                        'assoc_name',
-                        'prog_id',
-                        'prog_name',
-                        'univ_id',
-                        'univ_name',
-                        'user_id',
-                        'create_at',
-                        'users',
-                        'applicable_courses',
-                        'requirements',
-                        'users'
-                        ),
-                    (
-                        map_.id,
-                        map_.name,
-                        map_.assoc_id,
-                        db.session.query(AssociateDegree).get(map_.assoc_id).name,
-                        map_.prog_id,
-                        db.session.query(Program).get(map_.prog_id).name,
-                        map_.univ_id,
-                        db.session.query(University).get(map_.univ_id).name,
-                        map_.user_id,
-                        map_.created_at,
-                        [
-                            {
-                                k:v for k,v in zip(
-                                    ('id','email'),
-                                    (user.id,user.email)
-                                )
-                            }
-                        for user in map_.users],
-                        [
-                            {
-                                k:v for k,v in zip(
-                                    ('id','rubric','name','number','hours'),
-                                    (course.id,course.rubric,course.number,course.name,course.hours)
-                                )
-                            }
-                        for course in map_.applicable_courses
-                        ],
-                        [
-                        {
-                            k:v for k,v in zip(
-                                (
-                                    'id',
-                                    'name',
-                                    'map_id',
-                                    'code',
-                                    'hours',
-                                    'default_courses',
-                                    'course_slots'
-                                ),
-                                (
-                                    req.id,
-                                    req.name,
-                                    req.map_id,
-                                    req.code,
-                                    req.hours,
-                                    [
-                                        {
-                                            k:v for k,v in zip(
-                                                ('id','rubric','name','number','hours'),
-                                                (course.id,course.rubric,course.name,course.number,course.hours)
-                                            )
-                                        }
-                                    for course in req.default_courses
-                                    ],
-                                    [
-                                        {
-                                            k:v for k,v in zip(
-                                                ('id','name','req_id','course','note'),
-                                                (slot.id,slot.name,slot.req_id,
-                                                {
-                                                    'id':db.session.query(SJC).get(slot.course_id).id,
-                                                    'name':db.session.query(SJC).get(slot.course_id).name,
-                                                    'rubric':db.session.query(SJC).get(slot.course_id).rubric,
-                                                    'number':db.session.query(SJC).get(slot.course_id).number,
-                                                    'hours':db.session.query(SJC).get(slot.course_id).hours
-                                                } if slot.course_id else {},
-                                                {
-                                                    'id':slot.note[0].id,
-                                                    'text':slot.note[0].text,
-                                                    'applicable':slot.note[0].applicable,
-                                                    'slot_id':slot.note[0].slot_id,
-                                                    'course_id':slot.note[0].course_id,
-                                                    'prog_id':slot.note[0].prog_id
-                                                } if slot.note else {}
-                                                )
-                                            )
-                                        }
-                                    for slot in req.course_slots],
-                                )
-                            )
-                        }
-                    for req in map_.requirements],
-                    [
-                        {   
-                            'id':user.id,
-                            'email':user.email
-                        } for user in map_.users
-                    ]+[{'id':user.id,'email':user.email}])
-                )
-            }
-        for map_ in maps]
+        'maps':[map_.get_object() for map_ in maps]   
     })
     return application.response_class(
         response = maps_data,
