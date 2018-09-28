@@ -12,12 +12,11 @@ export_template = env.get_template("map_export_template.html")
 
 @application.route('/api/universities',methods=["GET"])
 def get_universities():
-    universities = University.query.all()
-    return JSON.dumps([university.get_object() for university in universities])
+    return JSON.dumps([univ.get_object() for univ in University.get_universities()])
 
 @application.route('/api/programs_by_university/<int:univ_id>')
 def get_programs(univ_id):
-    programs = Program.query.filter_by(univ_id=univ_id).all()
+    programs = Program.get_programs_by_univ_id(univ_id)
     return JSON.dumps([program.get_meta_object() for program in programs])
 
 @application.route('/api/requirements_by_program/<int:prog_id>')
@@ -31,13 +30,16 @@ def sjc_courses():
 
 @application.route('/api/login',methods=['POST'])
 def login():
-    form_data = json.loads(request.data)
-    email = form_data['loginEmail']
-    password = form_data['loginPassword']
+    try:
+        form_data = JSON.loads(request.data)
+        email = form_data['loginEmail']
+        password = form_data['loginPassword']
+    except:
+        return '',400
     user,token = User.login_user(email,password)
     if(not user):
         return '',401
-    return json.jsonify({
+    return JSON.dumps({
         'loggedIn':True,
         'userId':user.id,
         'userEmail':user.email,
@@ -46,9 +48,12 @@ def login():
 
 @application.route('/api/load_login_data',methods=['POST'])
 def load_login_data():
-    user = None
-    form_data = json.loads(request.data)
-    token = form_data['token']
+    try:
+        user = None
+        form_data = json.loads(request.data)
+        token = form_data['token']
+    except:
+        return '',400
     if(token != None):
         user = User.verify_auth_token(token)
     if(not user):
@@ -116,40 +121,8 @@ general_associates_degree = {
 }
 
 def get_program(prog_id):
-    program = db.session.query(Program).get(prog_id)
-    return {
-        k:v for k,v in zip(
-            ('program_link','program_id','program_name','program_components'),
-            (program.link,program.id,program.name, [
-                {
-                    k:v for k,v in zip(
-                        ('prog_comp_id','prog_comp_name','prog_comp_hours','requirements'),
-                        (prog_comp.id,prog_comp.name,prog_comp.hours,[
-                            {
-                                k:v for k,v in zip(
-                                    ('prog_comp_req_id','prog_comp_req_name','prog_comp_req_hours','prog_comp_req_code','courses'),
-                                    (prog_comp_req.id,prog_comp_req.name,prog_comp_req.hours,prog_comp_req.code,[
-                                        {
-                                            k:v for k,v in zip(
-                                                ('id','rubric','number','name','hours'),
-                                                (
-                                                    db.session.query(SJC).get(course.sjc_id).id,
-                                                    db.session.query(SJC).get(course.sjc_id).rubric,
-                                                    db.session.query(SJC).get(course.sjc_id).number,
-                                                    db.session.query(SJC).get(course.sjc_id).name,
-                                                    db.session.query(SJC).get(course.sjc_id).hours
-                                                )
-                                            )
-                                        } for course in prog_comp_req.courses if course.sjc
-                                    ])
-                                )
-                            } for prog_comp_req in prog_comp.requirements
-                        ])
-                    )
-                } for prog_comp in program.program_components
-            ])
-        )
-    }
+    program = Program.query.get(prog_id)
+    return program.get_object()
 
 
 def get_courses_by_code(PROG_ID):

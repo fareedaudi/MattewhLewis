@@ -35,6 +35,9 @@ class University(db.Model):
             'university_id':self.id,
             'university_name':self.name
         }
+    @staticmethod
+    def get_universities():
+        return __class__.query.all()
 
 course_programs = db.Table(
     'course_programs', 
@@ -229,6 +232,9 @@ class Program(db.Model):
             'program_id':self.id,
             'program_name':self.name
         }
+    @staticmethod
+    def get_programs_by_univ_id(univ_id):
+        return Program.query.filter_by(univ_id=univ_id).all()
     
 
 class ProgramComponent(db.Model):   
