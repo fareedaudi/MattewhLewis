@@ -65,24 +65,6 @@ programs_sjc_courses = db.Table(
     db.Column('sjc_course_id', db.ForeignKey('SJC.id'), primary_key=True)
     )
 
-requirements_courses = db.Table(
-    'requirements_courses',
-    db.Column('course_id', db.ForeignKey('course.id'), primary_key=True),
-    db.Column('requirement_id', db.ForeignKey('requirement.id'), primary_key=True)
-)
-
-requirements_programs = db.Table(
-    'requirements_programs',
-    db.Column('program_id', db.ForeignKey('program.id'), primary_key=True),
-    db.Column('requirement_id', db.ForeignKey('requirement.id'), primary_key=True)
-)
-
-users_maps = db.Table(
-    'users_maps', 
-    db.Column('user_id', db.ForeignKey('user.id'), primary_key=True),
-    db.Column('map_id', db.ForeignKey('map.id'), primary_key=True)
-    )
-
 users_new_maps = db.Table(
     'users_new_maps', 
     db.Column('user_id', db.ForeignKey('user.id'), primary_key=True),
@@ -131,11 +113,6 @@ class Course(db.Model):
         "Program", 
         secondary=course_programs,
         back_populates="courses",)
-    requirements = db.relationship(
-        "Requirement",
-        secondary=requirements_courses,
-        back_populates="courses"
-    )
     core_requirements = db.relationship(
         "CoreRequirement",
         secondary=course_core_requirements,
@@ -174,12 +151,6 @@ class Program(db.Model):
         "Course", 
         secondary=course_programs, 
         back_populates="programs")
-
-    requirements = db.relationship(
-        "Requirement",
-        secondary=requirements_programs,
-        back_populates="programs"
-    )
     sjc_courses = db.relationship(
         "SJC", 
         secondary=programs_sjc_courses, 
@@ -278,23 +249,6 @@ class ProgramCoreRequirement(db.Model):
         "Course",
         secondary=course_program_core_requirements,
         back_populates="program_core_requirements"
-    )
-
-class Requirement(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-    univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
-    name = db.Column(db.String(250), nullable=False)
-    comp_id = db.Column(db.Integer, db.ForeignKey('component.id'))
-    courses = db.relationship(
-        "Course",
-        secondary=requirements_courses,
-        back_populates="requirements"
-    )
-    programs = db.relationship(
-        "Program",
-        secondary=requirements_programs,
-        back_populates="requirements"
     )
 
 class Core(db.Model): # DEPRECATED.
