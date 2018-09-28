@@ -1,8 +1,7 @@
 from flask import render_template, redirect, url_for, request, json,send_file
-from sqlalchemy import and_
-from application import application
 from application.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement,AssociateDegree,CourseSlot,CourseNote
 import json as JSON
+from slugify import slugify
 from functools import reduce
 from pprint import pprint
 from jinja2 import Environment, FileSystemLoader
@@ -39,8 +38,6 @@ def login():
         return json.jsonify({
             "logged_in":False,
             "email":None}),401
-    all_maps = db.session.query(Map).all()
-    user_maps = [map_ for map_ in all_maps if user in map_.users]
     token = user.generate_auth_token().decode('ascii')
     return json.jsonify({
         'loggedIn':True,
@@ -49,8 +46,6 @@ def login():
         'token':token,
     }),200
 
-
-
 @application.route('/api/load_login_data',methods=['POST'])
 def load_login_data():
     user = None
@@ -58,65 +53,22 @@ def load_login_data():
     token = form_data['token']
     if(token != None):
         user = User.verify_auth_token(token)
-    if(user):
-        all_maps = db.session.query(Map).all()
-        user_maps = [map_ for map_ in all_maps if user in map_.users]
-        token = user.generate_auth_token().decode('ascii')
-        return json.jsonify({
-            'loggedIn':True,
-            'userId':user.id,
-            'userEmail':user.email,
-            'token':token,
-        })
-    else:
+    if(not user):
         return json.jsonify({
             'loggedIn':False
-        })
-
-
-@application.route('/api/logout',methods=['GET'])   
-def logout():
-    return 'check console'
+        }),401
+    token = user.generate_auth_token().decode('ascii')
+    return json.jsonify({
+        'loggedIn':True,
+        'userId':user.id,
+        'userEmail':user.email,
+        'token':token,
+    }),200
 
 @application.route('/api/user_emails',methods=['GET'])
 def user_emails():
     users = db.session.query(User).all()
-    user_emails = [user.email for user in users]
-    return JSON.dumps(user_emails)
-
-@application.route('/api/degree_components',methods=['GET'])
-def degree_components():
-    components = Map.component_areas
-    return JSON.dumps(
-        [
-            {
-                'name':area,
-                'fields':[field for field in components[area]]
-            } for area in components
-        ]
-    )
-
-def courseify(course):
-    course_dict = {
-        'id':course.id,
-        'rubric':course.rubric,
-        'number':course.number,
-        'name':course.name,
-        'hours':course.hours
-    }
-    sjc = {}
-    if(course.sjc_id):
-        SJC_course = db.session.query(SJC).get(course.sjc_id)
-        sjc = {
-            'id':SJC_course.id,
-            'name':SJC_course.name,
-            'rubric':SJC_course.rubric,
-            'number':SJC_course.number,
-            'hours':SJC_course.hours
-        }
-    course_dict['sjc_course'] = sjc
-    return course_dict
-
+    return JSON.dumps([user.email for user in users])
 
 def add_requirement(acc,nextItem): # No longer in use.
     core_component_id = nextItem.id
@@ -141,7 +93,6 @@ def get_object_dict(sqlalchemy_object):
     dict_ = sqlalchemy_object.__dict__
     dict_.pop('_sa_instance_state',None)
     return dict_
-
 
 general_associates_degree = {
     '010':{
