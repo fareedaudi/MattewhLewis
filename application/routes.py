@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, request, json,send_file
+from application import application
 from application.models import db,University,Program,Component,Course,SJC,User,Map,Core,CoreRequirement,CoreComponent,NewMap,MapRequirement,AssociateDegree,CourseSlot,CourseNote
 import json as JSON
 from slugify import slugify
