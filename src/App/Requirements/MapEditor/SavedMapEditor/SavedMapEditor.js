@@ -1,25 +1,9 @@
 import React from 'react';
-import axios from 'axios';
 import PropTypes from 'prop-types';
-import {ROOT_URL} from '../../../../api';
 import MapForm from './MapForm';
 import {WithMapActionHandlers} from '../../../../contexts/SavedMapsContext';
 
 class SavedMapEditorComponent extends React.Component{
-
-    componentDidMount(){
-        this.getComponentsFromServer();
-    }
-
-    getComponentsFromServer = () => {
-        axios.get(
-            `${ROOT_URL}/api/degree_components`
-        ).then(
-            response => response.data
-        ).then(
-            components => {this.setState({components});}
-        );
-    }
 
     handleSaveMap = (mapData) => {
         return this.props.mapActionHandlers.saveMap(mapData);
