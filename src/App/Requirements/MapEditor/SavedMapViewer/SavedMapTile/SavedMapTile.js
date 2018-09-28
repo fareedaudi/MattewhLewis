@@ -66,7 +66,7 @@ class SavedMapTileComponent extends React.Component{
                     <MapActionButton type="approve" map_id={this.props.id} handler={approveMap} disabled={true}/>&nbsp;&nbsp;
                     <MapActionButton type="share" activated={this.props.map.users.length>1} disabled={true} map_id={this.props.id} handler={this.toggleCollaboratorsModal}/>&nbsp;&nbsp;
                     <MapActionButton type="delete" map_id={this.props.id} handler={this.toggleDeleteModal}/>
-                    {/*<a href="#" onClick={(e)=>{e.preventDefault();this.getPDF();}}>p</a>*/}
+                    <a href="#" onClick={(e)=>{e.preventDefault();this.getPDF();}}>p</a>
                 </span>
             </ListGroupItem>
             <DeleteMapModal
