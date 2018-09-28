@@ -26,8 +26,8 @@ def requirements_by_program(prog_id):
 
 @application.route('/api/sjc_courses',methods=['GET'])
 def sjc_courses():
-    sjc_courses_objects = db.session.query(SJC).all()
-    return JSON.dumps([get_object_dict(map_) for map_ in sjc_courses_objects])
+    courses = SJC.query.all()
+    return JSON.dumps([course.get_object() for course in courses])
 
 @application.route('/api/login',methods=['POST'])
 def login():
@@ -70,21 +70,6 @@ def load_login_data():
 def user_emails():
     users = db.session.query(User).all()
     return JSON.dumps([user.email for user in users])
-
-def add_requirement(acc,nextItem): # No longer in use.
-    core_component_id = nextItem.id
-    component_details = get_component_details(core_component_id)
-    code = component_details['code']
-    if(code not in acc):
-        acc[code] = {**component_details,'courses':[]}
-    course_details = get_course_details(nextItem.course_id)
-    acc[code]['courses'].append(course_details)
-    return acc
-
-
-def get_component_details(core_component_id): # No longer in use
-    core_component = db.session.query(CoreComponent).filter(CoreComponent.id==core_component_id).first()
-    return get_object_dict(core_component)
 
 def get_course_details(course_id):
     course = db.session.query(Course).filter(Course.id==course_id).first()
