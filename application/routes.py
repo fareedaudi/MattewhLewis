@@ -36,25 +36,9 @@ def get_programs(univ_id):
     ]
     return JSON.dumps(programs_list)
 
-
 @application.route('/api/requirements_by_program/<int:prog_id>')
 def requirements_by_program(prog_id):
-    program = db.session.query(Program).get(prog_id)
-    return JSON.dumps({
-        k:v for k,v in zip(
-            ('program_link','program_id','program_name','program_components'),
-            (program.link,program.id,program.name, [
-                {
-                    k:v for k,v in zip(
-                        ('prog_comp_id','prog_comp_name','prog_comp_hours','requirements'),
-                        (prog_comp.id,prog_comp.name,prog_comp.hours,[
-                            prog_comp_req.get_object() for prog_comp_req in prog_comp.requirements
-                        ])
-                    )
-                } for prog_comp in program.program_components
-            ])
-        )
-    })
+    return JSON.dumps(Program.query.get(prog_id).get_object())
 
 @application.route('/api/sjc_courses',methods=['GET'])
 def sjc_courses():

@@ -210,6 +210,15 @@ class Program(db.Model):
         "ProgramComponent",
         back_populates="program"
     )
+    def get_object(self):
+        return {
+            'program_link':self.link,
+            'program_id':self.id,
+            'program_name':self.name,
+            'program_components':[
+                prog_comp.get_object() for prog_comp in self.program_components
+            ]
+        }
     
 
 class ProgramComponent(db.Model):   
@@ -226,6 +235,15 @@ class ProgramComponent(db.Model):
         "Program",
         back_populates="program_components"
     )
+    def get_object(self):
+        return {
+            'prog_comp_id':self.id,
+            'prog_comp_name':self.name,
+            'prog_comp_hours':self.hours,
+            'requirements':[
+                prog_comp_req.get_object() for prog_comp_req in self.requirements
+            ]
+        }
 
 class ProgramComponentRequirement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
