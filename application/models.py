@@ -18,11 +18,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import (JSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
-
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
-
 
 class University(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -140,9 +138,8 @@ class Course(db.Model):
 
 University.courses = db.relationship("Course", order_by=Course.id, back_populates="university")
 
-
 class Program(db.Model):
-
+    __tablename__ = "program"
     id = db.Column(db.Integer, primary_key=True)
     univ_id = db.Column(db.Integer, db.ForeignKey('university.id'))
     name = db.Column(db.String(250),nullable=False)

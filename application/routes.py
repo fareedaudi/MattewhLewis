@@ -235,7 +235,6 @@ def get_maps_(request):
         mimetype="application/json"
     )
     
-
 def delete_map_(id,request):
     user = get_user_from_token(request)
     if(not user):
