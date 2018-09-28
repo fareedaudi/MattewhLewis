@@ -48,14 +48,7 @@ def requirements_by_program(prog_id):
                     k:v for k,v in zip(
                         ('prog_comp_id','prog_comp_name','prog_comp_hours','requirements'),
                         (prog_comp.id,prog_comp.name,prog_comp.hours,[
-                            {
-                                k:v for k,v in zip(
-                                    ('prog_comp_req_id','prog_comp_req_name','prog_comp_req_hours','prog_comp_req_code','courses'),
-                                    (prog_comp_req.id,prog_comp_req.name,prog_comp_req.hours,prog_comp_req.code,[
-                                        course.get_object() for course in prog_comp_req.courses
-                                    ])
-                                )
-                            } for prog_comp_req in prog_comp.requirements
+                            prog_comp_req.get_object() for prog_comp_req in prog_comp.requirements
                         ])
                     )
                 } for prog_comp in program.program_components

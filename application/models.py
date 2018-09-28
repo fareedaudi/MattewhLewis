@@ -244,6 +244,16 @@ class ProgramComponentRequirement(db.Model):
         "ProgramComponent",
         back_populates="requirements"
     )
+    def get_object(self):
+        return {
+            'prog_comp_req_id':self.id,
+            'prog_comp_req_name':self.name,
+            'prog_comp_req_hours':self.hours,
+            'prog_comp_req_code':self.code,
+            'courses':[
+                course.get_object() for course in self.courses
+            ]
+        }
 
 
 class Component(db.Model):
