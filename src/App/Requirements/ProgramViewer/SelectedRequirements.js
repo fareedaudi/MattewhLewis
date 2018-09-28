@@ -34,7 +34,7 @@ const SelectedRequirements = (props) => {
                                                         if(course.sjc_course && showSJCCourses){
                                                             return <li key={i} style={{color:'green'}}>{course.sjc_course.rubric} {course.sjc_course.number} - {course.sjc_course.name}</li>
                                                         } else {
-                                                            return <li key={i}>{course.course_rubric} {course.course_number} - {course.course_name}</li>
+                                                            return <li key={i}>{course.rubric} {course.number} - {course.name}</li>
                                                         }
                                                         
                                                     }
