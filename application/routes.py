@@ -13,15 +13,7 @@ export_template = env.get_template("map_export_template.html")
 @application.route('/api/universities',methods=["GET"])
 def get_universities():
     universities = University.query.all()
-    universities_list = [
-        {
-            k:v for k,v in zip(
-                ('university_id','university_name'),
-                (university.id,university.name)
-            )
-        } for university in universities
-    ]
-    return JSON.dumps(universities_list)
+    return JSON.dumps([university.get_object() for university in universities])
 
 @application.route('/api/programs_by_university/<int:univ_id>')
 def get_programs(univ_id):

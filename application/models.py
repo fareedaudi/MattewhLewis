@@ -30,6 +30,11 @@ class University(db.Model):
     is_university = db.Column(db.Boolean)
     FICE = db.Column(db.String(250))
     SJC_trans_imp = db.Column(db.Integer)
+    def get_object(self):
+        return {
+            'university_id':self.id,
+            'university_name':self.name
+        }
 
 course_programs = db.Table(
     'course_programs', 
