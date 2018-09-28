@@ -219,6 +219,11 @@ class Program(db.Model):
                 prog_comp.get_object() for prog_comp in self.program_components
             ]
         }
+    def get_meta_object(self):
+        return {
+            'program_id':self.id,
+            'program_name':self.name
+        }
     
 
 class ProgramComponent(db.Model):   

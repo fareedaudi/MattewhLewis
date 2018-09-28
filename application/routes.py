@@ -26,15 +26,7 @@ def get_universities():
 @application.route('/api/programs_by_university/<int:univ_id>')
 def get_programs(univ_id):
     programs = Program.query.filter_by(univ_id=univ_id).all()
-    programs_list = [
-        {
-            k:v for k,v in zip(
-                ('program_id','program_name'),
-                (program.id,program.name)
-            )
-        } for program in programs
-    ]
-    return JSON.dumps(programs_list)
+    return JSON.dumps([program.get_meta_object() for program in programs])
 
 @application.route('/api/requirements_by_program/<int:prog_id>')
 def requirements_by_program(prog_id):
