@@ -34,12 +34,9 @@ def login():
     form_data = json.loads(request.data)
     email = form_data['loginEmail']
     password = form_data['loginPassword']
-    user = User.query.filter_by(email=email).first()
-    if user is None or not user.check_password(password):
-        return json.jsonify({
-            "logged_in":False,
-            "email":None}),401
-    token = user.generate_auth_token().decode('ascii')
+    user,token = User.login_user(email,password)
+    if(not user):
+        return '',401
     return json.jsonify({
         'loggedIn':True,
         'userId':user.id,
@@ -69,16 +66,7 @@ def load_login_data():
 @application.route('/api/user_emails',methods=['GET'])
 def user_emails():
     users = db.session.query(User).all()
-    return JSON.dumps([user.email for user in users])
-
-def get_course_details(course_id):
-    course = db.session.query(Course).filter(Course.id==course_id).first()
-    return get_object_dict(course)
-
-def get_object_dict(sqlalchemy_object):
-    dict_ = sqlalchemy_object.__dict__
-    dict_.pop('_sa_instance_state',None)
-    return dict_
+    return JSON.dumps([user.get_email() for user in users])
 
 general_associates_degree = {
     '010':{

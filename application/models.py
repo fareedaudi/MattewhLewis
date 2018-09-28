@@ -459,6 +459,20 @@ class User(UserMixin,db.Model):
         user = User.query.get(data['id'])
         print(token)
         return user
+    def get_email(self):
+        return self.email
+    @staticmethod
+    def get_user_by_email(email):
+        user = __class__.query.filter_by(email=email).first()
+        return user
+    @staticmethod
+    def login_user(email,password):
+        user = __class__.get_user_by_email(email)
+        if(user is None or not user.check_password(password)):
+            return None,None
+        token = user.generate_auth_token().decode('ascii')
+        return user,token
+        
 
     def set_password(self,password):
         self.password_hash = generate_password_hash(password)
