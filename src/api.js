@@ -64,7 +64,7 @@ export const getUsers = () => {
 export const getPrintableMap = (mapId,mapName) => {
     let token = localStorage.getItem('jwtToken');
     const Authorization = `Bearer ${token}`;
-    let url = `${ROOT_URL}/api/report/${mapId}`;
+    let url = `${ROOT_URL}/api/report/${mapId}/${Date.now()}`;
     console.log(url);
     return axios.get(
         url, 
