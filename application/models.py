@@ -779,3 +779,8 @@ class AssociateDegree(db.Model):
     type_ = db.Column(db.String(255))
     def get_name(self):
         return self.name
+    def get_object(self):
+        return {
+            'id':self.id,
+            'name':self.name
+        }

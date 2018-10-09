@@ -5,6 +5,7 @@ import json as JSON
 from slugify import slugify
 from functools import reduce
 from pprint import pprint
+from application import mail_handler
 
 @application.route('/api/universities',methods=["GET"])
 def get_universities():
@@ -209,3 +210,8 @@ def get_pdf(map_id):
     map_.create_pdf_of_map()
     FILE_PATH = '../report.pdf'
     return send_file(FILE_PATH,attachment_filename="report1.pdf",mimetype="application/pdf")
+
+@application.route('/testing')
+def get_test():
+    raise Exception('Testing!')
+    return 'Failure!',500
