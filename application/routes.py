@@ -211,7 +211,7 @@ def get_pdf(map_id,time):
     FILE_PATH = f'../reports/{file_name}'
     return send_file(FILE_PATH,attachment_filename="report1.pdf",mimetype="application/pdf")
 
-@application.route('/testing')
+@application.route('/api/testing')
 def get_test():
     raise Exception('Testing!')
     return 'Failure!',500
