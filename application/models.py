@@ -20,6 +20,7 @@ from itsdangerous import (JSONWebSignatureSerializer
 from slugify import slugify
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
+import datetime
 
 env = Environment(loader=FileSystemLoader('./data'))
 export_template = env.get_template("map_export_template.html")
@@ -461,7 +462,7 @@ class NewMap(db.Model):
         },
         '030':{
             'name':'Life and Physical Sciences',
-            'hours':'8'
+            'hours':'6'
         },
         '040':{
             'name':'Language, Philosophy, and Culture',
@@ -641,8 +642,9 @@ class NewMap(db.Model):
             'requirements':map_dict['requirements']
         }
         html_out = export_template.render(template_vars)
-        HTML(string=html_out).write_pdf("./report.pdf",stylesheets=["./data/style.css"])
-        return None
+        file_name = f"report-{self.id}.pdf"
+        HTML(string=html_out).write_pdf(f'./reports/{file_name}',stylesheets=["./data/style.css"])
+        return file_name
     def update_map(self,map_data):
         self.name = map_data['name']
         requirements_objects = map_data['requirements']

@@ -199,16 +199,16 @@ def GET_users():
     handler = users_handlers[request.method]
     return handler(request)
 
-@application.route('/api/report/<int:map_id>',methods=['GET'])
-def get_pdf(map_id):
+@application.route('/api/report/<int:map_id>/<int:time>',methods=['GET'])
+def get_pdf(map_id,time):
     user = get_user_from_token(request)
     if not user:
         return 'Error',401
     map_ = NewMap.query.get(map_id)
     if not map:
         return 'Error',404
-    map_.create_pdf_of_map()
-    FILE_PATH = '../report.pdf'
+    file_name = map_.create_pdf_of_map()
+    FILE_PATH = f'../reports/{file_name}'
     return send_file(FILE_PATH,attachment_filename="report1.pdf",mimetype="application/pdf")
 
 @application.route('/testing')
