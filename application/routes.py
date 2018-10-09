@@ -14,7 +14,7 @@ def get_universities():
 @application.route('/api/programs_by_university/<int:univ_id>')
 def get_programs(univ_id):
     programs = Program.get_programs_by_univ_id(univ_id)
-    return JSON.dumps([program.get_meta_object() for program in programs])
+    return JSON.dumps(sorted([program.get_meta_object() for program in programs],key=lambda x:x['program_name']))
 
 @application.route('/api/requirements_by_program/<int:prog_id>')
 def requirements_by_program(prog_id):
