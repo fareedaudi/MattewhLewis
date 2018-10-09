@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-export const ROOT_URL = 'http://localhost:5000';
+export const ROOT_URL = '';
 export const UNIVERSITIES_URL = ROOT_URL + '/api/universities';
 export const SAVED_MAPS_URL = ROOT_URL + '/saved_maps_by_user';
 
