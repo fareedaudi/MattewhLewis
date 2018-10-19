@@ -162,7 +162,11 @@ export class MapFormComponent extends React.Component{
             }
             this.forceUpdate();
         });
-        this.optionsByReqId[reqId].push(course);
+        let coursePresent = !!this.optionsByReqId[reqId].filter(elem=>elem.id == course.id).length;
+        if(!coursePresent){
+            this.optionsByReqId[reqId].push(course);
+        }
+        
     }
 
     cleanCourses = (sjcCourses) => {
@@ -309,6 +313,7 @@ export class MapFormComponent extends React.Component{
         */
        console.log('Saved Map',this.state.savedMapToEdit);
        console.log(this.state.courseSlots);
+       console.log('OptionsByReq',this.optionsByReqId);
         let {univ_name,prog_name,assoc_name,requirements} = this.state.savedMapToEdit;
         let totalHours = 0;
         let courseSelectionFields = requirements.map(
@@ -334,6 +339,7 @@ export class MapFormComponent extends React.Component{
                                     <Input
                                         
                                         //style={{width:'90%'}}
+                                        key={slot.name}
                                         type={"select"}
                                         value={isObjNotEmpty(course)?course.id:"-1"}
                                         valid={this.isCourseApplicable(course)}
@@ -353,7 +359,7 @@ export class MapFormComponent extends React.Component{
                                     <option value={"-1"}>Please select a course.</option>
                                     {
                                         this.optionsByReqId[requirement.id].filter(course=>isObjNotEmpty(course)).map(
-                                            (course,i)=><option key={course.id} value={course.id} disabled={this.isCourseNotSelectable(course)}>{course.rubric} {course.number} - {course.name}</option>
+                                            (course,i)=><option key={slot.name + course.id} value={course.id} disabled={this.isCourseNotSelectable(course)}>{course.rubric} {course.number} - {course.name}</option>
                                         )
                                     }
                                     <option value={"-2"}>Select alternative course.</option>
