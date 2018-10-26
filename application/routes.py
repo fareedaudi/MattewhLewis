@@ -143,7 +143,7 @@ def delete_map_(id,request):
     return 'Success!',200
 
 def update_map_(id,request):
-    # Authenticate
+    # Authenticate  
     user = get_user_from_token(request)
     if(not user):
         return 'error',401

@@ -440,7 +440,7 @@ class NewMap(db.Model):
             'id':self.id,
             'name':self.name,
             'assoc_id':self.assoc_id,
-            'assoc_name':AssociateDegree.query.get(self.assoc_id).get_name(),
+            'assoc_name':AssociateDegree.query.get(self.assoc_id).get_name() if AssociateDegree.query.get(self.assoc_id) else 'No associate degree selected',
             'prog_id':self.prog_id,
             'prog_name':Program.query.get(self.prog_id).get_name(),
             'univ_id':self.univ_id,
