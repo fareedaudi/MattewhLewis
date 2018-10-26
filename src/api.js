@@ -4,7 +4,6 @@ export const ROOT_URL = '';
 export const UNIVERSITIES_URL = ROOT_URL + '/api/universities';
 export const SAVED_MAPS_URL = ROOT_URL + '/saved_maps_by_user';
 
-
 export const withFetching = (url,structure={}) => (Comp) => 
     class WithFetching extends React.Component{
         constructor(props){
@@ -49,7 +48,6 @@ export const withFetching = (url,structure={}) => (Comp) =>
 
 export const getUsers = () => {
     let token = localStorage.getItem('jwtToken');
-    console.log({token});
     const Authorization = `Bearer ${token}`;
     return axios.get(
         `${ROOT_URL}/api/users`, {headers:{Authorization}}
@@ -65,7 +63,6 @@ export const getPrintableMap = (mapId,mapName) => {
     let token = localStorage.getItem('jwtToken');
     const Authorization = `Bearer ${token}`;
     let url = `${ROOT_URL}/api/report/${mapId}/${Date.now()}`;
-    console.log(url);
     return axios.get(
         url, 
         {

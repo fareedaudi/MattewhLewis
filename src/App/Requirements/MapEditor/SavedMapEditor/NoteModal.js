@@ -33,7 +33,6 @@ export default class NoteModal extends React.Component {
     }
 
     onSelectChange = ({target:{name,value}}) => {
-        console.log({name,value});
         if(name !== "applicable"){
             this.setState({[name]:value});
         } else {

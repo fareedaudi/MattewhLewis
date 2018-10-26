@@ -91,7 +91,7 @@ export default class CreateMapModal extends React.Component{
     }
     
     createMapHandler = (mapState) => {
-        if(mapState.selectedProgramId!==-1){
+        if(mapState.selectedProgramId!=-1 && mapState.selectedAssociateDegree!=-1){
             this.setState({
                 creating:true,
                 createError:false,
@@ -116,7 +116,6 @@ export default class CreateMapModal extends React.Component{
                         },500);
                 }).catch(
                     error => {
-                        console.log({error});
                         this.setState({
                             creating:false,
                             createError:true
@@ -133,7 +132,6 @@ export default class CreateMapModal extends React.Component{
     }
     
     render(){
-        console.log(this.state);
         let modalState = this.state;
         return (
             <Modal isOpen={this.props.isOpen} toggle={this.openClose} className={this.props.className}>
@@ -241,7 +239,7 @@ export default class CreateMapModal extends React.Component{
                     <Button 
                         color="primary" 
                         onClick={()=>this.createMapHandler(modalState)} 
-                        disabled={(this.state.selectedProgramId === -1) || !this.state.newMapName}
+                        disabled={(this.state.selectedProgramId == -1) || (this.state.selectedAssociateDegree ==-1) || !this.state.newMapName}
                     >
                         Submit
                     </Button>

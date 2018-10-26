@@ -30,7 +30,6 @@ class SavedMapsContextProviderComponent extends React.Component{
             ).then(
                 response => {
                     if(response.status==200){
-                        console.log('Map successfully deleted!');
                         return response.data;
                     }
                     throw new Error('Could not delete map.');  
@@ -53,7 +52,6 @@ class SavedMapsContextProviderComponent extends React.Component{
         }).then(
             response => {
                 if(response.status==200){
-                    console.log('Map successfully updated!');
                     return response.data;
                 }
                 throw new Error('Something went wrong');
@@ -100,7 +98,6 @@ class SavedMapsContextProviderComponent extends React.Component{
         }).then(
             response=>{
                 if(response.status==200){
-                    console.log('Map successfully created!');
                     this.getSavedMaps();
                 } else {
                     throw new Error('Error!');
@@ -134,7 +131,6 @@ class SavedMapsContextProviderComponent extends React.Component{
         )
         .then(response => {
             if(response.status==200){
-                console.log('Maps gotten!');
                 return response.data;
             }
             throw new Error('Maps could not be retrieved from server');
@@ -143,7 +139,6 @@ class SavedMapsContextProviderComponent extends React.Component{
     }
 
     render(){
-        console.log(this.state.savedMaps);
         return (
         <SavedMapsContext.Provider value={{savedMaps:this.state.savedMaps,mapActionHandlers:this.mapActionHandlers}}>
             {this.props.children}

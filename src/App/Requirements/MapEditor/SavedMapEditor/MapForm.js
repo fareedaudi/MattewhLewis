@@ -86,7 +86,6 @@ export class MapFormComponent extends React.Component{
         let requirement = this.state.savedMapToEdit.requirements.filter(req=>req.id===req_id)[0];
         let slot = requirement.course_slots.filter(slot=>slot.id===id)[0];
         slot.note=note;
-        console.log('Edited map!',this.state.savedMapToEdit);
         this.forceUpdate();
     }
 
@@ -311,9 +310,6 @@ export class MapFormComponent extends React.Component{
             sessionStorage.setItem('prevMapState',JSON.stringify(this.state));
         }
         */
-       console.log('Saved Map',this.state.savedMapToEdit);
-       console.log(this.state.courseSlots);
-       console.log('OptionsByReq',this.optionsByReqId);
         let {univ_name,prog_name,assoc_name,requirements} = this.state.savedMapToEdit;
         let totalHours = 0;
         let courseSelectionFields = requirements.map(
@@ -381,7 +377,7 @@ export class MapFormComponent extends React.Component{
                                     )
                             }
                         )}
-                        {requirement.name.includes("Component")?<a href="#" onClick={(e)=>{e.preventDefault();this.addHandler(requirement.id,requirement.course_slots.length);}}>Add Course Slot</a>:null}
+                        {requirement.name.includes("Component") || requirement.name.includes("Transfer")?<a href="#" onClick={(e)=>{e.preventDefault();this.addHandler(requirement.id,requirement.course_slots.length);}}>Add Course Slot</a>:null}
                     </FormGroup>
                 );}
         );
