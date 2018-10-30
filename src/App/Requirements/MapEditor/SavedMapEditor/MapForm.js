@@ -65,11 +65,12 @@ export class MapFormComponent extends React.Component{
             noteModalSlot:{},
             savingMap:false,
             saveError:false,
-            saved:false
-
+            saved:false,
+            tooltipOpen:false,
         };
         this.applicableCourseIds = new Set(this.state.savedMapToEdit.applicable_courses.map(course=>String(course.id)));
         this.applicableCourseIds.add("-1"); // Unspecified courses are "applicable."
+        this.toggle = () => {this.setState({tooltipOpen:!this.state.tooltipOpen});};
     }
 
     launchNoteModal = (slot) => {
@@ -225,6 +226,7 @@ export class MapFormComponent extends React.Component{
         if(formerSelection.id){
             this.alreadySelected.delete(String(formerSelection.id));
         }
+        console.log('Calling set state!');
         this.setState(
             prevState => ({
                 ...prevState,
@@ -236,9 +238,10 @@ export class MapFormComponent extends React.Component{
             () => {
                 // Hacky way to deal with the fact that I am using a poorly nested data structure in state.
                 let req = this.state.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
-                let slot = req.course_slots.filter(slot=>slot.id===slotId)[0];
+                let slot = req.course_slots.filter(slot=>slot.name===slotName)[0];
                 slot.course = selectedCourse;
                 this.forceUpdate();
+                console.log(this.state.courseSlots);
             }
         );
     }
@@ -283,9 +286,11 @@ export class MapFormComponent extends React.Component{
         );
     }
     
-    addHandler = (reqId,nextNumber) => {
+    addHandler = (reqId,nextNumber,slot) => {
+        let slotPrefix = slot.substring(0,slot.length-1);
+        console.log(slotPrefix);
         let requirement = this.state.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
-        let slotName = `component-area-option-${nextNumber}`;
+        let slotName = `${slotPrefix}${nextNumber}`;
         let newSlot = {
             id:null,
             name:slotName,
@@ -302,6 +307,7 @@ export class MapFormComponent extends React.Component{
                 [slotName]:{}
             }
         });
+        console.log(requirement);
     }
 
     render(){
@@ -362,8 +368,9 @@ export class MapFormComponent extends React.Component{
                                     </Input>
                                      {
                                          isObjNotEmpty(slot.course)?
+                            
                                          <InputGroupAddon addonType="append">
-                                            <span className="fa fa-sticky-note" style={{color:noteColor,cursor:'pointer',opacity:.5}} onClick={()=>{this.launchNoteModal(slot)}}></span>
+                                            <span id={slot.name} className="fa fa-sticky-note" style={{color:noteColor,cursor:'pointer',opacity:.5}} onClick={()=>{this.launchNoteModal(slot)}}></span>
                                         </InputGroupAddon>:
                                         null
                                      }
@@ -377,7 +384,7 @@ export class MapFormComponent extends React.Component{
                                     )
                             }
                         )}
-                        {requirement.name.includes("Component") || requirement.name.includes("Transfer")?<a href="#" onClick={(e)=>{e.preventDefault();this.addHandler(requirement.id,requirement.course_slots.length);}}>Add Course Slot</a>:null}
+                        {requirement.name.includes("Component") || requirement.name.includes("Transfer")?<a href="#" onClick={(e)=>{e.preventDefault();this.addHandler(requirement.id,requirement.course_slots.length,requirement.course_slots[0].name);}}>Add Course Slot</a>:null}
                     </FormGroup>
                 );}
         );

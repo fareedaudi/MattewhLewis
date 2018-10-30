@@ -60,7 +60,7 @@ class AppComponent extends React.Component{
           <Requirements university={university} coreRequirements={this.state.coreRequirements}/>
         :
           <HomePage/>
-        }}   
+        }   
         
         <Footer/>
         </div>
