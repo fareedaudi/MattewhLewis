@@ -610,6 +610,10 @@ class MapEditorComponent extends React.Component{
             '13':{
                     name:'Associate of Science, Physical Sciences',
                     courses:[]
+                },
+            '14':{
+                    name:'Associate of Science, Engineering',
+                    courses:[]
                 }
         }
     }
