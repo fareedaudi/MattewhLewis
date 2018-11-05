@@ -57,7 +57,7 @@ export class MapFormComponent extends React.Component{
             courseSlots,
             altCourseModalOpen:false,
             altCourseModalReqId:'',
-            altCourseModalSlotId:'',
+            altCourseModalSlotName:'',
             savedMapToEdit,
             noteModalOpen:false,
             noteModalNote:{},
@@ -137,11 +137,10 @@ export class MapFormComponent extends React.Component{
         });
     }
 
-    getSelectionFromModal = (reqId,slotId,course,note) => {
+    getSelectionFromModal = (reqId,slotName,course,note) => {
 
         let requirement = this.state.savedMapToEdit.requirements.filter(req=>req.id===reqId)[0];
-        let slot = requirement.course_slots.filter(slot=>slot.id===slotId)[0];
-        let slotName = slot.name;
+        let slot = requirement.course_slots.filter(slot=>slot.name===slotName)[0];
         if(course.id){
             this.alreadySelected.add(String(course.id));
         }
@@ -246,10 +245,10 @@ export class MapFormComponent extends React.Component{
         );
     }
 
-    initializeAltCourseModal = (reqId,slotId) => {
+    initializeAltCourseModal = (reqId,slotName) => {
         this.setState({
             altCourseModalReqId:reqId,
-            altCourseModalSlotId:slotId,
+            altCourseModalSlotName:slotName,
             altCourseModalOpen:!this.state.altCourseModalOpen
         });
     }
@@ -349,7 +348,7 @@ export class MapFormComponent extends React.Component{
                                         onChange={
                                             ({target:{value}})=>{
                                                 if(value === "-2"){
-                                                    this.initializeAltCourseModal(requirement.id,slot.id);
+                                                    this.initializeAltCourseModal(requirement.id,slot.name);
                                                     return;
                                                 } 
                                                 let name = slot.name;
@@ -432,7 +431,7 @@ export class MapFormComponent extends React.Component{
                 toggle={this.toggleAltCourseModal}
                 SJCCourses={this.props.SJCCourses}
                 reqId={this.state.altCourseModalReqId}
-                slotId={this.state.altCourseModalSlotId}
+                slotName={this.state.altCourseModalSlotName}
                 getSelectionFromModal={this.getSelectionFromModal}
                 progId={this.state.savedMapToEdit.prog_id}
             />

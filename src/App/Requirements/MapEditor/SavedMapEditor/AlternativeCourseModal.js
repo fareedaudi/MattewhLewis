@@ -64,7 +64,7 @@ export default class AlternativeCourseModal extends React.Component {
 
     handleSubmission = (rubric,number) => {
         let reqId = this.props.reqId;
-        let slotId = this.props.slotId;
+        let slotName = this.props.slotName;
         let course = this.props.SJCCourses.filter(
             course=>(course.rubric===rubric)&&(course.number===number)
         );
@@ -78,7 +78,7 @@ export default class AlternativeCourseModal extends React.Component {
                 }
             }
 
-            this.props.getSelectionFromModal(reqId,slotId,{id,name,number,rubric,hours},note);
+            this.props.getSelectionFromModal(reqId,slotName,{id,name,number,rubric,hours},note);
             this.resetModalState();
             this.props.toggle();
         }
