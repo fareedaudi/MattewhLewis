@@ -215,3 +215,10 @@ def get_pdf(map_id,time):
 def get_test():
     raise Exception('Testing!')
     return 'Failure!',500
+
+@application.route('/api/all_maps')
+def get_all_maps():
+    maps = NewMap.query.all()
+    for map_ in maps:
+    map_data = [map_.get_object() for map_ in maps]
+    return JSON.dumps(map_data)
