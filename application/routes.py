@@ -219,7 +219,7 @@ def get_test():
 @application.route('/api/all_maps')
 def get_all_maps():
     maps = NewMap.query.all()
-    map_data = [map_.get_object() for map_ in maps]
+    map_data = [map_.get_meta_object() for map_ in maps]
     return JSON.dumps(map_data)
 
 @application.route('/api/map/<int:id>')
@@ -227,4 +227,4 @@ def get_map(id):
     map_ = NewMap.query.get(id)
     if(not map_):
         return 404
-    return json.dumps({'map':map_.get_object()})
+    return json.dumps({'map':map_.get_meta_object()})

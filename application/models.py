@@ -435,6 +435,32 @@ class NewMap(db.Model):
         "SJC",
         secondary=applicable_SJC
     )
+    def _get_total_credits(self):
+        total_credits = 0
+        for req in self.requirements:
+            for course_slot in req.course_slots:
+                if(not course_slot.course_id):
+                    continue
+                sjc_course = SJC.query.get(course_slot.course_id)
+                hours = int(sjc_course.hours)
+                total_credits += hours
+        return total_credits
+
+    def _get_applicable_credits(self):
+        total_applicable_credits = 0
+        applicable_course_ids = set([course.id for course in self.applicable_courses])
+        for req in self.requirements:
+            default_course_ids = set([course.id for course in req.default_courses])
+            if(req.code == 'inst'):
+                default_course_ids = applicable_course_ids
+            for course_slot in req.course_slots:
+                if(course_slot.course_id):
+                    sjc_course = SJC.query.get(course_slot.course_id)
+                    hours = int(sjc_course.hours)
+                    if(course_slot.course_id in default_course_ids):
+                        total_applicable_credits += hours
+        return total_applicable_credits
+
     def _compute_applicability_rating(self):
         total_map_credits = 0
         total_applicable_credits = 0
@@ -453,6 +479,22 @@ class NewMap(db.Model):
         if(not total_map_credits):
             return 0
         return 100*total_applicable_credits/total_map_credits
+    def get_meta_object(self):
+        return {
+            'id':self.id,
+            'name':self.name,
+            'assoc_name':AssociateDegree.query.get(self.assoc_id).get_name() if AssociateDegree.query.get(self.assoc_id) else 'No associate degree selected',
+            'prog_id':self.prog_id,
+            'prog_name':Program.query.get(self.prog_id).get_name(),
+            'univ_id':self.univ_id,
+            'univ_name':University.query.get(self.univ_id).get_name() if University.query.get(self.univ_id) else "University Not Found",
+            'user_id':self.user_id,
+            'user_email':User.query.get(self.user_id).email if User.query.get(self.user_id) else 'No user email',
+            'created_at':self.created_at,
+            'applicability':round(self._compute_applicability_rating(),1),
+            'applicable_credits':self._get_applicable_credits(),
+            'total_credits':self._get_total_credits()
+        }
     def get_object(self):
         return {
             'id':self.id,
