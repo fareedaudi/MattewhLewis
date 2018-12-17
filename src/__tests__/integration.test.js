@@ -75,10 +75,10 @@ it('should log in', async () => {
     let loginButtonXpath = '//button[text()="Login"]';
     let emailInputXpath = '//input[@placeholder="Email"]';
     let passwordInputXpath = '//input[@placeholder="Password"]';
-    let email = 'matthew.lewis@sjcd.edu';
-    let password = 'szw42elk';
+    let email = 'chris.duke@sjcd.edu';
+    let password = 'test';
     let submitButtonXpath = '//button[text()="Submit"]';
-    let visibleEmailXpath = '//div[contains(text(),"matthew.lewis@sjcd.edu")]';
+    let visibleEmailXpath = '//div[contains(text(),"chris.duke@sjcd.edu")]';
     el = await getElementByXpath(loginButtonXpath);
     await el.click();
     el = await getElementByXpath(emailInputXpath);
@@ -89,7 +89,7 @@ it('should log in', async () => {
     await el.click();
     el = await getElementByXpath(visibleEmailXpath);
     actual = await el.getText();
-    expected = 'matthew.lewis@sjcd.edu';
+    expected = 'chris.duke@sjcd.edu';
     expect(actual).toContain(expected);
 })
 

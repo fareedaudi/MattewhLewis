@@ -18,7 +18,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom --univ=2 --browser=firefox",
+    "test": "react-scripts test --env=jsdom --univ=2 --browser=chrome",
     "eject": "react-scripts eject",
     "play": "echo 'This is a test'; echo 'This is also a test';"
   },
