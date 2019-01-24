@@ -6,7 +6,14 @@ import {
   DropdownItem
 } from "reactstrap";
 
-const MapTableHeader = ({ header, handlers, sortKey, filterValues }) => {
+const MapTableHeader = ({
+  header,
+  handlers,
+  sortKey,
+  filteredValues,
+  allFilterValues,
+  testProp
+}) => {
   let { setSortKey, clearFilters, changeFilters, selectAllFilters } = handlers;
   return (
     <th key={header.key}>
@@ -14,11 +21,12 @@ const MapTableHeader = ({ header, handlers, sortKey, filterValues }) => {
       {header.filterBy && (
         <MapFilterButton
           {...{
-            filterValues,
+            filteredValues,
             header,
             clearFilters,
             changeFilters,
-            selectAllFilters
+            selectAllFilters,
+            allFilterValues
           }}
         />
       )}
@@ -44,17 +52,12 @@ const MapHeaderText = ({ sortKey, setSortKey, header }) => {
   );
 };
 
-const MapFilterButton = ({
-  filterValues,
-  header,
-  clearFilters,
-  changeFilter,
-  selectAllFilters
-}) => {
-  let style = {
+export default MapTableHeader;
+
+class MapFilterButton extends React.Component {
+  style = {
     filterButton: {
-      color: filterValues.length ? "green" : "black",
-      fontSize: "10px",
+      fontSize: "14px",
       cursor: "pointer"
     },
     dropDownMenu: {
@@ -63,36 +66,85 @@ const MapFilterButton = ({
     }
   };
 
-  let onClick = () => {
-    console.log("Handler clicked!", filterValues);
+  onChange = ({ key, value, checked }) => {
+    this.props.changeFilters({ key, value, checked });
   };
 
-  return (
-    <UncontrolledDropdown>
-      <DropdownToggle
-        tag="span"
-        className="fa fa-filter"
-        style={style.filterButton}
-      />
-      <DropdownMenu style={style.dropDownMenu}>
-        <DropdownItem disable>
-          <a href="" onClick={clearFilters}>
-            Clear All
-          </a>
-          &nbsp;|&nbsp;
-          <a href="" onClick={selectAllFilters}>
-            Select All
-          </a>
-        </DropdownItem>
-        {[1, 2, 3, 4].map(i => (
-          <DropdownItem disabled key={i}>
-            <input type="checkbox" />
-            &nbsp;Test
-          </DropdownItem>
-        ))}
-      </DropdownMenu>
-    </UncontrolledDropdown>
-  );
-};
+  onClearFilters = ({ ev, key }) => {
+    ev.preventDefault();
+    this.props.clearFilters({ key });
+  };
 
-export default MapTableHeader;
+  onSelectAll = ({ ev, key }) => {
+    ev.preventDefault();
+    this.props.selectAllFilters({ key });
+  };
+
+  render() {
+    let {
+      filteredValues,
+      header,
+      clearFilters,
+      changeFilters,
+      selectAllFilters,
+      allFilterValues
+    } = this.props;
+    let filterActivated = allFilterValues.length !== filteredValues.length;
+    allFilterValues = Array.from(allFilterValues).sort();
+    let filterState = this.props.allFilterValues.reduce((state, value) => {
+      state[value] = this.props.filteredValues.indexOf(value) >= 0;
+      return state;
+    }, {});
+    return (
+      <UncontrolledDropdown style={{ display: "inline" }}>
+        <DropdownToggle
+          tag="span"
+          className="fa fa-filter"
+          style={{
+            ...this.style.filterButton,
+            color: filterActivated ? "green" : "black"
+          }}
+        />
+        <DropdownMenu style={this.style.dropDownMenu}>
+          <li className="dropdown-item">
+            <a
+              href="#"
+              onClick={ev => this.onClearFilters({ ev, key: header.key })}
+            >
+              Clear All
+            </a>
+            &nbsp;|&nbsp;
+            <a
+              href="#"
+              onClick={ev => this.onSelectAll({ ev, key: header.key })}
+            >
+              Select All
+            </a>
+          </li>
+          {allFilterValues.map((value, i) => (
+            <li
+              style={{ cursor: "pointer" }}
+              class="dropdown-item"
+              key={value + i}
+              onClick={_ =>
+                this.onChange({
+                  key: this.props.header.key,
+                  value,
+                  checked: filterState[value]
+                })
+              }
+            >
+              <input
+                enabled
+                type="checkbox"
+                value={value}
+                checked={filterState[value]}
+              />
+              &nbsp;{value}
+            </li>
+          ))}
+        </DropdownMenu>
+      </UncontrolledDropdown>
+    );
+  }
+}

@@ -4,7 +4,7 @@ import getMapData from "../api";
 const trimEmail = email => email.split("@")[0];
 
 const uiMapping = [
-  { key: "name", displayName: "Map Name", sortBy: true, filterBy: true },
+  { key: "name", displayName: "Map Name", sortBy: true, filterBy: false },
   {
     key: "univ_name",
     displayName: "University Name",
@@ -51,8 +51,10 @@ const uiMapping = [
 ];
 
 const blankFilterState = {};
+const filterValuesByKey = {};
 uiMapping.forEach(({ key, filterBy }) => {
   if (filterBy) blankFilterState[key] = [];
+  if (filterBy) filterValuesByKey[key] = [];
 });
 
 class MapsProvider extends React.Component {
@@ -68,16 +70,37 @@ class MapsProvider extends React.Component {
   }
 
   componentDidMount() {
-    getMapData().then(maps => this.setState({ maps, loaded: true }));
+    getMapData()
+      .then(maps => {
+        this.setState({ maps });
+        return maps;
+      })
+      .then(maps => this.setFilterValuesByKey(maps))
+      .then(_ =>
+        this.setState({
+          filters: JSON.parse(JSON.stringify(filterValuesByKey))
+        })
+      )
+      .then(_ => this.forceUpdate())
+      .then(_ => this.setState({ loaded: true }));
   }
+
+  setFilterValuesByKey = maps => {
+    maps.reduce((filterValuesByKey, map) => {
+      for (let key in filterValuesByKey) {
+        if (filterValuesByKey[key].indexOf(map[key]) === -1) {
+          filterValuesByKey[key].push(map[key]);
+        }
+      }
+      return filterValuesByKey;
+    }, filterValuesByKey);
+  };
 
   getFilterFunction = filters => {
     return map => {
       let filterResult = true;
       for (let attr in filters) {
-        filters[attr].forEach(
-          value => (filterResult = filterResult && map[attr] === value)
-        );
+        filterResult = filterResult && filters[attr].indexOf(map[attr]) >= 0;
       }
       return filterResult;
     };
@@ -104,24 +127,40 @@ class MapsProvider extends React.Component {
     this.setState({ sortKey: newSortKey, invertSort });
   };
 
-  changeFilter = ev => {
-    ev.preventDefault();
-    console.log("Change filter!");
+  changeFilters = ({ key, value, checked }) => {
+    // If checked == true, need to remove from filters.
+    // If checked == false, need to add to filters.
+    //if (checked) this.setState({});
+    let prevFilters = this.state.filters[key];
+    if (checked) {
+      let filterIndex = prevFilters.indexOf(value);
+      prevFilters.splice(filterIndex, 1);
+      this.setState({
+        filters: { ...this.state.filters, [key]: prevFilters }
+      });
+    } else {
+      this.setState({
+        filters: { ...this.state.filters, [key]: prevFilters.concat(value) }
+      });
+    }
   };
 
-  clearFilters = ev => {
-    ev.preventDefault();
-    console.log("Clear filter!");
+  clearFilters = ({ key }) => {
+    this.setState({ filters: { ...this.state.filters, [key]: [] } });
   };
 
-  selectAllFilters = ev => {
-    ev.preventDefault();
-    console.log("Select all filter!");
+  selectAllFilters = ({ key }) => {
+    this.setState({
+      filters: {
+        ...this.state.filters,
+        [key]: Array.from(filterValuesByKey[key])
+      }
+    });
   };
 
   handlers = {
     setSortKey: this.setSortKey,
-    changeFilter: this.changeFilter,
+    changeFilters: this.changeFilters,
     clearFilters: this.clearFilters,
     selectAllFilters: this.selectAllFilters
   };
@@ -140,7 +179,8 @@ class MapsProvider extends React.Component {
           uiMapping,
           handlers: this.handlers,
           sortKey,
-          filters: this.state.filters
+          filters: this.state.filters,
+          filterValuesByKey
         })}
       </div>
     );

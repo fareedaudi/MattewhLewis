@@ -14,14 +14,24 @@ const MapList = ({ mapsData }) => {
       height: h
     }
   };
-  let { maps, uiMapping, loaded, handlers, sortKey, filters } = mapsData;
+  let {
+    maps,
+    uiMapping,
+    loaded,
+    handlers,
+    sortKey,
+    filters,
+    filterValuesByKey
+  } = mapsData;
 
   let tableHeaders = uiMapping.map(header => {
-    let filterValues = filters[header.key];
+    let filteredValues = filters[header.key];
+    let allFilterValues = filterValuesByKey[header.key];
     return (
       <MapTableHeader
         key={header.key}
-        {...{ header, sortKey, filterValues, handlers }}
+        {...{ header, sortKey, filteredValues, handlers, allFilterValues }}
+        testProp={"yay"}
       />
     );
   });
@@ -37,6 +47,7 @@ const MapList = ({ mapsData }) => {
       })}
     </tr>
   ));
+
   return (
     <Col>
       <Card>

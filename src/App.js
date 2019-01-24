@@ -7,9 +7,6 @@ import MapsProvider from "./components/MapsProvider";
 const App = () => (
   <div className="App">
     <Layout>
-      <h3>
-        Pathways Mapping Toolkit - <i>Reports</i>
-      </h3>
       <Row>
         <MapsProvider render={data => <MapList mapsData={data} />} />
       </Row>
