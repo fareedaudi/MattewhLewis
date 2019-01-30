@@ -4,43 +4,41 @@ import getMapData from "../api";
 const trimEmail = email => email.split("@")[0];
 
 const uiMapping = [
-  { key: "name", displayName: "Map Name", sortBy: true, filterBy: false },
+  {
+    key: "name",
+    displayName: "Map Name",
+    sortBy: true,
+    filterBy: false,
+    mapLauncher: true
+  },
   {
     key: "univ_name",
     displayName: "University Name",
     sortBy: true,
-    filterBy: true
+    filterBy: true,
+    mapLauncher: false
   },
   {
     key: "prog_name",
     displayName: "Transfer Program",
     sortBy: true,
-    filterBy: true
+    filterBy: true,
+    mapLauncher: false
   },
   {
     key: "assoc_name",
     displayName: "Associate's Degree",
     sortBy: true,
-    filterBy: true
+    filterBy: true,
+    mapLauncher: false
   },
   {
     key: "user_email",
     displayName: "Owner",
     sortBy: true,
     filterBy: true,
-    formatFunc: trimEmail
-  },
-  {
-    key: "total_credits",
-    displayName: "Total Credits",
-    sortBy: true,
-    filterBy: false
-  },
-  {
-    key: "applicable_credits",
-    displayName: "Applicable Credits",
-    sortBy: true,
-    filterBy: false
+    formatFunc: trimEmail,
+    mapLauncher: false
   },
   {
     key: "applicability",

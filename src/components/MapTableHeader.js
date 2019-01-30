@@ -11,8 +11,7 @@ const MapTableHeader = ({
   handlers,
   sortKey,
   filteredValues,
-  allFilterValues,
-  testProp
+  allFilterValues
 }) => {
   let { setSortKey, clearFilters, changeFilters, selectAllFilters } = handlers;
   return (
@@ -124,7 +123,7 @@ class MapFilterButton extends React.Component {
           {allFilterValues.map((value, i) => (
             <li
               style={{ cursor: "pointer" }}
-              class="dropdown-item"
+              className="dropdown-item"
               key={value + i}
               onClick={_ =>
                 this.onChange({

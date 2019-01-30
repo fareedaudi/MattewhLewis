@@ -2,6 +2,7 @@ import "./Table.css";
 import React from "react";
 import { Card, CardBody, Col, Table } from "reactstrap";
 import MapTableHeader from "./MapTableHeader";
+import { Link } from "react-router-dom";
 
 const MapList = ({ mapsData }) => {
   let h =
@@ -42,6 +43,9 @@ const MapList = ({ mapsData }) => {
         let value = map[header.key];
         if (header.formatFunc) {
           value = header.formatFunc(value);
+        }
+        if (header.mapLauncher) {
+          value = <Link to={`/map/${map.id}`}>{value}</Link>;
         }
         return <td key={i}>{value}</td>;
       })}
