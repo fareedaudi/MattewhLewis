@@ -2,8 +2,9 @@ import React from "react";
 import axios from "axios";
 import { Col, Card, CardBody } from "reactstrap";
 import MapTable from "./MapTable";
+import {API_URL} from '../api';
 
-const mapURL = id => `http://localhost:5000/api/map/${id}`;
+const mapURL = id => `${API_URL}/map/${id}`;
 
 class MapDetail extends React.Component {
   constructor(props) {
@@ -29,6 +30,7 @@ class MapDetail extends React.Component {
   }
 
   getMap = id => {
+    console.log(mapURL(id));
     return axios.get(mapURL(id));
   };
 

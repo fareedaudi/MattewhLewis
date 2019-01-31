@@ -7,7 +7,7 @@ import MapDetail from "./components/MapDetail";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 const App = () => (
-  <Router>
+  <Router basename='/reports'>
     <div className="App">
       <Layout>
         <Route

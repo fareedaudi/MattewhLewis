@@ -32,7 +32,7 @@ RUN npm run build
 FROM nginx:1.15.0-alpine
 
 # copy static files
-COPY --from=BUILDER /usr/src/app/build /usr/share/nginx/html
+COPY --from=BUILDER /usr/src/app/build /usr/share/nginx/html/reports
 
 # expose port
 EXPOSE 80
