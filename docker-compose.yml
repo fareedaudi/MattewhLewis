@@ -1,0 +1,54 @@
+version: '3.6'
+
+services:
+
+  api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    image: infoambassador/pmt_api
+    expose:
+      - '5000'
+    depends_on:
+      - database
+    environment:
+      - FLASK_APP=run.py
+
+  nginx:
+    build:
+      context: './nginx'
+      dockerfile: Dockerfile
+    restart: always
+    image: infoambassador/pmt_nginx
+    ports:
+      - 80:80
+    depends_on:
+      - api
+      - client
+
+  client:
+    build:
+      context: ./dmt_ui
+      dockerfile: Dockerfile
+    image: infoambassador/pmt_client_editor
+    depends_on:
+      - api
+      - database
+    
+  database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    image: infoambassador/pmt_database
+    ports:
+      - 3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=Szw42elk!
+
+  pmt_reports:
+    build:
+      context: ./pmt_reports
+      dockerfile: Dockerfile
+    image: infoambassador/pmt_reports
+    expose:
+      - '80'
