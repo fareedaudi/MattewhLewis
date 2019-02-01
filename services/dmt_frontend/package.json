@@ -26,5 +26,5 @@
     "chromedriver": "^2.42.0",
     "geckodriver": "^1.12.2",
     "selenium-webdriver": "^4.0.0-alpha.1"
-}
+  }
 }

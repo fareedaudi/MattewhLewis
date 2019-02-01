@@ -4,7 +4,7 @@ services:
 
   api:
     build: 
-      context: ./backend
+      context: services/dmt_backend
       dockerfile: Dockerfile
     image: infoambassador/pmt_api
     expose:
@@ -16,7 +16,7 @@ services:
 
   nginx:
     build:
-      context: './nginx'
+      context: services/pmt_nginx
       dockerfile: Dockerfile
     restart: always
     image: infoambassador/pmt_nginx
@@ -28,7 +28,7 @@ services:
 
   client:
     build:
-      context: ./dmt_ui
+      context: services/dmt_frontend
       dockerfile: Dockerfile
     image: infoambassador/pmt_client_editor
     depends_on:
@@ -37,7 +37,7 @@ services:
     
   database:
     build:
-      context: ./database
+      context: services/pmt_database
       dockerfile: Dockerfile
     image: infoambassador/pmt_database
     ports:
@@ -47,7 +47,7 @@ services:
 
   pmt_reports:
     build:
-      context: ./pmt_reports
+      context: services/pmt_reports
       dockerfile: Dockerfile
     image: infoambassador/pmt_reports
     expose:
