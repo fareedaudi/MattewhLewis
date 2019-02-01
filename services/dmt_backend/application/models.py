@@ -22,7 +22,7 @@ from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
 import datetime
 
-env = Environment(loader=FileSystemLoader('./data'))
+env = Environment(loader=FileSystemLoader('./templates'))
 export_template = env.get_template("map_export_template.html")
 
 

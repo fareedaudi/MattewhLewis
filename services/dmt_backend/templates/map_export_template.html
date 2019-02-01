@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Pathway Map Course Selection Export</h1>
+    <p>
+        <ul style="list-style:none; list-style-position: inside; padding-left: 0;">
+            <li style="margin-left: 0px; font-size:130%"><b>Map name:</b> {{map_name}}</li>
+            <li style="margin-left: 0px; font-size:130%"><b>Transfer institution:</b> {{univ_name}}</li>
+            <li style="margin-left: 0px; font-size:130%"><b>Transfer program:</b> {{prog_name}}</li>
+            <li style="margin-left: 0px; font-size:130%"><b>Linked SJC associate's degree:</b> {{assoc_name}}</li>
+        </ul>
+    </p>
+    <h2>Component Area Selections</h2>
+    {% for requirement in requirements %}
+    <h3>{{requirement['name']}} ({{requirement['hours']}} hours)</h3>
+    <ul style="list-style:none; list-style-position: inside; padding-left: 0;">
+        {% for slot in requirement['course_slots'] %}
+            {% if slot['course'] %}
+            <li>
+                {{slot['course']['rubric']}} {{slot['course']['number']}} - {{slot['course']['name']}}
+                {% if slot['note'] %}
+                <ul>
+                    <li>
+                        <b>This course is{{' NOT' if not slot['note']['applicable'] else ''}} known to apply to this degree.</b>
+                    </li>
+                    <li>
+                        <b>Comments:</b> {{slot['note']['text'] or 'None'}}
+                    </li>
+                </ul>
+                {% endif %}
+            </li>
+
+            {% endif %}
+        {% endfor %}
+    </ul>
+    {% endfor %}
+</body>
+</html>
