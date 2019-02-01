@@ -3,8 +3,9 @@ BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
     SECRET_KEY = os.environ.get('FLASK_SECRET_KEY','test-key')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(BASEDIR, 'transfer_experiment.db')
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:Szw42elk!@database:3306/transfer_experiment'
+    '''SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(BASEDIR, 'transfer_experiment.db')'''
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     #DEBUG = False
     DEBUG = int(os.environ.get('FLASK_DEBUG',1))

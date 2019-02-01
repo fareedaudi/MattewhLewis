@@ -7,23 +7,8 @@ from flask_cors import CORS
 import logging
 from logging.config import dictConfig
 from logging.handlers import SMTPHandler
-'''
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-    }},
-    'handlers': {'wsgi': {
-        'class': 'logging.StreamHandler',
-        'stream': 'ext://flask.logging.wsgi_errors_stream',
-        'formatter': 'default'
-    }},
-    'root': {
-        'level': 'INFO',
-        'handlers': ['wsgi']
-    }
-})
-'''
+from flask_admin import Admin
+
 
 config_object = Config()
 
@@ -45,10 +30,13 @@ mail_handler.setFormatter(logging.Formatter(
 
 application = Flask(__name__)
 application.config.from_object(Config)
+print(application.config['SQLALCHEMY_DATABASE_URI'])
+application.config['FLASK_ADMIN_SWITCH'] = 'cerulean'
 application.logger.addHandler(mail_handler)
 login = LoginManager(application)
 CORS(application,expose_headers='Authorization')
 db = SQLAlchemy(application)
 migrate = Migrate(application,db)
+admin = Admin(application, name='PMT', template_mode='bootstrap3')
 
 from application import routes, models

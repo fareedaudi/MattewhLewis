@@ -6,6 +6,16 @@ from slugify import slugify
 from functools import reduce
 from pprint import pprint
 from application import mail_handler
+from application import admin
+from flask_admin.contrib.sqla import ModelView
+from flask_admin import expose
+
+class NewUserView(ModelView):
+    column_exclude_list = ['password_hash']
+    create_template = 'test.html'
+
+
+admin.add_view(NewUserView(User, db.session))
 
 @application.route('/api/universities',methods=["GET"])
 def get_universities():
@@ -76,7 +86,7 @@ def initialize_new_map(name,assoc_id,prog_id,univ_id,user_id,created_at,collabor
         prog_id=prog_id,
         univ_id=univ_id,
         user_id=user_id,
-        created_at=created_at
+        created_at=10000
     )
     user = User.query.get(user_id)
     map_.users.append(user)
@@ -124,7 +134,7 @@ def get_maps_(request):
         status=200,
         mimetype="application/json"
     )
-    
+
 def delete_map_(id,request):
     user = get_user_from_token(request)
     if(not user):
@@ -194,6 +204,8 @@ def DELETE_PATCH_maps(id):
     handler = maps_handlers[request.method]
     return handler(id,request)
 
+
+
 @application.route('/api/users', methods=['GET'])
 def GET_users():
     handler = users_handlers[request.method]
@@ -224,7 +236,8 @@ def get_all_maps():
 
 @application.route('/api/map/<int:id>')
 def get_map(id):
+    print('This ran!')
     map_ = NewMap.query.get(id)
     if(not map_):
-        return 404
-    return json.dumps({'map':map_.get_meta_object()})
+        return '',404
+    return json.dumps({'map':map_.get_stats_object()})

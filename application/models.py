@@ -111,7 +111,7 @@ class Course(db.Model):
     hours = db.Column(db.Integer, nullable=True)
     acgm = db.Column(db.Boolean, nullable=True)
     acgm_id = db.Column(db.Integer, db.ForeignKey('ACGM.id'))
-    sjc = db.Column(db.Boolean, nullable=True)
+    sjc = db.Column(db.Integer, nullable=True)
     sjc_id = db.Column(db.Integer, db.ForeignKey('SJC.id'))
     super_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     university = db.relationship("University", back_populates="courses")
@@ -135,6 +135,7 @@ class Course(db.Model):
         secondary=program_component_requirement_courses,
         back_populates="courses")
     def get_object(self):
+        print(self.id,self.name,self.rubric,self.number,self.sjc_id, bool(self.sjc))
         return {
             'id':self.id,
             'rubric':self.rubric,
@@ -353,12 +354,42 @@ class SJC(db.Model):
     @staticmethod
     def get_all_sjc_courses():
         return __class__.query.all()
+    def _get_applicable_count(self,univ_id,code):
+        search_criteria = {}
+        search_criteria['univ_id'] = univ_id
+        if(code not in ['trans','inst']):
+            search_criteria['code'] = code
+        applicable_count = 0
+        for prog in Program.query.filter_by(univ_id=univ_id).all():
+            search_criteria['prog_id'] = prog.id
+            for req in ProgramComponentRequirement.query.filter_by(**search_criteria):
+                applicable_ids = filter(lambda c:c['sjc_id']==self.id,req.courses)
+                try:
+                    applicable_ids.__next__()
+                    applicable_count += 1
+                    continue
+                except:
+                    continue
+        return applicable_count
+
+    def get_stats_object(self,univ_id,code):
+        print('Stats object!')
+        return {
+            'id':self.id,
+            'rubric':self.rubric,
+            'number':self.number,
+            'name':self.name,
+            'hours':self.hours,
+            'applicable_count':self._get_applicable_count(univ_id,code)
+        }
+        
 
 class User(UserMixin,db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    is_authorizer = db.Column(db.Boolean)
     new_maps = db.relationship(
         "NewMap",
         secondary=users_new_maps,
@@ -496,7 +527,7 @@ class NewMap(db.Model):
             'total_credits':self._get_total_credits()
         }
     def get_object(self):
-        return {
+        map_object = {
             'id':self.id,
             'name':self.name,
             'assoc_id':self.assoc_id,
@@ -511,8 +542,114 @@ class NewMap(db.Model):
             'applicable_courses':[course.get_object() for course in self.applicable_courses],
             'requirements':[req.get_object() for req in self.requirements],
             'user_email':User.query.get(self.user_id).email,
-            'applicability':round(self._compute_applicability_rating(),1)
+            'applicability':round(self._compute_applicability_rating(),1),
+            'applicable_credits':self._get_applicable_credits(),
+            'total_credits':self._get_total_credits()
         }
+        
+        return map_object
+
+    def get_stats_object(self):
+
+        map_object = {
+            'id':self.id,
+            'name':self.name,
+            'assoc_id':self.assoc_id,
+            'assoc_name':AssociateDegree.query.get(self.assoc_id).get_name() if AssociateDegree.query.get(self.assoc_id) else 'No associate degree selected',
+            'prog_id':self.prog_id,
+            'prog_name':Program.query.get(self.prog_id).get_name(),
+            'univ_id':self.univ_id,
+            'univ_name':University.query.get(self.univ_id).get_name(),
+            'user_id':self.user_id,
+            'create_at':self.created_at,
+            'users':[user.get_object() for user in self.users],
+            'applicable_courses':[course.get_object() for course in self.applicable_courses],
+            'requirements':[req.get_object() for req in self.requirements],
+            'user_email':User.query.get(self.user_id).email,
+            'applicability':round(self._compute_applicability_rating(),1),
+            'applicable_credits':self._get_applicable_credits(),
+            'total_credits':self._get_total_credits()
+        }
+        applicable_ids = set(map(lambda x:x['id'],map_object['applicable_courses']))
+        program_count = len(Program.query.filter_by(univ_id=map_object['univ_id']).all())
+        for req in map_object['requirements']:
+            course_slots = CourseSlot.query.filter_by(req_id = req['id'])
+
+        for req in map_object['requirements']:
+            print(req['course_slots'])
+            for slot in req['course_slots']:
+                print(slot)
+                course = slot['course']
+                if(not course):
+                    continue
+                course['applicable'] = course['id'] in applicable_ids
+                if(course['applicable']):
+                    course['applicable_count'] = 0
+                    continue
+                applicable_count = 0
+                for prog in Program.query.filter_by(univ_id=map_object['univ_id']).all():
+                    applicable = False
+                    if(req['code'] not in ['inst','trans','090']):
+                        for r in ProgramComponentRequirement.query.filter_by(prog_id=prog.id,code=req['code']):
+                            applicable_course_ids = set(map(lambda c:c.sjc_id,filter(lambda c:c.sjc_id,r.courses)))
+                            if(course['id'] in applicable_course_ids):
+                                applicable = True
+                                break
+                    else:
+                        for r in ProgramComponentRequirement.query.filter_by(prog_id=prog.id):
+                            applicable_course_ids = set(map(lambda c:c.sjc_id,filter(lambda c:c.sjc_id,r.courses)))
+                            if(course['id'] in applicable_course_ids):
+                                applicable = True
+                                break
+                    if(applicable):
+                        applicable_count += 1
+                course['applicable_count'] = applicable_count
+
+        map_object['program_count'] = program_count
+        return map_object
+
+        '''
+        return {
+            'id':self.id,
+            'name':self.name,
+            'assoc_id':self.assoc_id,
+            'assoc_name':AssociateDegree.query.get(self.assoc_id).get_name() if AssociateDegree.query.get(self.assoc_id) else 'No associate degree selected',
+            'prog_id':self.prog_id,
+            'prog_name':Program.query.get(self.prog_id).get_name(),
+            'univ_id':self.univ_id,
+            'univ_name':University.query.get(self.univ_id).get_name(),
+            'user_id':self.user_id,
+            'created_at':self.created_at,
+            'users':[user.get_object() for user in self.users],
+            'applicable_courses':[course.get_object() for course in self.applicable_courses],
+            'requirements':[
+                {
+                    'id':req.id,
+                    'name':req.name,
+                    'map_id':req.map_id,
+                    'code':req.code,
+                    'hours':req.hours,
+                    'default_courses':[course.get_object() for course in req.default_courses],
+                    'course_slots':[
+                        {
+                            'id':slot.id,
+                            'name':slot.name,
+                            'req_id':slot.req_id,
+                            'course':SJC.query.get(slot.course_id).get_stats_object(self.univ_id,req.code) if slot.course_id else {}
+                        } for slot in req.course_slots
+                    ]
+
+                } for req in self.requirements
+            ],
+            'user_email':User.query.get(self.user_id).email,
+            'applicability':round(self._compute_applicability_rating(),1),
+            'applicable_credits':self._get_applicable_credits(),
+            'total_credits':self._get_total_credits(),
+            'program_count':len(Program.query.filter_by(univ_id=self.univ_id).all())
+        }
+        '''
+        
+
     general_associates_degree = {
         '010':{
             'name':'Communication',
