@@ -46,6 +46,8 @@ services:
       - 3306
     environment:
       - MYSQL_ROOT_PASSWORD=Szw42elk!
+    volumes:
+      - my-datavolume:/var/lib/mysql
 
   pmt_reports:
     build:
@@ -54,3 +56,6 @@ services:
     image: infoambassador/pmt_reports
     expose:
       - '80'
+
+volumes:
+  my-datavolume:
