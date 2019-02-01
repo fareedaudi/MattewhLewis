@@ -13,6 +13,8 @@ services:
       - database
     environment:
       - FLASK_APP=run.py
+    volumes:
+      - './services/dmt_backend:/api'
 
   nginx:
     build:

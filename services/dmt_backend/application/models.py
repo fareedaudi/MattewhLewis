@@ -841,7 +841,7 @@ class NewMap(db.Model):
         }
         html_out = export_template.render(template_vars)
         file_name = f"report-{self.id}.pdf"
-        HTML(string=html_out).write_pdf(f'./reports/{file_name}',stylesheets=["./data/style.css"])
+        HTML(string=html_out).write_pdf(f'./reports/{file_name}',stylesheets=["./templates/style.css"])
         return file_name
     def update_map(self,map_data):
         self.name = map_data['name']
