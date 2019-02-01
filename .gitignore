@@ -1,4 +1,5 @@
-services/env
+services/dmt_backend/env
+services/dmt_backend/reports/*
 __pycache__
 output_before.sql
 *.pyc
