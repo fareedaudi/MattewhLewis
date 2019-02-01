@@ -1,0 +1,6 @@
+env
+__pycache__
+output_before.sql
+*.pyc
+*/.DS_Store
+.DS_Store
