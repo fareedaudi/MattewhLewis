@@ -35,7 +35,7 @@ The Pathways Mapping Toolkit has two primary dependencies:
 
 As mentioned above, all of the remaining configuration for the individual microservices are handled by their respective containers.
 
-### To Deploy PMT for development:
+### Deploying PMT for Development
 
 0. Install Docker and Docker Compose on the development machine.
 1. Navigate to desired development directory.
@@ -47,7 +47,7 @@ As mentioned above, all of the remaining configuration for the individual micros
 
 Upon making changes, reissue the `docker-compose` command, above, to incorporate changes and relaunch application.
 
-### To Deploy PMT for production:
+### Deploying PMT for Production
 
 0. Install Docker and Docker Compose on host machine.
 1. (On Development Machine) If you have made changes to the application since the previous deployment, make sure to push changes to [Docker Hub](https://hub.docker.com/) by running `docker-compose push` on the **development machine**.
