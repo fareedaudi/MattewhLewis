@@ -3,10 +3,10 @@ import Layout from "./components/Layout";
 import MapList from "./components/MapList";
 import MapsProvider from "./components/MapsProvider";
 import MapDetail from "./components/MapDetail";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 
 const App = () => (
-  <Router basename='/reports'>
+  <Router basename="/reports">
     <div className="App">
       <Layout>
         <Route

@@ -47,7 +47,7 @@ export const withFetching = (url,structure={}) => (Comp) =>
     }
 
 export const getUsers = () => {
-    let token = localStorage.getItem('jwtToken');
+    let token = localStorage.getItem('PMTjwtToken');
     const Authorization = `Bearer ${token}`;
     return axios.get(
         `${ROOT_URL}/api/users`, {headers:{Authorization}}
@@ -60,7 +60,7 @@ export const getUsers = () => {
 }
 
 export const getPrintableMap = (mapId,mapName) => {
-    let token = localStorage.getItem('jwtToken');
+    let token = localStorage.getItem('PMTjwtToken');
     const Authorization = `Bearer ${token}`;
     let url = `${ROOT_URL}/api/report/${mapId}/${Date.now()}`;
     return axios.get(

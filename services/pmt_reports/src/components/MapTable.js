@@ -2,6 +2,8 @@ import "./Table.css";
 import React from "react";
 import { Table } from "reactstrap";
 import MapsProvider from "./MapsProvider";
+import MapActionButton from "./MapActionButton";
+import NoteModal from "./NoteModal";
 
 const isObjectEmpty = obj => {
   for (let key in obj) {
@@ -10,7 +12,8 @@ const isObjectEmpty = obj => {
   return true;
 };
 
-const MapForm = ({ map, loaded, updateMap }) => {
+const MapForm = props => {
+  let { map, loaded, updateMap } = props;
   let h =
     (Math.max(document.documentElement.clientHeight, window.innerHeight) || 0) -
     250;
@@ -56,13 +59,17 @@ const MapForm = ({ map, loaded, updateMap }) => {
         <React.Fragment>
           <thead>
             <tr>
-              <th style={style.headerRow}>&nbsp;</th>
+              <th style={style.headerRow}>
+                Transfer Program:{" "}
+                <a href={map.prog_link} target="_blank">
+                  {map.prog_name}
+                </a>
+              </th>
               <th style={style.headerRow}>Applicable</th>
               <th style={style.headerRow}>Applicability Across Inst.</th>
-              <th style={style.headerRow}>Alternative</th>
+              <th style={style.headerRow}>Actions</th>
             </tr>
           </thead>
-
           <tbody style={style.tbody}>
             {requirements.map(req => (
               <React.Fragment key={req.id}>
@@ -103,16 +110,29 @@ const MapForm = ({ map, loaded, updateMap }) => {
                         {isApplicable(course) ? (
                           "-"
                         ) : (
-                          <select style={{ width: "250px" }}>
-                            <option value="-1">
-                              Please select an alternative.
-                            </option>
-                            {req.default_courses.map(course => (
-                              <option value={course.id} key={course.id}>
-                                {course.rubric} {course.number} - {course.name}
-                              </option>
-                            ))}
-                          </select>
+                          <span className="pull-right">
+                            <MapActionButton
+                              type="note"
+                              map_id={course.id}
+                              handler={() => props.launchNoteModal(slot)}
+                            />
+                            &nbsp;&nbsp;
+                            <MapActionButton
+                              type="exchangeCourse"
+                              map_id={course.id}
+                              handler={_ => {
+                                return;
+                              }}
+                            />
+                            &nbsp;&nbsp;
+                            <MapActionButton
+                              type="makeApplicable"
+                              map_id={course.id}
+                              handler={_ => {
+                                return;
+                              }}
+                            />
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -133,7 +153,15 @@ class MapTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      map: {}
+      map: {},
+      noteModalOpen: false,
+      noteModalNote: {},
+      noteModalCourse: {},
+      noteModalSlot: {},
+      savedMapToEdit: props.map,
+      savingMap: false,
+      saveError: false,
+      saved: false
     };
   }
 
@@ -154,13 +182,75 @@ class MapTable extends React.Component {
     }
   };
 
+  toggleNoteModal = () => {
+    this.setState({
+      noteModalOpen: !this.state.noteModalOpen
+    });
+  };
+
+  launchNoteModal = slot => {
+    let { note, course } = slot;
+    this.setState({
+      noteModalNote: note,
+      noteModalCourse: course,
+      noteModalOpen: true,
+      noteModalSlot: slot
+    });
+  };
+
+  editNote = ({ id, req_id, note }) => {
+    let requirement = this.state.savedMapToEdit.requirements.filter(
+      req => req.id == req_id
+    )[0];
+    let slot = requirement.course_slots.filter(slot => slot.id === id)[0];
+    slot.note = note;
+    this.forceUpdate();
+  };
+
+  saveMapHandler = savedMapToEdit => {
+    this.setState({
+      savingMap: true,
+      saveError: false,
+      saved: false
+    });
+
+    this.handleSave(savedMapToEdit)
+      .then(() => {
+        this.timer = setTimeout(_ => {
+          this.setState({ savingMap: false, saved: true }, _ => {
+            this.timer = setTimeout(_ => {
+              this.setState({ saved: false }, 1500);
+            });
+          });
+        });
+      })
+      .catch(e => {
+        this.setState({ savingMap: false, saveError: true });
+      });
+  };
+
+  handleSave(mapToEdit) {
+    console.log("Saving that mutha!");
+  }
+
   render() {
     return (
-      <MapForm
-        map={this.state.map}
-        loaded={this.props.loaded}
-        updateMap={this.updateMap}
-      />
+      <div>
+        <MapForm
+          map={this.state.map}
+          loaded={this.props.loaded}
+          updateMap={this.updateMap}
+          launchNoteModal={this.launchNoteModal}
+        />
+        <NoteModal
+          isOpen={this.state.noteModalOpen}
+          toggle={this.toggleNoteModal}
+          noteModalNote={this.state.noteModalNote}
+          noteModalCourse={this.state.noteModalCourse}
+          editNote={this.editNote}
+          slot={this.state.noteModalSlot}
+        />
+      </div>
     );
   }
 }

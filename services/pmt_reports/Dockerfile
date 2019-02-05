@@ -33,6 +33,9 @@ FROM nginx:1.15.0-alpine
 
 # copy static files
 COPY --from=BUILDER /usr/src/app/build /usr/share/nginx/html/reports
+RUN rm /etc/nginx/conf.d/default.conf
+COPY --from=BUILDER /usr/src/app/nginx.conf /etc/nginx/conf.d
+
 
 # expose port
 EXPOSE 80

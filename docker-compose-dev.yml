@@ -5,7 +5,7 @@ services:
   api:
     build: 
       context: services/dmt_backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dev
     expose:
       - '5000'
     depends_on:
@@ -18,7 +18,7 @@ services:
   nginx:
     build:
       context: services/pmt_nginx
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dev
     restart: always
     ports:
       - 80:80
@@ -29,12 +29,15 @@ services:
   client:
     build:
       context: services/dmt_frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dev
     depends_on:
       - api
       - database
+    expose:
+      - '3000'
     volumes:
       - './services/dmt_frontend:/usr/src/app'
+      - '/usr/src/app/node_modules'
     
   database:
     build:
@@ -50,11 +53,12 @@ services:
   pmt_reports:
     build:
       context: services/pmt_reports
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dev
     expose:
-      - '80'
+      - '3000'
     volumes:
       - './services/pmt_reports:/usr/src/app'
+      - '/usr/src/app/node_modules'
 
 volumes:
   my-datavolume:

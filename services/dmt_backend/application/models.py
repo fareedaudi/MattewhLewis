@@ -557,6 +557,7 @@ class NewMap(db.Model):
             'assoc_name':AssociateDegree.query.get(self.assoc_id).get_name() if AssociateDegree.query.get(self.assoc_id) else 'No associate degree selected',
             'prog_id':self.prog_id,
             'prog_name':Program.query.get(self.prog_id).get_name(),
+            'prog_link':Program.query.get(self.prog_id).link,
             'univ_id':self.univ_id,
             'univ_name':University.query.get(self.univ_id).get_name(),
             'user_id':self.user_id,
