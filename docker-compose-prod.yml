@@ -5,6 +5,7 @@ services:
     build:
       context: services/dmt_backend
       dockerfile: Dockerfile
+    image: infoambassador/dmt_api
     expose:
       - "5000"
     depends_on:
@@ -18,7 +19,9 @@ services:
     build:
       context: services/pmt_nginx
       dockerfile: Dockerfile
+    image: infoambassador/pmt_nginx
     restart: always
+    image: infoambassador/pmt_nginx
     ports:
       - 80:80
     depends_on:
@@ -28,17 +31,24 @@ services:
   client:
     build:
       context: services/dmt_frontend
-      dockerfile: Dockerfile-dev
+      dockerfile: Dockerfile-prod
+    image: infoambassador/pmt_client_editor
     depends_on:
       - api
       - database
+    expose:
+      - "3000"
     volumes:
       - "./services/dmt_frontend:/usr/src/app"
+      - "/usr/src/app/node_modules"
+    environment:
+      - REACT_APP_DEPLOYMENT_URL=http://deg-map.main.sjcd.edu
 
   database:
     build:
       context: services/pmt_database
       dockerfile: Dockerfile
+    image: infoambassador/pmt_database
     ports:
       - 3306
     environment:
@@ -49,11 +59,15 @@ services:
   pmt_reports:
     build:
       context: services/pmt_reports
-      dockerfile: Dockerfile-dev
+      dockerfile: Dockerfile-prod
+    image: infoambassador/pmt_reports
     expose:
-      - "80"
+      - "3000"
     volumes:
       - "./services/pmt_reports:/usr/src/app"
+      - "/usr/src/app/node_modules"
+    environment:
+      - REACT_APP_DEPLOYMENT_URL=http://deg-map.main.sjcd.edu
 
 volumes:
   my-datavolume:

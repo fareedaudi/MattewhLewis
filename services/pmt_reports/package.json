@@ -2,7 +2,7 @@
   "name": "reports_dmt",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://localhost/reports",
+  "homepage": "http://deg-map.main.sjcd.edu/reports",
   "dependencies": {
     "axios": "^0.18.0",
     "bootstrap": "^4.2.1",

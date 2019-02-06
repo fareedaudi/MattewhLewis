@@ -14,8 +14,23 @@ COPY package.json /usr/src/app/package.json
 RUN npm install --silent
 RUN npm install react-scripts@1.1.4 -g --silent
 
-EXPOSE 3000
-
 # create build
 COPY . /usr/src/app
-CMD ["npm","start"]
+RUN npm run build
+
+#########
+# FINAL #
+#########
+
+# base image
+FROM nginx:1.15.0-alpine
+
+# copy static files
+COPY --from=BUILDER /usr/src/app/build /usr/share/nginx/html
+
+
+# expose port
+EXPOSE 80
+
+# run nginx
+CMD ["nginx", "-g", "daemon off;"]

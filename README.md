@@ -39,19 +39,21 @@ As mentioned above, all of the remaining configuration for the individual micros
 
 0. Install Docker and Docker Compose on the development machine.
 1. Navigate to desired development directory.
-1. Clone the `mattl3w1s/pmt` repository on Github by running the following in a posix shell (or Windows equivalent).  
+1. Clone the `mattl3w1s/pmt` repository on Github by running the following command in a posix shell (or Windows equivalent).  
    `git clone https://github.com/mattl3w1s/pmt.git`
 1. Navigate to the `pmt` directory.
 1. Spin up the docker containers by executing the following commands:  
-   `docker-compose up --build`
+   `docker-compose -f docker-compose-dev.yml up --build`
 
 Upon making changes, reissue the `docker-compose` command, above, to incorporate changes and relaunch application.
 
 ### Deploying PMT for Production
 
 0. Install Docker and Docker Compose on host machine.
-1. (On Development Machine) If you have made changes to the application since the previous deployment, make sure to push changes to [Docker Hub](https://hub.docker.com/) by running `docker-compose push` on the **development machine**.
-1. (On Host Machine) Pull any changes from [Docker Hub](https://hub.docker.com/) by running `docker-compose pull` on the **host machine**.
-1. Make sure an updated version `docker-compose-prod.yml` is in the desired directory on the host machine.
-1. Navigate to the directory containing the `docker-compose-prod.yml` and run the following command:  
-   `docker-compose up`
+1. (On Development Machine) If you have made changes to the application since the previous deployment, make sure to create a new production build of the images and push to Docker Hub using the following commands:
+   - Run `docker-compose -f docker-compose-prod.yml build` to build production images.
+   - Run `docker-compose -f docker-compose-prod.yml push` to push production images to Dockerhub.
+1. (On Host Machine) Ensure there is an updated version of `docker-compose-deploy.yml` on the host machine and navigate to the directory.
+1. Pull down updated production images by running `docker-compose -f docker-compose-deploy.yml pull`.
+1. Launch application by running the command `docker-compose -f docker-compose-deploy.yml up -d`.
+1. To stop the running application, run the command `docker-compose -f docker-compose-deploy.yml down`.
