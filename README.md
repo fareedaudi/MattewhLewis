@@ -57,3 +57,5 @@ Upon making changes, reissue the `docker-compose` command, above, to incorporate
 1. Pull down updated production images by running `docker-compose -f docker-compose-deploy.yml pull`.
 1. Launch application by running the command `docker-compose -f docker-compose-deploy.yml up -d`.
 1. To stop the running application, run the command `docker-compose -f docker-compose-deploy.yml down`.
+
+This is new in the readme.md
